@@ -23,28 +23,49 @@
 var s_ns = "http://www.w3.org/2000/svg";        // svg namespace
 var s_xlinkns = "http://www.w3.org/1999/xlink"; // xlink namespace
 
+var s_getSentenceURL = null;          // where to get treebank sentence from
+var s_putSentenceURL = null;          // where to put modified treebank sentence
+var s_editTransform = null;           // transform between SVG and XML, etc.
+var s_editTransformDoc = null;        // transform document
+var s_params = null;                  // treebank parameters
+var s_direction = null;               // text direction
+
 var s_showExpansionControls = true;
 var s_contractionSymbol = "-";
 var s_expansionSymbol = "+";
 
-var s_currentId = null;                         // current target id
-var s_dragId = null;                            // dragged word id
-var s_dragObj = null;                           // object being dragged
-var s_dragStartTrans = null;                    // initial transform of group
-var s_dragTransX = 0;                           // X translation of group
-var s_dragTransY = 0;                           // Y translation of group
-var s_dragX = 0;                                // mouse X
-var s_dragY = 0;                                // mouse Y
+var s_currentId = null;               // current target id
+var s_dragId = null;                  // dragged word id
+var s_dragObj = null;                 // object being dragged
+var s_dragStartTrans = null;          // initial transform of group
+var s_dragTransX = 0;                 // X translation of group
+var s_dragTransY = 0;                 // Y translation of group
+var s_dragX = 0;                      // mouse X
+var s_dragY = 0;                      // mouse Y
 
-var s_firebug = false;                          // using firebug
-var s_firefox = false;                          // in Firefox
-var s_direction = null;                         // text direction
+var s_firebug = false;                // using firebug
+var s_firefox = false;                // in Firefox
+var s_mode = "old";                   // edit mode: old/structure/labels
+
+var s_keyTable =                      // table of key, char, function
+[
+    [0, 104, traverseTreeLeft],
+    [0, 108, traverseTreeRight],
+    [0, 106, traverseTreeDown],
+    [0, 107, traverseTreeUp]
+];
 
 //****************************************************************************
 // initialization
 //****************************************************************************
 
-// initialize tree structure
+/**
+ * Initialize tree structure
+ * Create any missing elements
+ * Bind event handlers
+ * Position elements
+ * @param {Event} a_evt event
+ */
 function Init(a_evt)
 {
     try
@@ -52,220 +73,115 @@ function Init(a_evt)
         // set state variables
         if (navigator.userAgent.indexOf("Firefox") != -1)
             s_firefox = true;
-        s_direction =
-            $('head meta[name="text-direction"]', document).attr("content");
+        var form = $("form[name='sent-edit-mode']", document); 
+        if (form.size() > 0)
+            s_mode = $("input[checked]", form).attr("value");
 
-        // set initial state of expansion controls
-        s_showExpansionControls =
-                ($("#expansion-checkbox:checked", document).size() > 0);
-
-        // if tree exists, but no text
-        if (($(document).find("g.tree").size() > 0) &&
-            ($(document).find("g.text").size() == 0))
+        // get parameters from call
+        s_params = location.search.substr(1).split("&");
+        var numParams = s_params.length;
+        for (i in s_params)
         {
-            CreateTextFromTree();
+            s_params[i] = s_params[i].split("=");
+            s_params[s_params[i][0]] = s_params[i][1];
         }
+        s_params["numParams"] = numParams;
 
-        // if text exists, but no tree
-        else if (($(document).find("g.text").size() > 0) &&
-            ($(document).find("g.tree").size() == 0))
+        // get treebank transform
+        var req = new XMLHttpRequest();
+        if (req.overrideMimeType)
+            req.overrideMimeType('text/xml')
+        req.open("GET",
+                 $("meta[name='alpheios-editTransformURL']",
+                   document).attr("content"),
+                 false);
+        req.send(null);
+        if (req.status != 200)
         {
-            CreateTreeFromText();
+            var msg = "Can't get SVG transform";
+            alert(msg);
+            throw(msg);
         }
+        s_editTransformDoc = req.responseXML;
+        s_editTransform = new XSLTProcessor();
+        s_editTransform.importStylesheet(s_editTransformDoc);
 
-        // if input text element exists
-        else if ($(document).find("text.input-text").size() > 0)
+        // get info about treebank
+        var getInfoURL = $("meta[name='alpheios-getInfoURL']",
+                           document).attr("content");
+        if (getInfoURL)
         {
-            CreateBothFromText($("text.input-text", document).text());
-        }
-
-        // if neither tree nor text exists
-        else if (($(document).find("g.text").size() == 0) &&
-            ($(document).find("g.tree").size() == 0))
-        {
-            CreateBothFromText(document.forms[0].inputtext.value);
-        }
-
-        // right-to-left doesn't seem to be working in firefox svg
-        // reverse strings by hand, but ignore strings containing digits
-        if (s_firefox && (s_direction == "rtl"))
-        {
-            $("text.node-label, text.text-word", document).each(
-            function()
+            var buildMenus = $("meta[name='alpheios-buildMenus']",
+                               document).size() > 0;
+            req.open("GET",
+                     getInfoURL +
+                        "?doc=" + s_params["doc"] +
+                        (buildMenus ? "&desc=y" : ""),
+                     false);
+            req.send(null);
+            var root = $(req.responseXML.documentElement);
+            if ((req.status != 200) || root.is("error"))
             {
-                var text = $(this).text();
-                if (text.match(/^[^0-9]*$/))
-                {
-                    // if starts with nbsp, move it to end
-                    if (text.charAt(0) == '\u00A0')
-                        text = text.substr(1) + '\u00A0';
-                    $(this).text(text.split("").reverse().join(""));
-                }
-            });
-        }
-
-        // create text node rectangles and arc lines if needed
-        $("g.tree-node", document).each(
-        function()
-        {
-            if ($(this).children("rect.highlight").size() == 0)
-            {
-                var rect = document.createElementNS(s_ns, "rect");
-                rect.setAttribute("class", "highlight");
-                $(this).prepend(rect);
-            }
-            if ($(this).children("rect.arc-highlight").size() == 0)
-            {
-                var rect = document.createElementNS(s_ns, "rect");
-                rect.setAttribute("class", "arc-highlight");
-                $(this).prepend(rect);
-            }
-            if ($(this).children("g.expand").size() == 0)
-            {
-                var rect = document.createElementNS(s_ns, "g");
-                rect.setAttribute("class", "expand");
-                $(this).prepend(rect);
-                $(rect).append(document.createElementNS(s_ns, "rect"));
-                $(rect).append(document.createElementNS(s_ns, "text"));
-                $(rect).children("text").text("\u02C4");
-            }
-            if ($(this).children("line").size() == 0)
-            {
-                $(this).prepend(document.createElementNS(s_ns, "line"));
+                var msg = root.is("error") ?
+                            root.text() :
+                            "Error getting info for treebank " + s_params["doc"];
+                alert(msg);
+                throw(msg);
             }
 
-            // start with node fully expanded
-            this.setAttribute("expanded", "yes");
-        });
+            // save treebank attributes
+            s_params["maxSentId"] = Number(root.attr("numSentences"));
+            s_params["lang"] = root.attr("xml:lang");
+            s_direction = root.attr("direction");
 
-        // for each text word
-        $("text.text-word", document).each(
-        function()
-        {
-            var thisNode = $(this);
-            var tbrefid = thisNode.attr("tbref");
-
-            // if rectangle needed, create it
-            var rect = $("g.text rect[tbref='" + tbrefid + "']", document)[0];
-            if (!rect)
+            // if we need to build menus
+            if (buildMenus)
             {
-                rect = document.createElementNS(s_ns, "rect");
-                rect.setAttribute("tbref", tbrefid);
-                rect.setAttribute("class", "highlight");
-                thisNode.before(rect);
+                s_editTransform.setParameter(null, "e_mode", "menus");
+                var menus =
+                        s_editTransform.transformToDocument(req.responseXML);
+                var menuContent = $(menus.documentElement).children();
+                $("form[name='menus']", document).append(menuContent);
             }
-
-            // turn on highlighting for the word
-            thisNode.bind(
-                "mouseenter",
-                function()
-                {
-                    if (s_dragObj)
-                    {
-                        // if we're dragging and this node is descendant
-                        // don't highlight
-                        var dragRoot = $("#" + s_dragId, document);
-                        var treeNode = $("#" + tbrefid, document);
-                        if (treeNode.parents().andSelf().index(dragRoot) >= 0)
-                            return;
-                    }
-                    highlight_word(this.ownerDocument, tbrefid);
-                }
-            );
-        });
-
-        // for each label
-        $("text.node-label, rect.highlight", document).each(
-        function()
+        }
+        else
         {
-            var thisNode = $(this);
-            // highlight the word while hovering
-            var id = thisNode.parent().attr("id");
-            thisNode.hover(
-                function()
-                {
-                    if (s_dragObj)
-                    {
-                        // if we're dragging and this node is descendant
-                        // don't highlight
-                        var dragRoot = $("#" + s_dragId, document);
-                        if ($(this).parents().andSelf().index(dragRoot) >= 0)
-                            return;
-                    }
-                    highlight_word(this.ownerDocument, id);
-                },
-                function() { highlight_word(this.ownerDocument, null); }
-            );
-        });
+            // get values from html
+            s_params["maxSentId"] =
+                Number($("meta[name='alpheios-numSentences']", document).
+                       attr("content"));
+            s_params["lang"] =
+                $("meta[name='alpheios-lang']", document).attr("content");
+            s_params["direction"] =
+                $("meta[name='alpheios-direction']", document).attr("content");
+        }
 
-        // for each arc highlight
-        $("text.arc-label, rect.arc-highlight", document).each(
-        function()
-        {
-            // highlight while hovering
-            $(this).hover(
-                function()
-                {
-                    if (!s_dragObj)
-                    {
-                        var label =
-                          $(this).parent().children("rect.arc-highlight");
-                        AlphEdit.addClass(label[0], "hovering");
-                    }
-                },
-                function()
-                {
-                    var label =
-                          $(this).parent().children("rect.arc-highlight");
-                    AlphEdit.removeClass(label[0], "hovering"); }
-            );
-        });
+        // handle metadata flags
+        var flag = $("meta[name='alpheios-sentenceNavigation']", document);
+        if (flag.size() == 0)
+            $("div#sent-navigation", document).remove();
+        flag = $("meta[name='alpheios-editModes']", document);
+        if (flag.size() == 0)
+            $("form[name='sent-edit-mode']", document).remove();
 
-        // for each expansion control
-        $("g.expand", document).each(
-        function()
-        {
-            // highlight while hovering
-            $(this).hover(
-                function()
-                {
-                    if (!s_dragObj)
-                        this.setAttribute("showme", "focus");
-                },
-                function() { this.setAttribute("showme", "normal"); }
-            );
-        });
+        // fix various values in html
+        var exitForm = $("form[name='sent-navigation-exit']", document);
+        var exitURL = $("meta[name='alpheios-exitURL']", document);
+        var exitLabel = $("meta[name='alpheios-exitLabel']", document);
+        exitForm.attr("action", exitURL.attr("content"));
+        $("input[name='doc']", exitForm).attr("value", s_params["doc"]);
+        $("button", exitForm).text(exitLabel.attr("content"));
+        $("html", document).attr("xml:lang", s_params["lang"]);
+        $("svg", document).attr("alph-doc", s_params["doc"]);
 
-        // for text group
-        $("g.text", document).each(
-        function()
-        {
-            // turn off highlighting when we leave
-            $(this).bind(
-                "mouseleave",
-                function() { highlight_word(this.ownerDocument, null); }
-            );
-        });
+        // get URLs from header
+        s_getSentenceURL =
+          $("meta[name='alpheios-getSentenceURL']", document).attr("content");
+        s_putSentenceURL =
+          $("meta[name='alpheios-putSentenceURL']", document).attr("content");
 
-        // bind mouse events
-        $("body", document).bind("click", Click);
-        $("body", document).bind("mousemove", Drag);
-        $("text.text-word, text.node-label", document).bind("mouseover", Enter);
-        $("text.text-word, text.node-label", document).bind("mouseout", Leave);
-        $("text.arc-label", document).bind("click", ClickOnArcLabel);
-        $("g.expand rect, g.expand text", document).each(
-        function()
-        {
-            $(this).attr("pointer-events", "all");
-            $(this).bind("click", Expand);
-        });
-
-        // set/reset buttons
-        $("#undo-button", document).attr("disabled", "yes");
-        $("#redo-button", document).attr("disabled", "yes");
-        $("#save-button", document).attr("disabled", "yes");
-
-        Reposition();
+        // go to new sentence
+        InitNewSentence();
     }
     catch(e)
     {
@@ -276,125 +192,243 @@ function Init(a_evt)
     window.addEventListener("resize", Resize, false);
 };
 
-// create text group from tree nodes
-function CreateTextFromTree()
+/**
+ * Initialize new sentence
+ */
+function InitNewSentence()
 {
-    // create group to hold words
-    var textGroup = document.createElementNS(s_ns, "g");
-    textGroup.setAttribute("class", "text");
+    // clear undo/redo history
+    AlphEdit.clearHistory();
 
-    // for each tree node, sorted by id
-    var childNodes = $("g.tree-node", document).get();
-    var rootId = $(childNodes[0]).attr("id");
-    childNodes.sort(sortById);
-    $(childNodes).each(
-    function(i)
+    // get and transform treebank sentence
+    var sentence = AlphEdit.getContents(s_getSentenceURL,
+                                        s_params["doc"],
+                                        s_params["s"]);
+    var root = $(sentence.documentElement);
+    s_params["document_id"] = root.attr("document_id");
+    s_params["subdoc"] = root.attr("subdoc");
+    s_editTransform.setParameter(null, "e_mode", "xml-to-svg");
+    var svg = s_editTransform.transformToDocument(sentence);
+    $("svg", document).empty().append($(svg.documentElement).children());
+
+    // sentence id in <svg>
+    $("svg", document).attr("alph-sentid", s_params["s"]);
+
+    // fix numeric sentence number
+    s_params["snum"] = Number(s_params["s"]);
+    if (isNaN(s_params["snum"]))
+        s_params["snum"] = 1;
+    else if (s_params["snum"] <= 0)
+        s_params["snum"] = 1;
+    if (s_params["snum"] > s_params["maxSentId"])
+        s_params["snum"] = s_params["maxSentId"];
+
+    var s = s_params["snum"];
+    var maxSentId = s_params["maxSentId"];
+
+    // first sentence button
+    var button = $("#first-button", document);
+    if (s <= 1)
+        button.attr("disabled", "disabled");
+    else
+        button.removeAttr("disabled");
+    button.attr("value", "1");
+    button.text("1" + "\u00A0\u25C2\u25C2");
+
+    // previous sentence button
+    button = $("#prev-button", document);
+    button.attr("value", s - 1);
+    if (s <= 1)
+        button.attr("disabled", "disabled");
+    else
+        button.removeAttr("disabled");
+    if (s <= 1)
+        button.text("1" + "\u00A0\u25C2");
+    else
+        button.text((s - 1) + "\u00A0\u25C2");
+    $("#current-label", document).text(s);
+
+    // next sentence button
+    button = $("#next-button", document);
+    button.attr("value", s + 1);
+    if (s >= maxSentId)
+        button.attr("disabled", "disabled");
+    else
+        button.removeAttr("disabled");
+    if (s >= maxSentId)
+        button.text("\u25B8\u00A0" + maxSentId);
+    else
+        button.text("\u25B8\u00A0" + (s + 1));
+
+    // last sentence button
+    button = $("#last-button", document);
+    button.attr("value", maxSentId);
+    if (s >= maxSentId)
+        button.attr("disabled", "disabled");
+    else
+        button.removeAttr("disabled");
+    button.text("\u25B8\u25B8\u00A0" + maxSentId);
+
+    // html fixes
+    $("head title", document).text("Alpheios:Edit Treebank Sentence: " +
+                                   s_params["document_id"] +
+                                   ": " +
+                                   s_params["subdoc"]);
+    $("form[name='sent-navigation-exit'] input[name='s']",
+      document).attr("value", s_params["s"]);
+
+    // set initial state of controls
+    $("form[name='sent-navigation-goto'] input", document).removeAttr("value");
+    $("#expansion-checkbox", document).attr("checked", "checked");
+    s_showExpansionControls = true;
+
+    // right-to-left doesn't seem to be working in firefox svg
+    // reverse strings by hand, but ignore strings containing digits
+    if (s_firefox && (s_direction == "rtl"))
     {
-        // if this is not the synthesized root
-        var thisNode = $(this);
-        if (thisNode.attr("id") != rootId)
+        $("text.node-label, text.text-word", document).each(
+        function()
         {
-            // add to text group
-            $(textGroup).append(
-                CreateWord(thisNode.attr("id"),
-                           thisNode.children("text.node-label").text()));
-        }
-    });
+            var thisNode = $(this);
+            var text = thisNode.text();
+            if (text.match(/^[^0-9]*$/))
+            {
+                // if this is node, save original form
+                if (thisNode.is(".node-label"))
+                    thisNode.attr("form", text);
 
-    // add text group to document
-    $("g.tree", document).after(textGroup);
-};
-
-// create tree group from text words
-function CreateTreeFromText()
-{
-    // create group to hold nodes and create root
-    var treeGroup = document.createElementNS(s_ns, "g");
-    treeGroup.setAttribute("class", "tree");
-    var rootGroup = document.createElementNS(s_ns, "g");
-    rootGroup.setAttribute("class", "tree-node");
-    rootGroup.setAttribute("id", "0");
-    var nodeLabel = document.createElementNS(s_ns, "text");
-    nodeLabel.setAttribute("class", "node-label");
-    $(nodeLabel).text("#");
-    $(treeGroup).append(rootGroup);
-    $(rootGroup).append(nodeLabel);
+                // if starts with nbsp, move it to end
+                if (text.charAt(0) == '\u00A0')
+                    text = text.substr(1) + '\u00A0';
+                thisNode.text(text.split("").reverse().join(""));
+            }
+        });
+    }
 
     // for each text word
     $("text.text-word", document).each(
-    function(i)
+    function()
     {
-        // create label with boundary space removed
         var thisNode = $(this);
-        var word = thisNode.text().replace(/^\s*(.*?)\s*$/,"$1");
+        var tbrefid = thisNode.attr("tbref");
 
-        // create group with node and arc labels
-        var nodeGroup = document.createElementNS(s_ns, "g");
-        nodeGroup.setAttribute("class", "tree-node");
-        nodeGroup.setAttribute("id", thisNode.attr("tbref"));
-        var nodeLabel = document.createElementNS(s_ns, "text");
-        nodeLabel.setAttribute("class", "node-label");
-        $(nodeLabel).text(word);
-        var arcLabel = document.createElementNS(s_ns, "text");
-        arcLabel.setAttribute("class", "arc-label alpheios-ignore");
-        $(arcLabel).text("nil");
-        $(nodeGroup).append(nodeLabel);
-        $(nodeGroup).append(arcLabel);
-
-        // add to root group
-        $(rootGroup).append(nodeGroup);
+        // turn on highlighting for the word
+        thisNode.bind(
+            "mouseenter",
+            function()
+            {
+                if (s_dragObj)
+                {
+                    // if we're dragging and this node is descendant
+                    // don't highlight
+                    var dragRoot = $("#" + s_dragId, document);
+                    var treeNode = $("#" + tbrefid, document);
+                    if (treeNode.parents().andSelf().index(dragRoot) >= 0)
+                        return;
+                }
+                highlightWord(this.ownerDocument, tbrefid);
+            }
+        );
     });
 
-    // add text group to document
-    $("g.text", document).before(treeGroup);
-};
-
-// create default tree from text string
-function CreateBothFromText(a_text)
-{
-    // get text words from form, normalizing by
-    //   placing spaces around punctuation,
-    //   reducing multiple whitespace to single,
-    //   removing leading/trailing space
-    var text = a_text;
-    text = text.replace(/([,.:;!?'"])/g," $1 ");
-    text = text.replace(/\s+/g," ");
-    text = text.replace(/^\s*(.*?)\s*$/,"$1");
-    var words = text.split(' ');
-
-    // create group to hold words
-    var textGroup = document.createElementNS(s_ns, "g");
-    textGroup.setAttribute("class", "text");
-
-    $(words).each(
-    function(i)
+    // for each label
+    $("text.node-label, rect.highlight", document).each(
+    function()
     {
-        // add word to text group
-        $(textGroup).append(CreateWord("1-" + (i + 1), this));
+        var thisNode = $(this);
+        // highlight the word while hovering
+        var id = thisNode.parent().attr("id");
+        thisNode.hover(
+            function()
+            {
+                if (s_dragObj)
+                {
+                    // if we're dragging and this node is descendant
+                    // don't highlight
+                    var dragRoot = $("#" + s_dragId, document);
+                    if ($(this).parents().andSelf().index(dragRoot) >= 0)
+                        return;
+                }
+                highlightWord(this.ownerDocument, id);
+            },
+            function() { highlightWord(this.ownerDocument, null); }
+        );
     });
 
-    // add text group to document
-    $("#dependency-tree", document).append(textGroup);
+    // for each arc highlight
+    $("text.arc-label, rect.arc-highlight", document).each(
+    function()
+    {
+        // highlight while hovering
+        $(this).hover(
+            function()
+            {
+                if (!s_dragObj)
+                {
+                    var label =
+                      $(this).parent().children("rect.arc-highlight");
+                    AlphEdit.addClass(label[0], "hovering");
+                }
+            },
+            function()
+            {
+                var label =
+                      $(this).parent().children("rect.arc-highlight");
+                AlphEdit.removeClass(label[0], "hovering"); }
+        );
+    });
 
-    // remove input form
-    $("#input-form", document).remove();
+    // for each expansion control
+    $("g.expand", document).each(
+    function()
+    {
+        // highlight while hovering
+        $(this).hover(
+            function()
+            {
+                if (!s_dragObj)
+                    this.setAttribute("showme", "focus");
+            },
+            function() { this.setAttribute("showme", "normal"); }
+        );
+    });
 
-    // now initialize tree
-    CreateTreeFromText();
+    // for text group
+    $("g.text", document).each(
+    function()
+    {
+        // turn off highlighting when we leave
+        $(this).bind(
+            "mouseleave",
+            function() { highlightWord(this.ownerDocument, null); }
+        );
+    });
+
+    // bind mouse events
+    $("body", document).bind("click", Click);
+    $("body", document).bind("mousemove", Drag);
+    $("text.text-word, text.node-label", document).bind("mouseover", Enter);
+    $("text.text-word, text.node-label", document).bind("mouseout", Leave);
+    $("text.arc-label", document).bind("click", ClickOnArcLabel);
+    $("g.expand rect, g.expand text", document).each(
+    function()
+    {
+        $(this).attr("pointer-events", "all");
+        $(this).bind("click", Expand);
+    });
+
+    // set/reset buttons
+    $("#undo-button", document).attr("disabled", "disabled");
+    $("#redo-button", document).attr("disabled", "disabled");
+    $("#save-button", document).attr("disabled", "disabled");
+
+    Reposition();
 };
 
-// create new word element
-function CreateWord(a_id, a_text)
-{
-    // create text word with non-breaking space prepended
-    var word = document.createElementNS(s_ns, "text");
-    word.setAttribute("class", "text-word");
-    word.setAttribute("tbref", a_id);
-    $(word).text("\u00A0" + a_text);
-    return word;
-};
-
-// log message to console
+/**
+ * Log message to console
+ * @param {String} a_msg message to send
+ */
 function Log(a_msg)
 {
     if (s_firebug)
@@ -405,7 +439,10 @@ function Log(a_msg)
 // event handlers
 //****************************************************************************
 
-// event handler for mouseover
+/**
+ * Event handler for mouseover
+ * @param {Event} a_evt the event
+ */
 function Enter(a_evt)
 {
     // if over word
@@ -421,7 +458,10 @@ function Enter(a_evt)
     Log("Enter " + s_currentId);
 };
 
-// event handler for mouseout
+/**
+ * Event handler for mouseout
+ * @param {Event} a_evt the event
+ */
 function Leave(a_evt)
 {
     // if over word
@@ -432,12 +472,30 @@ function Leave(a_evt)
     }
 };
 
-// event handler for mouse click
+/**
+ * Event handler for mouse click
+ * @param {Event} a_evt the event
+ */
 function Click(a_evt)
 {
-    (s_dragObj ? Drop(a_evt) : Grab(a_evt));
+    switch (s_mode)
+    {
+      case "old":
+      case "struct":
+        (s_dragObj ? Drop(a_evt) : Grab(a_evt));
+        break;
+
+      case "label":
+        s_currentId = $("g.tree > g.tree-node", document).attr("id");
+        highlightWord(document, s_currentId);
+        break;
+    }
 };
 
+/**
+ * Event handler for picking up word/subtree
+ * @param {Event} a_evt the event
+ */
 function Grab(a_evt)
 {
     Log("Grab");
@@ -459,7 +517,7 @@ function Grab(a_evt)
         }
         AlphEdit.addClass($("#dependency-tree", document)[0], "dragging");
         AlphEdit.addClass(s_dragObj, "dragging");
-        highlight_word(s_dragObj.ownerDocument, null);
+        highlightWord(s_dragObj.ownerDocument, null);
         s_dragStartTrans = s_dragObj.getAttribute("transform");
         s_dragX = a_evt.pageX;
         s_dragY = a_evt.pageY;
@@ -496,6 +554,10 @@ function Grab(a_evt)
     }
 };
 
+/**
+ * Event handler for moving word/subtree
+ * @param {Event} a_evt the event
+ */
 function Drag(a_evt)
 {
     // if we're dragging something
@@ -523,6 +585,10 @@ function Drag(a_evt)
     }
 };
 
+/**
+ * Event handler for dropping word/subtree
+ * @param {Event} a_evt the event
+ */
 function Drop(a_evt)
 {
     Log("Drop");
@@ -565,6 +631,10 @@ function Drop(a_evt)
     Reposition();
 };
 
+/**
+ * Event handler for clicking on expansion control
+ * @param {Event} a_evt the event
+ */
 function Expand(a_evt)
 {
     // if we're dragging, treat it like a drop
@@ -586,17 +656,28 @@ function Expand(a_evt)
     Reposition();
 };
 
-// event handlers for undo/redo
+/**
+ * Event handler for undo operation
+ * @param {Event} a_evt the event
+ */
 function ClickOnUndo(a_evt)
 {
     ReplayEvent(AlphEdit.popHistory(null), false);
 };
 
+/**
+ * Event handler for redo operation
+ * @param {Event} a_evt the event
+ */
 function ClickOnRedo(a_evt)
 {
     ReplayEvent(AlphEdit.repushHistory(null), true);
 };
 
+/**
+ * Event handler for toggling display of expansion controls
+ * @param {Event} a_evt the event
+ */
 function ShowExpansionControls(a_evt)
 {
     s_showExpansionControls =
@@ -607,8 +688,16 @@ function ShowExpansionControls(a_evt)
     Reposition();
 };
 
+/**
+ * Event handler for clicking on arc label
+ * @param {Event} a_evt the event
+ */
 function ClickOnArcLabel(a_evt)
 {
+    // only allow if in label editing mode
+    if ((s_mode != "label") && (s_mode != "old"))
+        return;
+
     var newLabel = "";
     if ($('select[name="arcrel1"]', document).size() > 0)
         newLabel += $('select[name="arcrel1"]', document)[0].value;
@@ -618,54 +707,124 @@ function ClickOnArcLabel(a_evt)
     Reposition();
 };
 
+/**
+ * Event handler for save operation
+ * @param {Event} a_evt the event
+ */
 function ClickOnSave(a_evt)
 {
-    // do nothing for now, but pretend we did it
-    alert("Saving has not yet been implemented");
-    AlphEdit.saved();
+    DoSave();
 };
 
-// event handler for window resize
+/**
+ * Event handler for window resize
+ * @param {Event} a_evt the event
+ */
 function Resize(a_evt)
 {
     // force full repositioning of elements
     Reposition();
 };
 
-// handler for form submission
-function FormSubmit(a_form)
+/**
+ * Event handler for exit form
+ * @param {Element} a_form the form
+ */
+function SubmitExit(a_form)
 {
-    // if this is not return to sentence list
-    if (a_form.name != "sent-navigation-list")
-    {
-        // if value is out of bounds
-        if ((Number(a_form.s.value) <= 0) ||
-            (Number(a_form.s.value) > Number(a_form.maxSentId.value)))
-        {
-          alert("Sentence must between 1 and " + a_form.maxSentId.value);
-          return false;
-        }
-    }
-
     // if there are unsaved changes
-//    if (s_saveCursor != s_historyCursor)
-//    {
-//        if (confirm("Save changes before going to new sentence?"))
-//          SaveContents();
-//    }
+    if (AlphEdit.unsavedChanges())
+    {
+        if (confirm("Save changes before continuing?"))
+            DoSave();
+    }
 
     return true;
 };
 
-// function for handling key presses
+/**
+ * Event handler for form submission of jump to new sentence
+ * @param a_form the form
+ */
+function SubmitGoTo(a_form)
+{
+    // if value is out of bounds
+    if ((Number(a_form.s.value) <= 0) ||
+        (Number(a_form.s.value) > s_params["maxSentId"]))
+    {
+        alert("Sentence must between 1 and " + s_params["maxSentId"]);
+        return false;
+    }
+
+    // if there are unsaved changes
+    if (AlphEdit.unsavedChanges())
+    {
+        if (confirm("Save changes before going to new sentence?"))
+            DoSave();
+    }
+
+    // go to new sentence
+    s_params["s"] = a_form.s.value;
+    InitNewSentence();
+
+    // always return false - we've already done the action
+    return false;
+};
+
+/**
+ * Event handler for button to go to new sentence
+ * @param {Event} a_evt the event
+ */
+function ClickOnGoTo(a_evt)
+{
+    // if there are unsaved changes
+    if (AlphEdit.unsavedChanges())
+    {
+        if (confirm("Save changes before going to new sentence?"))
+            DoSave();
+    }
+
+    // go to new sentence
+    s_params["s"] = a_evt.target.value;
+    InitNewSentence();
+};
+
+/**
+ * Event handler for mode buttons
+ * @param {Event} a_evt the event
+ */
+function ClickOnMode(a_event)
+{
+    s_mode = a_event.target.value;
+};
+
+/**
+ * Event handler for key presses
+ * @param {Event} a_evt the event
+ */
 function Keypress(a_evt)
 {
+    for (var i = 0; i < s_keyTable.length; ++i)
+    {
+        if ((s_keyTable[i][0] == a_evt.keyCode) &&
+            (s_keyTable[i][1] == a_evt.charCode))
+        {
+            s_keyTable[i][2]();
+            return;
+        }
+    }
 };
 
 //****************************************************************************
 // actions
 //****************************************************************************
 
+/**
+ * Move node in tree
+ * @param {String} a_moveId id of element to move
+ * @param {String} a_newHeadId id new head element
+ * @param {Boolean} a_push whether to push event onto history
+ */
 function DoMove(a_moveId, a_newHeadId, a_push)
 {
     Log("Moving " + a_moveId + " to " + a_newHeadId);
@@ -691,6 +850,12 @@ function DoMove(a_moveId, a_newHeadId, a_push)
     }
 };
 
+/**
+ * Expand/contract node in tree
+ * @param {String} a_id id of element to change
+ * @param {String} a_expand "yes" to expand, else contract
+ * @param {Boolean} a_push whether to push event onto history
+ */
 function DoExpand(a_id, a_expand, a_push)
 {
     Log((a_expand == "yes") ? "Expanding " : "Contracting ", a_id);
@@ -706,6 +871,12 @@ function DoExpand(a_id, a_expand, a_push)
     }
 };
 
+/**
+ * Change label on arc
+ * @param {String} a_id id of element to change
+ * @param {String} a_label new label
+ * @param {Boolean} a_push whether to push event onto history
+ */
 function DoLabelArc(a_id, a_label, a_push)
 {
     Log("Labeling " + a_id + " as " + a_label);
@@ -722,10 +893,30 @@ function DoLabelArc(a_id, a_label, a_push)
     }
 };
 
+/**
+ * Save contents
+ */
+function DoSave()
+{
+    // transform sentence
+    s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
+    var doc = document.implementation.createDocument("", "", null);
+    doc.appendChild(doc.importNode($("svg", document).get(0), true));
+    var xml = s_editTransform.transformToDocument(doc);
+
+    AlphEdit.putContents(xml.documentElement,
+                         s_putSentenceURL,
+                         s_params["doc"],
+                         s_params["s"]);
+};
+
 //****************************************************************************
 // reposition elements
 //****************************************************************************
 
+/**
+ * Reposition everything in tree
+ */
 function Reposition()
 {
     var svgXML = $("#dependency-tree", document);
@@ -733,13 +924,17 @@ function Reposition()
     show_tree(rootNode, true);
 
     var fontSize = 20;
-    var treeSize = position_tree(rootNode, fontSize)[0];
+    var treeSize = positionTree(rootNode, fontSize)[0];
     var maxWidth = treeSize[0];
-    var textSize = position_text(document, maxWidth, fontSize);
-    position_all(document, treeSize, textSize, fontSize);
+    var textSize = positionText(document, maxWidth, fontSize);
+    positionAll(document, treeSize, textSize, fontSize);
 };
 
-// replay event from history
+/**
+ * Replay event from history
+ * @param {Event} a_event event to replay
+ * @param {Boolean} a_forward whether we're playing forward or backward
+ */
 function ReplayEvent(a_event, a_forward)
 {
     // if no event, do nothing
@@ -801,9 +996,8 @@ function ReplayEvent(a_event, a_forward)
 
 /**
  * Recursively set visibility of (sub-)tree
- *
- * @param a_container SVG group containing tree
- * @param a_visible whether root of subtree is visible
+ * @param {Element} a_container group containing tree
+ * @param {Boolean} a_visible whether root of subtree is visible
  */
 function show_tree(a_container, a_visible)
 {
@@ -822,13 +1016,12 @@ function show_tree(a_container, a_visible)
 
 /**
  * Recursively position elements of (sub-)tree
- *
- * @param a_container SVG group containing tree
+ * @param {Element} a_container group containing tree
  * @param {int} a_fontSize size of font in pixels
  * @return size of tree, center line of root element, and width of root node
  * @type Array
  */
-function position_tree(a_container, a_fontSize)
+function positionTree(a_container, a_fontSize)
 {
     // get various pieces of tree
     // childNodes contains arc labels followed by subtrees
@@ -855,7 +1048,7 @@ function position_tree(a_container, a_fontSize)
         var thisNode = $(this);
 
         // get size, center, and root width of child
-        var thisReturn = position_tree(thisNode, a_fontSize);
+        var thisReturn = positionTree(thisNode, a_fontSize);
         var thisSize = thisReturn[0];
         childReturn.push(thisReturn);
 
@@ -1049,9 +1242,12 @@ function position_tree(a_container, a_fontSize)
 /**
  * Comparison functions for id values
  *
- * @param a_a first element to compare
- * @param a_b second element to compare
- * @param a_mult multiplier (1=increasing, -1=decreasing)
+ * sortById - sort ascending
+ * sortByIdDir - sort ascending if LTR text, descending if RTL
+ * sortByIdBase - do actual comparison
+ * @param {Element} a_a first element to compare
+ * @param {Element} a_b second element to compare
+ * @param {int} a_mult multiplier (1=increasing, -1=decreasing)
  * @return <0, =0, >0 as a < b, a = b, a > b, respectively
  * @type Number
  */
@@ -1059,10 +1255,15 @@ function sortByIdBase(a_a, a_b, a_mult)
 {
     var id1 = $(a_a).attr("id").split('-');
     var id2 = $(a_b).attr("id").split('-');
-    var diff = Number(id1[0]) - Number(id2[0]);
-    if (diff != 0)
-        return a_mult * diff;
-    return a_mult * (Number(id1[1]) - Number(id2[1]));
+    for (var i = 0; i < Math.min(id1.length, id2.length); ++i)
+    {
+        var diff = Number(id1[i]) - Number(id2[i]);
+        if (diff != 0)
+            return a_mult * diff;
+    }
+
+    // if all initial components match, shortest comes first
+    return a_mult * (id2.length - id1.length);
 };
 
 function sortById(a_a, a_b)
@@ -1085,13 +1286,13 @@ function sortByIdDir(a_a, a_b)
  * The height and width including the text are set as the values for
  * the parent svg element.
  *
- * @param a_doc the document
+ * @param {Document} a_doc the document
  * @param {int} a_width width of tree
  * @param {int} a_fontSize size of font in pixels
- * @return size of text
+ * @return size (width, height) of text
  * @type Array
  */
-function position_text(a_doc, a_width, a_fontSize)
+function positionText(a_doc, a_width, a_fontSize)
 {
     // if no words, just return empty size
     var words = $("#dependency-tree", a_doc).children("g").next().children("text");
@@ -1146,13 +1347,12 @@ function position_text(a_doc, a_width, a_fontSize)
 
 /**
  * Position pieces
- *
- * @param a_doc the document
+ * @param {Document} a_doc the document
  * @param {Array} a_treeSize width and height of tree
  * @param {Array} a_textSize width and height of text
  * @param {int} a_fontSize size of font in pixels
  */
-function position_all(a_doc, a_treeSize, a_textSize, a_fontSize)
+function positionAll(a_doc, a_treeSize, a_textSize, a_fontSize)
 {
     // position text at top 
     $("#dependency-tree g.text", a_doc)[0].
@@ -1182,10 +1382,10 @@ function position_all(a_doc, a_treeSize, a_textSize, a_fontSize)
  *  If no id or a bad id is specified, the entire tree is
  *  ungrayed.
  *
- * @param a_doc the document
+ * @param {Document} a_doc the document
  * @param {String} a_id id of word in tree
  */
-function highlight_word(a_doc, a_id)
+function highlightWord(a_doc, a_id)
 {
     // find node of interest
     var focusNode = $("#" + a_id, a_doc);
@@ -1257,31 +1457,27 @@ function highlight_word(a_doc, a_id)
     focusNode.children("text.arc-label").attr("showme", "focus-parent");
 
     // set highlights on text words
-    highlight_text_word(a_doc, a_id, "focus");
-    highlight_text_word(a_doc, focusNode.parent().attr("id"), "focus-parent");
+    highlightTextWord(a_doc, a_id, "focus");
+    highlightTextWord(a_doc, focusNode.parent().attr("id"), "focus-parent");
     descendants.each(
     function()
     {
-        highlight_text_word(a_doc,
-                            this.getAttribute("id"),
-                            "focus-descendant");
+        highlightTextWord(a_doc, this.getAttribute("id"), "focus-descendant");
     });
     children.each(
     function()
     {
-        highlight_text_word(a_doc,
-                            this.getAttribute("id"),
-                            "focus-child");
+        highlightTextWord(a_doc, this.getAttribute("id"), "focus-child");
     });
 };
 
 /**
- * Highlight a text word below the tree
- * @param a_doc the document
+ * Highlight a text word
+ * @param {Document} a_doc the document
  * @param {String} a_id id of word (tbref attribute on text word)
  * @param {String} a_focus value to set showme attribute to
  */
-function highlight_text_word(a_doc, a_id, a_focus)
+function highlightTextWord(a_doc, a_id, a_focus)
 {
     // do nothing if no id specified
     if ((a_id == null) || (a_id.length == 0))
@@ -1299,11 +1495,10 @@ function highlight_text_word(a_doc, a_id, a_focus)
 
 /**
  * Highlight initial word in the tree
- *
- * @param a_doc the document
+ * @param {Document} a_doc the document
  * @param {Array} a_ids ids of words in tree
  */
-function highlight_first(a_doc, a_ids)
+function highlightFirst(a_doc, a_ids)
 {
     // for each id
     for (i in a_ids)
@@ -1330,5 +1525,72 @@ function highlight_first(a_doc, a_ids)
             if (this.getAttribute("tbref") == id)
                 this.setAttribute("first", "yes");
         });
+    }
+};
+
+/**
+ * Traverse nodes in tree
+ *
+ *  left/right - move through siblings, wrapping if needed
+ *  up - move to parent
+ *  down - move to left-right child, dependending in text direction
+ */
+function traverseTreeLeft()
+{
+    var current = $("#" + s_currentId, document);
+    var neighbor = (s_direction == "rtl") ? current.next("g.tree-node") :
+                                            current.prev("g.tree-node");
+    if (neighbor.size() == 0)
+    {
+        neighbor = current.siblings("g.tree-node");
+        neighbor =
+            neighbor.eq((s_direction == "rtl") ? 0 : (neighbor.size() - 1));
+    }
+
+    if (neighbor.size() > 0)
+    {
+        s_currentId = neighbor.attr("id");
+        highlightWord(document, s_currentId);
+    }
+};
+
+function traverseTreeRight()
+{
+    var current = $("#" + s_currentId, document);
+    var neighbor = (s_direction == "rtl") ? current.prev("g.tree-node") :
+                                            current.next("g.tree-node");
+    if (neighbor.size() == 0)
+    {
+        neighbor = current.siblings("g.tree-node");
+        neighbor =
+            neighbor.eq((s_direction == "rtl") ? (neighbor.size() - 1) : 0);
+    }
+
+    if (neighbor.size() > 0)
+    {
+        s_currentId = neighbor.attr("id");
+        highlightWord(document, s_currentId);
+    }
+};
+
+function traverseTreeUp()
+{
+    var current = $("#" + s_currentId, document);
+    var neighbor = current.parent("g.tree-node");
+    if (neighbor.size() > 0)
+    {
+        s_currentId = neighbor.attr("id");
+        highlightWord(document, s_currentId);
+    }
+};
+
+function traverseTreeDown()
+{
+    var current = $("#" + s_currentId, document);
+    var neighbor = current.children("g.tree-node:first");
+    if (neighbor.size() > 0)
+    {
+        s_currentId = neighbor.attr("id");
+        highlightWord(document, s_currentId);
     }
 };

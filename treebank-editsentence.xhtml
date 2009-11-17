@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008-2009 Cantus Foundation
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <title>Alpheios:Edit Treebank Sentence</title>
+    <meta id="alpheios-pedagogical-text" name="alpheios-pedagogical-text"
+      content="true"/>
+    <meta name="alpheios-editTransformURL" content="../xslt/treebank-svg-edit.xsl"/>
+    <link rel="stylesheet" type="text/css" href="../css/alph-treebank-edit.css"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-treebank-edit.js"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+    <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+
+    <!-- Either a URL should be supplied that can be used to retrieve
+         information about the treebank or the information should be
+         included directly in the metadata:
+            alpheios-numSentences = number of sentences in treebank
+              (needed only if sentence navigation controls are included below)
+            alpheios-lang = language of contents of treebank
+            alpheios-direction = text display direction ('ltr' or 'rtl')
+         If the URL is present, it will take precedence over the metadata items.
+         If the metadata are to be used, the URL should be commented out.
+    -->
+    <!-- Alternative 1: URL to retrieve treebank info -->
+    <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq"/>
+    <!-- Alternative 2: metadata for treebank info -->
+    <meta name="alpheios-numSentences" content="1"/>
+    <meta name="alpheios-lang" content="la"/>
+    <meta name="alpheios-direction" content="ltr"/>
+
+    <!-- Flags controlling behavior of the editor.
+         Comment out to disable the described behavior.
+            alpheios-buildMenus:
+              Build menus from treebank description.  This can only be done
+              if the URL to retrieve treebank info is supplied above.
+              If not enabled, the contents of <form name='menus'> below should
+              be included in this file.
+            alpheios-sentenceNavigation:
+              Include controls to allow navigation between sentences within the
+              editor.  For this to work, the sentence ids must be integers
+              running from 1 to maxSentId, where maxSentId is obtained either
+              from invoking the alpheios-getInfoURL or from the
+              alpheios-numSentence metadatum.
+            alpheios-editModes:
+              Allow modal editing behavior.
+              Under development.  Should be left commented out for now.
+    -->
+    <meta name="alpheios-buildMenus" content=""/>
+    <meta name="alpheios-sentenceNavigation" content=""/>
+    <!-- <meta name="alpheios-editModes" content=""/> -->
+
+    <!-- URLs to get and put a single sentence in treebank XML -->
+    <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq"/>
+    <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq"/>
+
+    <!-- URL to call when exiting and label to use on exit button -->
+    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/>
+    <meta name="alpheios-exitLabel" content="Go to list of sentences"/>
+
+  </head>
+  <body onkeypress="Keypress(event)" onload="Init(event)">
+    <div class="alpheios-ignore" id="alph-page-header">
+      <img src="../image/alpheios.png" alt="Alpheios"/>
+    </div>
+    <div class="controls alpheios-ignore">
+      <div id="sent-navigation">
+        <form onsubmit="return SubmitGoTo(this)" name="sent-navigation-goto">
+          <label>Go to sentence number</label>
+          <input type="text" name="s" size="5"/>
+        </form>
+        <button id="first-button" onclick="ClickOnGoTo(event)"
+          >&#160;</button>
+        <button id="prev-button" onclick="ClickOnGoTo(event)"
+          >&#160;</button>
+        <label id="current-label">&#160;</label>
+        <button id="next-button" onclick="ClickOnGoTo(event)"
+          >&#160;</button>
+        <button id="last-button" onclick="ClickOnGoTo(event)"
+          >&#160;</button>
+      </div>
+      <form onsubmit="return SubmitExit(this)" name="sent-navigation-exit">
+        <input type="hidden" name="doc"/>
+        <input type="hidden" name="s"/>
+        <button type="submit">Exit</button>
+      </form>
+      <button id="save-button" onclick="ClickOnSave(event)">Save
+        sentence</button>
+      <button id="undo-button" disabled="disabled" onclick="ClickOnUndo(event)"
+        >&lt; Undo</button>
+      <button id="redo-button" disabled="disabled" onclick="ClickOnRedo(event)"
+        >Redo &gt;</button>
+      <form>
+        <label for="expansion-checkbox">Show expansion controls</label>
+        <input id="expansion-checkbox" type="checkbox"
+          onclick="ShowExpansionControls(event)" checked="checked"/>
+      </form>
+      <!-- Provide menus here if alpheios-buildMenus metadatum is disabled -->
+      <form name="menus"/>
+      <form name="sent-edit-mode">
+        <span>Editing mode: </span>
+        <input type="radio" id="mode-struct" name="mode" value="struct"
+          checked="" onclick="ClickOnMode(event)"/>
+        <label for="mode-struct">Structure</label>
+        <input type="radio" id="mode-label" name="mode" value="label"
+          onclick="ClickOnMode(event)"/>
+        <label for="mode-label">Labels</label>
+      </form>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
+  </body>
+</html>

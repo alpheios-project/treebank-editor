@@ -1,0 +1,256 @@
+/*
+ * Style for treebank editor
+ *  
+ * Copyright 2009 Cantus Foundation
+ * http://alpheios.net
+ * 
+ * This file is part of Alpheios.
+ * 
+ * Alpheios is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Alpheios is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#tree-error {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+svg {
+    overflow: scroll;
+}
+
+/* normal text attributes */
+g text {
+    font-family: Georgia, Times, Arial, Helvetica, Serif;
+    font-size: 20px;
+    stroke: none;
+    fill: dimgray;
+}
+
+g text.error {
+    text-anchor: start;
+    fill: black;
+}
+
+g text.node-label {
+    text-anchor: middle;
+    cursor: pointer;
+}
+
+g text.arc-label {
+    font-size: 11px;
+    fill: black;
+}
+
+g text.arc-label:hover ~ text.arc-label-help-up,
+g text.arc-label:hover ~ text.arc-label-help-dn {
+	 visibility: visible;
+}
+
+rect.hovering {
+    fill: #FFEE77;
+}
+
+g text.arc-label-help-up {
+    font-size: 11px;
+    fill: black;
+}
+
+g text.arc-label-help-dn {
+    font-size: 11px;
+    fill: black;
+}
+
+g.text text {
+    text-anchor: start;
+    fill: black;
+    cursor: pointer;
+}
+
+g.expand text {
+    text-anchor: middle;
+    font-size: 25px;
+    fill: black;
+}
+
+g.key text {
+    text-anchor: start;
+    font-size: 15px;
+    fill: black;
+}
+
+g.key text.heading {
+	font-weight: bold;
+}
+
+/* normal line attributes */
+g line {
+    stroke: black;
+}
+
+/* normal rect attributes */
+g rect {
+    stroke-width: 0;
+    fill: none;
+}
+
+g.key > rect {
+    stroke-width: 1;
+    stroke: black;
+}
+
+g.expand rect {
+    stroke-width: 1;
+    stroke: black;
+}
+
+g[expanded="yes"] > g.expand[showme="focus"] rect {
+    fill: #FFEE77;
+}
+
+g[expanded="no"] > g.expand[showme="focus"] rect {
+    fill: #C0FFC0;
+}
+
+/* color text according to part of speech:
+POS            color       alternate?
+a adjective    blue
+d adverb       orange
+l article      pale blue   gray
+c conjunction  pink        purple/mauve
+i interjection yellow
+n noun         black
+r preposition  green
+p pronoun      purple      light pink
+v verb         red
+
+e exclamation=interjection
+
+Additional values for CATiB:
+n nominal       black
+p proper noun   bold black
+v active verb   bold red
+w passive verb  red
+g particle      pale blue
+
+Values for PROIEL:
+N noun          black
+P pronoun       purple
+V verb          red
+A adjective     blue
+S article       pale blue
+D adverb        orange
+R preposition   green
+C conjunction   pink
+I interjection  yellow
+*/
+g text[pos=a], g text[pos=A] {
+    fill: blue;
+}
+g text[pos=d], g text[pos=D] {
+    fill: darkorange;
+}
+g text[pos=l], g text[pos=S] {
+    fill: skyblue;
+}
+g text[pos=c],g text[pos=C] {
+    fill: deeppink;
+}
+g text[pos=e] {
+    fill: gold;
+}
+g text[pos=i], g text[pos=I] {
+    fill: gold;
+}
+g text[pos=n],g text[pos=N] {
+    fill: black;
+}
+g text[pos=r], g text[pos=R] {
+    fill: green;
+}
+svg[tb=aldt] g text[pos=p], g text[pos=P] {
+    fill: purple;
+}
+svg[tb=aldt] g text[pos=v], g text[pos=V] {
+    fill: red;
+}
+
+svg[tb=catib] g text[pos=p] {
+    fill: black;
+    font-weight: bold;
+}
+svg[tb=catib] g text[pos=v] {
+    fill: red;
+    font-weight: bold;
+}
+g text[pos=w] {
+    fill: red;
+}
+g text[pos=g] {
+    fill: blue;
+}
+
+/* how to gray out tree */
+g.tree text[showme="grayed"] {
+    fill: darkgray;
+}
+g line[showme="grayed"] {
+    stroke: darkgray;
+}
+g rect[showme="grayed"] {
+    stroke: darkgray;
+    fill: none;
+}
+
+/* how to highlight focus word and its relatives */
+g rect.highlight[first] {
+    fill: #E0E0E0;
+}
+g rect.highlight[showme="focus"] {
+    fill: #FFEE77;
+    stroke-width: 2px;
+    stroke: black;
+}
+g rect.highlight[showme="focus-descendant"] {
+    fill: #E0FFE0;
+}
+g rect.highlight[showme="focus-child"] {
+    fill: #C0FFC0;
+}
+g rect.highlight[showme="focus-parent"] {
+    fill: #FFC0C0;
+}
+
+g.dragging text, g.dragging line, text.dragging {
+    stroke: #000000;
+    fill: #000000;
+}
+
+g.dragging rect.highlight, g.dragging g.expand rect {
+    fill: none;
+}
+
+/* how to handle descendants in tree: */
+/* - to gray out, use this set of rules */
+/* - to highlight, comment out this set of rules */
+/*--- start descendant rules ---*/
+g.tree text[showme="focus-descendant"] {
+    fill: darkgray;
+}
+g.tree rect[showme="focus-descendant"] {
+    stroke: darkgray;
+    fill: none;
+}
+g.tree line[showme="focus-descendant"] {
+    stroke: darkgray;
+}
+/*--- end descendant rules ---*/

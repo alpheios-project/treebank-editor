@@ -70,6 +70,14 @@ function Init(a_evt)
 {
     try
     {
+        // modify html based on metadata flags
+        var flag = $("meta[name='alpheios-sentenceNavigation']", document);
+        if (flag.size() == 0)
+            $("div#sent-navigation", document).remove();
+        flag = $("meta[name='alpheios-editModes']", document);
+        if (flag.size() == 0)
+            $("form[name='sent-edit-mode']", document).remove();
+
         // set state variables
         if (navigator.userAgent.indexOf("Firefox") != -1)
             s_firefox = true;
@@ -155,14 +163,6 @@ function Init(a_evt)
             s_params["direction"] =
                 $("meta[name='alpheios-direction']", document).attr("content");
         }
-
-        // handle metadata flags
-        var flag = $("meta[name='alpheios-sentenceNavigation']", document);
-        if (flag.size() == 0)
-            $("div#sent-navigation", document).remove();
-        flag = $("meta[name='alpheios-editModes']", document);
-        if (flag.size() == 0)
-            $("form[name='sent-edit-mode']", document).remove();
 
         // fix various values in html
         var exitForm = $("form[name='sent-navigation-exit']", document);

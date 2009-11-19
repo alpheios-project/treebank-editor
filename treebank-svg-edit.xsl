@@ -424,15 +424,15 @@
       <!-- if this is an elided word -->
       <xsl:when test="$a_head/@elided">
         <xsl:variable name="arcLabel"
-          select="$a_head/text[contains(@class, 'arc-label')]"/>
+          select="$a_head/svg:text[contains(@class, 'arc-label')]"/>
         <!-- concatenate elided node info and ascend -->
         <xsl:call-template name="get-dependency-info">
           <xsl:with-param name="a_relation"
-                          select="concat($a_relation,
-                                         '_ExD',
-                                         $a_head/@elided,
-                                         '_',
-                                         $arcLabel/text())"/>
+            select="concat($a_relation,
+                           '_ExD',
+                           $a_head/@elided,
+                           '_',
+                           $arcLabel/text())"/>
           <xsl:with-param name="a_head" select="$a_head/.."/>
         </xsl:call-template>
       </xsl:when>

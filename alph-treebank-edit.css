@@ -121,6 +121,13 @@ g[expanded="no"] > g.expand[showme="focus"] rect {
     fill: #C0FFC0;
 }
 
+div.cmenu {
+    position: absolute;
+    background: buttonface;
+    padding: 2px;
+    border: 1px solid black;
+}
+
 /* color text according to part of speech:
 POS            color       alternate?
 a adjective    blue

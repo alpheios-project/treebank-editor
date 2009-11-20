@@ -124,10 +124,10 @@ clearHistory : function()
 
 /**
  * Add event to history
- * @param {Array} a_event event
+ * @param {Array} a_hEvent event
  * @param {function} a_updateCallback update callback function
  */
-pushHistory : function(a_event, a_updateCallback)
+pushHistory : function(a_hEvent, a_updateCallback)
 {
     // destroy any redo history and adjust save points and buttons
     if (this.d_historyCursor < this.d_history.length)
@@ -145,7 +145,7 @@ pushHistory : function(a_event, a_updateCallback)
     }
 
     // save event plus alignment state
-    this.d_history.push(a_event);
+    this.d_history.push(a_hEvent);
     this.d_historyCursor++;
 
     // adjust buttons
@@ -157,7 +157,7 @@ pushHistory : function(a_event, a_updateCallback)
 
     // update state
     if (a_updateCallback)
-        a_updateCallback(a_event, 1);
+        a_updateCallback(a_hEvent, 1);
 },
 
 /**
@@ -186,7 +186,7 @@ popHistory : function(a_updateCallback)
 
     // update state
     if (a_updateCallback)
-        a_updateCallback(a_event, -1);
+        a_updateCallback(event, -1);
 
     return event;
 },
@@ -217,7 +217,7 @@ repushHistory : function(a_updateCallback)
 
     // update state
     if (a_updateCallback)
-        a_updateCallback(a_event, 1);
+        a_updateCallback(event, 1);
 
     return event;
 },
@@ -243,31 +243,6 @@ saved : function()
 unsavedChanges: function()
 {
     return (this.d_saveCursor != this.d_historyCursor);
-},
-
-/**
- * Save contents of SVG element by sending to save URL
- */
-saveContents: function()
-{
-    // if nothing has changed, do nothing
-    // (shouldn't ever happen because save button should be disabled)
-    if (this.d_saveCursor == this.d_historyCursor)
-      return;
-
-    // send synchronous request to save
-    var req = new XMLHttpRequest();
-    var svg = document.getElementsByTagNameNS("http://www.w3.org/2000/svg",
-                                              "svg")[0];
-    req.open("POST", svg.getAttribute("alph-saveurl"), false);
-    req.setRequestHeader("Content-Type", "application/xml");
-    var svgxml = XMLSerializer().serializeToString(svg);
-    req.send(svgxml);
-    if (req.status != 200)
-      alert(req.responseText ? req.responseText : req.statusText);
-
-    // remember where we last saved and reset button
-    this.saved();
 },
 
 /**
@@ -338,6 +313,33 @@ putContents: function(a_xml, a_url, a_doc, a_sentid)
 
     // remember where we last saved and reset button
     this.saved();
+},
+
+//****************************************************************************
+// browser compatibility stuff
+//****************************************************************************
+
+/**
+ * Get event
+ * @param {Event} a_event event passed to handler
+ * @returns event to use
+ * @type {Event}
+ */
+getEvent: function(a_event)
+{
+    return (a_event != null) ? a_event : window.event;
+},
+
+/**
+ * Get event target
+ * @param {Event} a_event event
+ * @returns target to use
+ * @type {Element}
+ */
+getEventTarget: function(a_event)
+{
+    var event = this.getEvent(a_event);
+    return (event.target != null) ? event.target : event.srcElement;
 }
 
 }

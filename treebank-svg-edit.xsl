@@ -458,7 +458,7 @@
   <xsl:template name="desc-to-menus">
     <xsl:param name="a_desc"/>
     <xsl:element name="form" namespace="http://www.w3.org/1999/xhtml">
-      <xsl:element name="span" namespace="http://www.w3.org/1999/xhtml">
+      <xsl:element name="div" namespace="http://www.w3.org/1999/xhtml">
         <xsl:text>Dependency Relation: </xsl:text>
       </xsl:element>
       <xsl:variable name="entries1"

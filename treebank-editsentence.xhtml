@@ -74,9 +74,9 @@
     <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq"/>
 
     <!-- URL to call when exiting and label to use on exit button -->
-    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/>
+    <meta name="alpheios-exitURL" content="about:blank"/>
+    <!-- <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/> -->
     <meta name="alpheios-exitLabel" content="Go to list of sentences"/>
-
   </head>
   <body onkeypress="Keypress(event)" onload="Init(event)">
     <div class="alpheios-ignore" id="alph-page-header">
@@ -115,7 +115,11 @@
           onclick="ShowExpansionControls(event)" checked="checked"/>
       </form>
       <!-- Provide menus here if alpheios-buildMenus metadatum is disabled -->
-      <form name="menus"/>
+      <div id="arc-label-menus" class="cmenu" style="display: none">
+        <form name="menus"/>
+        <button id="arc-label-apply" onclick="ClickOnLabelButton(event)">Apply</button>
+        <button id="arc-label-quit" onclick="ClickOnLabelButton(event)">Quit</button>
+      </div>
       <form name="sent-edit-mode">
         <span>Editing mode: </span>
         <input type="radio" id="mode-struct" name="mode" value="struct"

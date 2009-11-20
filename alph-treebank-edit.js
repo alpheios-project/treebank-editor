@@ -35,6 +35,7 @@ var s_contractionSymbol = "-";
 var s_expansionSymbol = "+";
 
 var s_currentId = null;               // current target id
+var s_currentArcLabelId = null;       // id of current arc label
 var s_dragId = null;                  // dragged word id
 var s_dragObj = null;                 // object being dragged
 var s_dragStartTrans = null;          // initial transform of group
@@ -49,10 +50,11 @@ var s_mode = "old";                   // edit mode: old/structure/labels
 
 var s_keyTable =                      // table of key, char, function
 [
-    [0, 104, traverseTreeLeft],
-    [0, 108, traverseTreeRight],
-    [0, 106, traverseTreeDown],
-    [0, 107, traverseTreeUp]
+    [  0, 104, traverseTreeLeft],
+    [  0, 108, traverseTreeRight],
+    [  0, 106, traverseTreeDown],
+    [  0, 107, traverseTreeUp],
+    [ 27,   0, DoAbortAction]
 ];
 
 //****************************************************************************
@@ -64,9 +66,9 @@ var s_keyTable =                      // table of key, char, function
  * Create any missing elements
  * Bind event handlers
  * Position elements
- * @param {Event} a_evt event
+ * @param {Event} a_event event
  */
-function Init(a_evt)
+function Init(a_event)
 {
     try
     {
@@ -441,18 +443,20 @@ function Log(a_msg)
 
 /**
  * Event handler for mouseover
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Enter(a_evt)
+function Enter(a_event)
 {
+    var target = AlphEdit.getEventTarget(a_event);
+
     // if over word
-    if ($(a_evt.target).hasClass("node-label"))
+    if ($(target).hasClass("node-label"))
     {
-        s_currentId = $(a_evt.target.parentNode).attr("id");
+        s_currentId = $(target.parentNode).attr("id");
     }
-    else if ($(a_evt.target).hasClass("text-word"))
+    else if ($(target).hasClass("text-word"))
     {
-        s_currentId = $(a_evt.target).attr("tbref");
+        s_currentId = $(target).attr("tbref");
     }
 
     Log("Enter " + s_currentId);
@@ -460,12 +464,14 @@ function Enter(a_evt)
 
 /**
  * Event handler for mouseout
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Leave(a_evt)
+function Leave(a_event)
 {
+    var target = AlphEdit.getEventTarget(a_event);
+
     // if over word
-    if ($(a_evt.target).filter(".node-label, .text-word"))
+    if ($(target).filter(".node-label, .text-word"))
     {
         Log("Leave " + s_currentId);
         s_currentId = null;
@@ -474,15 +480,17 @@ function Leave(a_evt)
 
 /**
  * Event handler for mouse click
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Click(a_evt)
+function Click(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+
     switch (s_mode)
     {
       case "old":
       case "struct":
-        (s_dragObj ? Drop(a_evt) : Grab(a_evt));
+        (s_dragObj ? Drop(event) : Grab(event));
         break;
 
       case "label":
@@ -494,33 +502,36 @@ function Click(a_evt)
 
 /**
  * Event handler for picking up word/subtree
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Grab(a_evt)
+function Grab(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+    var target = AlphEdit.getEventTarget(event);
+
     Log("Grab");
 
     // if grabbed word, either in tree or in text
-    if ($(a_evt.target).hasClass("node-label") ||
-        $(a_evt.target).hasClass("text-word"))
+    if ($(target).hasClass("node-label") ||
+        $(target).hasClass("text-word"))
     {
-        if ($(a_evt.target).hasClass("node-label"))
+        if ($(target).hasClass("node-label"))
         {
-            s_dragObj = a_evt.target.parentNode;
+            s_dragObj = target.parentNode;
             s_dragId = $(s_dragObj).attr("id");
         }
         else
         {
-            s_dragObj = $(a_evt.target).clone(true)[0];
-            $(a_evt.target.parentNode).append(s_dragObj);
+            s_dragObj = $(target).clone(true)[0];
+            $(target.parentNode).append(s_dragObj);
             s_dragId = $(s_dragObj).attr("tbref");
         }
         AlphEdit.addClass($("#dependency-tree", document)[0], "dragging");
         AlphEdit.addClass(s_dragObj, "dragging");
         highlightWord(s_dragObj.ownerDocument, null);
         s_dragStartTrans = s_dragObj.getAttribute("transform");
-        s_dragX = a_evt.pageX;
-        s_dragY = a_evt.pageY;
+        s_dragX = event.pageX;
+        s_dragY = event.pageY;
         var pref = "translate(";
         if (s_dragStartTrans &&
             (s_dragStartTrans.substring(0, pref.length) == pref))
@@ -556,17 +567,19 @@ function Grab(a_evt)
 
 /**
  * Event handler for moving word/subtree
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Drag(a_evt)
+function Drag(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+
     // if we're dragging something
     if (s_dragObj)
     {
         var scale = s_dragObj.ownerSVGElement.currentScale;
         var trans = s_dragObj.ownerSVGElement.currentTranslate;
-        var newX = (a_evt.pageX - trans.x) / scale;
-        var newY = (a_evt.pageY - trans.y) / scale;
+        var newX = (event.pageX - trans.x) / scale;
+        var newY = (event.pageY - trans.y) / scale;
 
         // if we've moved, update transform
         if ((newX != s_dragX) || (newY != s_dragY))
@@ -587,9 +600,9 @@ function Drag(a_evt)
 
 /**
  * Event handler for dropping word/subtree
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Drop(a_evt)
+function Drop(a_event)
 {
     Log("Drop");
 
@@ -633,18 +646,21 @@ function Drop(a_evt)
 
 /**
  * Event handler for clicking on expansion control
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Expand(a_evt)
+function Expand(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+    var target = AlphEdit.getEventTarget(event);
+
     // if we're dragging, treat it like a drop
     if (s_dragObj)
     {
-        Drop(a_evt);
+        Drop(event);
         return;
     }
 
-    var node = a_evt.target.parentNode.parentNode;
+    var node = target.parentNode.parentNode;
     var expanded = $(node).attr("expanded");
 
     // set new expansion
@@ -658,27 +674,27 @@ function Expand(a_evt)
 
 /**
  * Event handler for undo operation
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ClickOnUndo(a_evt)
+function ClickOnUndo(a_event)
 {
     ReplayEvent(AlphEdit.popHistory(null), false);
 };
 
 /**
  * Event handler for redo operation
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ClickOnRedo(a_evt)
+function ClickOnRedo(a_event)
 {
     ReplayEvent(AlphEdit.repushHistory(null), true);
 };
 
 /**
  * Event handler for toggling display of expansion controls
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ShowExpansionControls(a_evt)
+function ShowExpansionControls(a_event)
 {
     s_showExpansionControls =
             ($("#expansion-checkbox:checked", document).size() > 0);
@@ -690,37 +706,79 @@ function ShowExpansionControls(a_evt)
 
 /**
  * Event handler for clicking on arc label
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ClickOnArcLabel(a_evt)
+function ClickOnArcLabel(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+    var target = AlphEdit.getEventTarget(event);
+
     // only allow if in label editing mode
     if ((s_mode != "label") && (s_mode != "old"))
         return;
+    s_currentArcLabelId = target.parentNode.getAttribute("id");
 
-    var newLabel = "";
-    if ($('select[name="arcrel1"]', document).size() > 0)
-        newLabel += $('select[name="arcrel1"]', document)[0].value;
-    if ($('select[name="arcrel2"]', document).size() > 0)
-        newLabel += $('select[name="arcrel2"]', document)[0].value;
-    DoLabelArc(a_evt.target.parentNode.getAttribute("id"), newLabel, true);
-    Reposition();
+    var div = $("#arc-label-menus", document);
+    var scroll =
+    [
+        document.body.scrollLeft ? document.body.scrollLeft :
+                                   document.documentElement.scrollLeft,
+        document.body.scrollTop ? document.body.scrollTop :
+                                  document.documentElement.scrollTop,
+        document.body.scrollRight ? document.body.scrollRight :
+                                   document.documentElement.scrollRight,
+        document.body.scrollBottom ? document.body.scrollBottom :
+                                     document.documentElement.scrollBottom
+    ];
+    div.css("display", "none");
+    div.css("left",
+            (event.clientX + scroll[0] - 7) + "px");
+    div.css("top",
+            (event.clientY + scroll[1] + 7 - div.height()) + "px");
+    div.css("display", "block");
+};
+
+/**
+ * Event handler for label menu
+ * @param {Event} a_event the event
+ */
+function ClickOnLabelButton(a_event)
+{
+    // hide menu
+    var div = $("#arc-label-menus", document);
+    div.css("display", "none");
+
+    var target = AlphEdit.getEventTarget(a_event);
+    if ($(target).is("#arc-label-apply"))
+    {
+        var newLabel = "";
+        var label = $('select[name="arcrel1"]', div);
+        if (label.size() > 0)
+            newLabel += label[0].value;
+        label = $('select[name="arcrel2"]', div);
+        if (label.size() > 0)
+            newLabel += label[0].value;
+        DoLabelArc(s_currentArcLabelId, newLabel, true);
+        Reposition();
+    }
+    
+    s_currentArcLabelId = null;
 };
 
 /**
  * Event handler for save operation
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ClickOnSave(a_evt)
+function ClickOnSave(a_event)
 {
     DoSave();
 };
 
 /**
  * Event handler for window resize
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Resize(a_evt)
+function Resize(a_event)
 {
     // force full repositioning of elements
     Reposition();
@@ -773,9 +831,9 @@ function SubmitGoTo(a_form)
 
 /**
  * Event handler for button to go to new sentence
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function ClickOnGoTo(a_evt)
+function ClickOnGoTo(a_event)
 {
     // if there are unsaved changes
     if (AlphEdit.unsavedChanges())
@@ -785,29 +843,39 @@ function ClickOnGoTo(a_evt)
     }
 
     // go to new sentence
-    s_params["s"] = a_evt.target.value;
+    s_params["s"] = AlphEdit.getEventTarget(a_event).value;
     InitNewSentence();
 };
 
 /**
  * Event handler for mode buttons
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
 function ClickOnMode(a_event)
 {
-    s_mode = a_event.target.value;
+    s_mode = AlphEdit.getEventTarget(a_event).value;
 };
 
 /**
  * Event handler for key presses
- * @param {Event} a_evt the event
+ * @param {Event} a_event the event
  */
-function Keypress(a_evt)
+function Keypress(a_event)
 {
+    var event = AlphEdit.getEvent(a_event);
+
+    Log("alt/ctrl/shift/meta=" +
+        (event.altKey ? "1" : "0") +
+        (event.ctrlKey ? "1" : "0") +
+        (event.shiftKey ? "1" : "0") +
+        (event.metaKey ? "1" : "0") +
+        "\nchar=" + event.charCode +
+        "\nkey=" + event.keyCode +
+        "\ntype=" + event.type);
     for (var i = 0; i < s_keyTable.length; ++i)
     {
-        if ((s_keyTable[i][0] == a_evt.keyCode) &&
-            (s_keyTable[i][1] == a_evt.charCode))
+        if ((s_keyTable[i][0] == event.keyCode) &&
+            (s_keyTable[i][1] == event.charCode))
         {
             s_keyTable[i][2]();
             return;
@@ -879,17 +947,27 @@ function DoExpand(a_id, a_expand, a_push)
  */
 function DoLabelArc(a_id, a_label, a_push)
 {
-    Log("Labeling " + a_id + " as " + a_label);
-
     var arcLabel = $("#" + a_id + " > text.arc-label", document);
     var oldLabel = arcLabel.text();
-    arcLabel.text(a_label);
 
-    // push event if requested
-    if (a_push)
+    // if new label
+    if (oldLabel != a_label)
     {
-        AlphEdit.pushHistory(Array("arc", Array(a_id, oldLabel, a_label)),
-                             null);
+        Log("Label " + a_id + " as " + a_label);
+
+        arcLabel.text(a_label);
+
+        // push event if requested
+        if (a_push)
+        {
+            AlphEdit.pushHistory(Array("arc", Array(a_id, oldLabel, a_label)),
+                                 null);
+        }
+    }
+    // if same label
+    else
+    {
+        Log("Label " + a_id + " unchanged");
     }
 };
 
@@ -908,6 +986,21 @@ function DoSave()
                          s_putSentenceURL,
                          s_params["doc"],
                          s_params["s"]);
+};
+
+/**
+ * Abort current action
+ */
+function DoAbortAction()
+{
+    // if labeling arc
+    if (s_currentArcLabelId)
+    {
+        // hide menu
+        var div = $("#arc-label-menus", document);
+        div.css("display", "none");
+        s_currentArcLabelId = null;
+    }
 };
 
 //****************************************************************************
@@ -932,13 +1025,13 @@ function Reposition()
 
 /**
  * Replay event from history
- * @param {Event} a_event event to replay
+ * @param {Array} a_hEvent history event to replay
  * @param {Boolean} a_forward whether we're playing forward or backward
  */
-function ReplayEvent(a_event, a_forward)
+function ReplayEvent(a_hEvent, a_forward)
 {
     // if no event, do nothing
-    if (!a_event)
+    if (!a_hEvent)
         return;
 
     // abandon any dragging operation
@@ -947,8 +1040,8 @@ function ReplayEvent(a_event, a_forward)
         Drop();
 
     // interpret event
-    var eventType = a_event[0];
-    var eventArgs = a_event[1];
+    var eventType = a_hEvent[0];
+    var eventArgs = a_hEvent[1];
     switch (eventType)
     {
       case "arc":

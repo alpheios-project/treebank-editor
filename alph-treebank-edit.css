@@ -43,7 +43,6 @@ g text.error {
 
 g text.node-label {
     text-anchor: middle;
-    cursor: pointer;
 }
 
 g text.arc-label {
@@ -73,7 +72,6 @@ g text.arc-label-help-dn {
 g.text text {
     text-anchor: start;
     fill: black;
-    cursor: pointer;
 }
 
 g.expand text {
@@ -128,82 +126,29 @@ div.cmenu {
     border: 1px solid black;
 }
 
-/* color text according to part of speech:
-POS            color       alternate?
-a adjective    blue
-d adverb       orange
-l article      pale blue   gray
-c conjunction  pink        purple/mauve
-i interjection yellow
-n noun         black
-r preposition  green
-p pronoun      purple      light pink
-v verb         red
-
-e exclamation=interjection
-
-Additional values for CATiB:
-n nominal       black
-p proper noun   bold black
-v active verb   bold red
-w passive verb  red
-g particle      pale blue
-
-Values for PROIEL:
-N noun          black
-P pronoun       purple
-V verb          red
-A adjective     blue
-S article       pale blue
-D adverb        orange
-R preposition   green
-C conjunction   pink
-I interjection  yellow
-*/
-g text[pos=a], g text[pos=A] {
-    fill: blue;
-}
-g text[pos=d], g text[pos=D] {
-    fill: darkorange;
-}
-g text[pos=l], g text[pos=S] {
-    fill: skyblue;
-}
-g text[pos=c],g text[pos=C] {
-    fill: deeppink;
-}
-g text[pos=e] {
-    fill: gold;
-}
-g text[pos=i], g text[pos=I] {
-    fill: gold;
-}
-g text[pos=n],g text[pos=N] {
-    fill: black;
-}
-g text[pos=r], g text[pos=R] {
-    fill: green;
-}
-svg[tb=aldt] g text[pos=p], g text[pos=P] {
-    fill: purple;
-}
-svg[tb=aldt] g text[pos=v], g text[pos=V] {
-    fill: red;
+/* cursors */
+body[alpheios-mode="tree"] {
+    cursor: move;
 }
 
-svg[tb=catib] g text[pos=p] {
-    fill: black;
-    font-weight: bold;
+body[alpheios-mode="label"] {
+    cursor: text;
 }
-svg[tb=catib] g text[pos=v] {
-    fill: red;
-    font-weight: bold;
+
+body[alpheios-mode="ellipsis"] {
+    cursor: row-resize;
 }
-g text[pos=w] {
-    fill: red;
+
+body[alpheios-mode="ellipsis"] g[elided] > text.node-label {
+    cursor: crosshair;
 }
-g text[pos=g] {
-    fill: blue;
+
+g[expanded="yes"] > g.expand {
+    cursor: n-resize;
+}
+
+g[expanded="no"] > g.expand {
+    cursor: s-resize;
 }
 
 /* how to gray out tree */
@@ -235,6 +180,30 @@ g rect.highlight[showme="focus-child"] {
 }
 g rect.highlight[showme="focus-parent"] {
     fill: #FFC0C0;
+}
+
+/* key */
+th {
+    text-align: left;
+}
+table {
+    border: 1px solid black;
+    padding: 5px;
+}
+td[first] {
+    background-color: #E0E0E0;
+}
+td[showme="focus"] {
+    background-color: #FFEE77;
+}
+td[showme="focus-descendant"] {
+    background-color: #E0FFE0;
+}
+td[showme="focus-child"] {
+    background-color: #C0FFC0;
+}
+td[showme="focus-parent"] {
+    background-color: #FFC0C0;
 }
 
 g.dragging text, g.dragging line, text.dragging {

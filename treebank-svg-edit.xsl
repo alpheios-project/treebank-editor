@@ -36,8 +36,11 @@
   svg-to-xml:
   Output is returned as a sentence element with a list of words as children.
 
-  menus:
+  desc-to-menus:
   Builds html menus from treebank description
+
+  desc-to-style:
+  Builds style from treebank description
  -->
 <xsl:stylesheet xmlns="http://www.w3.org/2000/svg"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -54,8 +57,12 @@
       e_mode    mode: xml-to-svg  transform treebank xml to svg
                       svg-to-xml  transform svg to treebank xml
                       menus       generate menus from format description
+                      style       generate style from format description
+                      key         generate key from format description
+      e_app     application ("edit" or "view")
   -->
   <xsl:param name="e_mode"/>
+  <xsl:param name="e_app" select="edit"/>
 
   <!--
     Template for external calls
@@ -76,6 +83,17 @@
       <xsl:when test="$e_mode = 'menus'">
         <xsl:call-template name="desc-to-menus">
           <xsl:with-param name="a_desc" select="info/tbd:desc"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$e_mode = 'style'">
+        <xsl:call-template name="desc-to-style">
+          <xsl:with-param name="a_desc" select="info/tbd:desc"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:when test="$e_mode = 'key'">
+        <xsl:call-template name="desc-to-key">
+          <xsl:with-param name="a_desc" select="info/tbd:desc"/>
+          <xsl:with-param name="a_app" select="$e_app"/>
         </xsl:call-template>
       </xsl:when>
     </xsl:choose>
@@ -283,8 +301,18 @@
     <xsl:for-each select="$a_words">
       <xsl:choose>
         <xsl:when test="contains(@relation, '_ExD')">
-          <xsl:variable name="rel1" select="substring-before(@relation, '_ExD')"/>
-          <xsl:variable name="tail" select="substring-after(@relation, '_ExD')"/>
+          <xsl:variable name="rel1">
+            <xsl:call-template name="substring-before-last">
+              <xsl:with-param name="a_in" select="@relation"/>
+              <xsl:with-param name="a_sub" select="'_ExD'"/>
+            </xsl:call-template>
+          </xsl:variable>
+          <xsl:variable name="tail">
+            <xsl:call-template name="substring-after-last">
+              <xsl:with-param name="a_in" select="@relation"/>
+              <xsl:with-param name="a_sub" select="'_ExD'"/>
+            </xsl:call-template>
+          </xsl:variable>
           <xsl:variable name="tnum" select="substring-before($tail, '_')"/>
           <xsl:variable name="num">
             <xsl:choose>
@@ -296,33 +324,33 @@
           </xsl:variable>
           <xsl:variable name="rel2" select="substring-after($tail, '_')"/>
 
-          <!-- point this word at synthetic node -->
+          <!-- create synthetic node -->
           <xsl:element name="word">
-            <xsl:copy-of select="@id|@elided|@form|@lemma|@postag"/>
-            <xsl:attribute name="head">
+            <xsl:attribute name="id">
               <xsl:value-of select="concat(@head, '-', $num)"/>
             </xsl:attribute>
+            <xsl:attribute name="elided">
+              <xsl:value-of select="$num"/>
+            </xsl:attribute>
+            <xsl:attribute name="form">
+              <xsl:value-of select="concat('[', $num, ']')"/>
+            </xsl:attribute>
+            <xsl:attribute name="head">
+              <xsl:value-of select="@head"/>
+            </xsl:attribute>
             <xsl:attribute name="relation">
-              <xsl:value-of select="$rel1"/>
+              <xsl:value-of select="$rel2"/>
             </xsl:attribute>
           </xsl:element>
-          <!-- create synthetic node -->
+          <!-- point word at synthetic node -->
           <xsl:variable name="new">
             <xsl:element name="word">
-              <xsl:attribute name="id">
+              <xsl:copy-of select="@id|@elided|@form|@lemma|@postag"/>
+              <xsl:attribute name="head">
                 <xsl:value-of select="concat(@head, '-', $num)"/>
               </xsl:attribute>
-              <xsl:attribute name="elided">
-                <xsl:value-of select="$num"/>
-              </xsl:attribute>
-              <xsl:attribute name="form">
-                <xsl:value-of select="concat('[', $num, ']')"/>
-              </xsl:attribute>
-              <xsl:attribute name="head">
-                <xsl:value-of select="@head"/>
-              </xsl:attribute>
               <xsl:attribute name="relation">
-                <xsl:value-of select="$rel2"/>
+                <xsl:value-of select="$rel1"/>
               </xsl:attribute>
             </xsl:element>
           </xsl:variable>
@@ -339,6 +367,79 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:for-each>
+  </xsl:template>
+
+  <!--
+    Functions to find last instance of substring
+
+    Parameters:
+      $a_in       text
+      $a_sub      substring to find
+
+    Return value:
+      portion of text before/after last occurrence of substring
+  -->
+  <xsl:template name="substring-after-last">
+    <xsl:param name="a_in"/>
+    <xsl:param name="a_sub"/>
+
+    <!-- reverse strings -->
+    <xsl:variable name="rin">
+      <xsl:call-template name="reverse-string">
+        <xsl:with-param name="a_in" select="$a_in"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:variable name="rsub">
+      <xsl:call-template name="reverse-string">
+        <xsl:with-param name="a_in" select="$a_sub"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- find first instance and reverse it -->
+    <xsl:call-template name="reverse-string">
+      <xsl:with-param name="a_in" select="substring-before($rin, $rsub)"/>
+    </xsl:call-template>
+  </xsl:template>
+  <xsl:template name="substring-before-last">
+    <xsl:param name="a_in"/>
+    <xsl:param name="a_sub"/>
+
+    <!-- reverse strings -->
+    <xsl:variable name="rin">
+      <xsl:call-template name="reverse-string">
+        <xsl:with-param name="a_in" select="$a_in"/>
+      </xsl:call-template>
+    </xsl:variable>
+    <xsl:variable name="rsub">
+      <xsl:call-template name="reverse-string">
+        <xsl:with-param name="a_in" select="$a_sub"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <!-- find first instance and reverse it -->
+    <xsl:call-template name="reverse-string">
+      <xsl:with-param name="a_in" select="substring-after($rin, $rsub)"/>
+    </xsl:call-template>
+  </xsl:template>
+
+  <!--
+    Function to reverse a string
+
+    Parameters:
+      $a_in       text to reverse
+
+    Return value:
+      string with characters reversed
+  -->
+  <xsl:template name="reverse-string">
+    <xsl:param name="a_in"/>
+    <xsl:variable name="len" select="string-length($a_in)"/>
+    <xsl:if test="$len &gt; 0">
+      <xsl:value-of select="substring($a_in, $len, 1)"/>
+      <xsl:call-template name="reverse-string">
+        <xsl:with-param name="a_in" select="substring($a_in, 1, $len - 1)"/>
+      </xsl:call-template>
+    </xsl:if>
   </xsl:template>
 
   <!--
@@ -448,16 +549,18 @@
 
   <!--
     Function to create menus from format description
-    
+
     Parameters:
-    $a_desc     treebank format description
-    
+      $a_desc     treebank format description
+
     Return value:
-    html menus
+      html menus
   -->
   <xsl:template name="desc-to-menus">
     <xsl:param name="a_desc"/>
+
     <xsl:element name="form" namespace="http://www.w3.org/1999/xhtml">
+      <xsl:attribute name="name">menus</xsl:attribute>
       <xsl:element name="div" namespace="http://www.w3.org/1999/xhtml">
         <xsl:text>Dependency Relation: </xsl:text>
       </xsl:element>
@@ -511,4 +614,117 @@
       </xsl:if>
     </xsl:element>
   </xsl:template>
+
+  <!--
+    Function to create style from format description
+
+    Parameters:
+      $a_desc     treebank format description
+
+    Return value:
+      html style tag
+  -->
+  <xsl:template name="desc-to-style">
+    <xsl:param name="a_desc"/>
+
+    <xsl:variable name="entries"
+      select="$a_desc/tbd:table[@type = 'morphology']/
+              tbd:category[@id = 'pos']/tbd:entry"/>
+
+    <xsl:element name="style" namespace="http://www.w3.org/1999/xhtml">
+      <xsl:attribute name="type">text/css</xsl:attribute>
+      <!-- for each part of speech -->
+      <xsl:for-each select="$entries[tbd:color|tbd:style]">
+        <xsl:variable name="subselector"
+          select="concat('[pos=', ./tbd:short, ']')"/>
+        <!-- if color specified -->
+        <xsl:if test="./tbd:color">
+          <!-- svg -->
+          <xsl:value-of select="concat('g text', $subselector, '{')"/>
+          <xsl:value-of select="concat('fill:', ./tbd:color)"/>
+          <xsl:value-of select="'}&#10;'"/>
+          <!-- key -->
+          <xsl:value-of select="concat('td', $subselector, '{')"/>
+          <xsl:value-of select="concat('color:', ./tbd:color)"/>
+          <xsl:value-of select="'}&#10;'"/>
+        </xsl:if>
+        <!-- if additional style specified -->
+        <xsl:if test="./tbd:style">
+          <!-- svg -->
+          <xsl:value-of select="concat('g text', $subselector, '{')"/>
+          <xsl:value-of select="./tbd:style"/>
+          <xsl:value-of select="'}&#10;'"/>
+          <!-- key -->
+          <xsl:value-of select="concat('td', $subselector, '{')"/>
+          <xsl:value-of select="./tbd:style"/>
+          <xsl:value-of select="'}&#10;'"/>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:element>
+  </xsl:template>
+
+  <!--
+    Function to create key from format description
+
+    Parameters:
+      $a_desc     treebank format description
+
+    Return value:
+      html table containing key
+  -->
+  <xsl:template name="desc-to-key">
+    <xsl:param name="a_desc"/>
+    <xsl:param name="a_app"/>
+
+    <xsl:variable name="entries"
+      select="$a_desc/tbd:table[@type = 'morphology']/
+      tbd:category[@id = 'pos']/tbd:entry"/>
+
+    <table xmlns="http://www.w3.org/1999/xhtml">
+      <thead>
+        <tr><th>Key to Background Colors</th></tr>
+      </thead>
+      <tbody>
+        <tr><td showme="focus">Focus word</td></tr>
+        <tr><td showme="focus-parent">Word that focus word depends on</td></tr>
+        <tr><td showme="focus-child">Words that immediately depend on focus word</td></tr>
+        <tr><td showme="focus-descendant">Other words that depend on focus word</td></tr>
+        <xsl:if test="$e_app = 'view'">
+          <tr><td first="yes">First selected word(s)</td></tr>
+        </xsl:if>
+      </tbody>
+      <br/>
+      <thead>
+        <tr><th>Key to Text Colors</th></tr>
+      </thead>
+      <tbody>
+        <!-- for each part of speech -->
+        <xsl:for-each select="$entries">
+          <xsl:sort select="./tbd:long"/>
+          <!-- if color specified -->
+          <xsl:if test="./tbd:color">
+            <xsl:element name="tr">
+              <xsl:element name="td">
+                <xsl:attribute name="pos">
+                  <xsl:value-of select="./tbd:short"/>
+                </xsl:attribute>
+                <xsl:value-of
+                  select="concat(translate(substring(./tbd:long, 1, 1),
+                                           'abcdefghijklmnopqrstuvwxyz',
+                                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+                                 substring(./tbd:long, 2))"/>
+              </xsl:element>
+            </xsl:element>
+          </xsl:if>
+        </xsl:for-each>
+        <tr><td pos="other">Other parts of speech</td></tr>
+      </tbody>
+      <br/>
+      <tbody>
+        <tr><td>LABEL on arc = dependency relation</td></tr>
+        <tr><td>[0], [1], etc. = implied (elided) words</td></tr>
+      </tbody>
+    </table>
+  </xsl:template>
+
 </xsl:stylesheet>

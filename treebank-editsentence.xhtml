@@ -25,7 +25,8 @@
     <title>Alpheios:Edit Treebank Sentence</title>
     <meta id="alpheios-pedagogical-text" name="alpheios-pedagogical-text"
       content="true"/>
-    <meta name="alpheios-editTransformURL" content="../xslt/treebank-svg-edit.xsl"/>
+    <meta name="alpheios-editTransformURL"
+      content="../xslt/treebank-svg-edit.xsl"/>
     <link rel="stylesheet" type="text/css" href="../css/alph-treebank-edit.css"/>
     <script language="javascript" type="text/javascript" src="../script/alph-treebank-edit.js"/>
     <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
@@ -50,33 +51,41 @@
 
     <!-- Flags controlling behavior of the editor.
          Comment out to disable the described behavior.
-            alpheios-buildMenus:
-              Build menus from treebank description.  This can only be done
+            alpheios-buildContent:
+              Build content from treebank description.  This can only be done
               if the URL to retrieve treebank info is supplied above.
-              If not enabled, the contents of <form name='menus'> below should
-              be included in this file.
+              The content is a space-separated list of possible values:
+                menus = menus of relation and morphology values
+                style = style sheet controlling display of values
+                key = key describing values
+              If not enabled, the content must be supplied directly in this
+              file.  Search for "alpheios-buildContent" to find the locations.
             alpheios-sentenceNavigation:
               Include controls to allow navigation between sentences within the
               editor.  For this to work, the sentence ids must be integers
               running from 1 to maxSentId, where maxSentId is obtained either
               from invoking the alpheios-getInfoURL or from the
               alpheios-numSentence metadatum.
-            alpheios-editModes:
-              Allow modal editing behavior.
-              Under development.  Should be left commented out for now.
     -->
-    <meta name="alpheios-buildMenus" content=""/>
+    <meta name="alpheios-buildContent" content="menus style key"/>
     <meta name="alpheios-sentenceNavigation" content=""/>
-    <!-- <meta name="alpheios-editModes" content=""/> -->
 
     <!-- URLs to get and put a single sentence in treebank XML -->
     <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq"/>
     <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq"/>
 
     <!-- URL to call when exiting and label to use on exit button -->
-    <meta name="alpheios-exitURL" content="about:blank"/>
-    <!-- <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/> -->
+    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/>
     <meta name="alpheios-exitLabel" content="Go to list of sentences"/>
+
+    <!-- Provide style here if alpheios-buildContent metadatum
+         does not contain "style".
+         Styles should be provided for
+            g text[pos=<pos>]     words in text and tree
+            td[pos=<pos>]         words in key
+         for each part of speech <pos>.
+    -->
+    <style type="text/css"/>
   </head>
   <body onkeypress="Keypress(event)" onload="Init(event)">
     <div class="alpheios-ignore" id="alph-page-header">
@@ -114,22 +123,33 @@
         <input id="expansion-checkbox" type="checkbox"
           onclick="ShowExpansionControls(event)" checked="checked"/>
       </form>
-      <!-- Provide menus here if alpheios-buildMenus metadatum is disabled -->
-      <div id="arc-label-menus" class="cmenu" style="display: none">
-        <form name="menus"/>
-        <button id="arc-label-apply" onclick="ClickOnLabelButton(event)">Apply</button>
-        <button id="arc-label-quit" onclick="ClickOnLabelButton(event)">Quit</button>
-      </div>
       <form name="sent-edit-mode">
-        <span>Editing mode: </span>
-        <input type="radio" id="mode-struct" name="mode" value="struct"
-          checked="" onclick="ClickOnMode(event)"/>
-        <label for="mode-struct">Structure</label>
+        <span>Tool: </span>
+        <input type="radio" id="mode-tree" name="mode" value="tree"
+          checked="checked" onclick="ClickOnMode(event)"/>
+        <label for="mode-tree">Tree</label>
         <input type="radio" id="mode-label" name="mode" value="label"
           onclick="ClickOnMode(event)"/>
-        <label for="mode-label">Labels</label>
+        <label for="mode-label">Label</label>
+        <input type="radio" id="mode-ellipsis" name="mode" value="ellipsis"
+          onclick="ClickOnMode(event)"/>
+        <label for="mode-label">Ellipsis</label>
       </form>
+      <!-- Provide menus here (in form[name="menus"] if alpheios-buildContent
+           metadatum does not contain "menus".
+      -->
+      <div id="arc-label-menus" class="cmenu" style="display: none">
+        <form name="menus"/>
+        <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
+          >Apply</button>
+        <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
+          >Quit</button>
+      </div>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
+    <!-- Provide key here if alpheios-buildContent metadatum
+         does not contain "key".
+    -->
+    <div id="key"/>
   </body>
 </html>

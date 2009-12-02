@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var s_ns = "http://www.w3.org/2000/svg";        // svg namespace
+var s_svgns = "http://www.w3.org/2000/svg";     // svg namespace
 var s_xlinkns = "http://www.w3.org/1999/xlink"; // xlink namespace
 
 var s_getSentenceURL = null;          // where to get treebank sentence from
@@ -44,17 +44,29 @@ var s_dragTransY = 0;                 // Y translation of group
 var s_dragX = 0;                      // mouse X
 var s_dragY = 0;                      // mouse Y
 
-var s_firebug = false;                // using firebug
+var s_firebug = true;                 // using firebug
 var s_firefox = false;                // in Firefox
-var s_mode = "old";                   // edit mode: old/structure/labels
+var s_mode = "tree";                  // edit mode: tree/label/ellipsis
 
-var s_keyTable =                      // table of key, char, function
+// table of [key, char, modifiers, function, arg]
+// where modifiers is four-char string acsm, where
+//    a = 1 if altKey else 0
+//    c = 1 if ctrlKey else 0
+//    s = 1 if shiftKey else 0
+//    m = 1 if metaKey else 0
+//   
+var s_keyTable =
 [
-    [  0, 104, traverseTreeLeft],
-    [  0, 108, traverseTreeRight],
-    [  0, 106, traverseTreeDown],
-    [  0, 107, traverseTreeUp],
-    [ 27,   0, DoAbortAction]
+    [  0, 104, "0000", traverseTreeLeft,  null],        // h
+    [  0, 108, "0000", traverseTreeRight, null],        // l
+    [  0, 106, "0000", traverseTreeDown,  null],        // j
+    [  0, 107, "0000", traverseTreeUp,    null],        // k
+    [ 27,   0, "0000", DoAbortAction,     null],        // <ESC>
+    [112,   0, "0100", DoSetMode,         "tree"],      // ctrl-F1
+    [113,   0, "0100", DoSetMode,         "label"],     // ctrl-F2
+    [114,   0, "0100", DoSetMode,         "ellipsis"],  // ctrl-F3
+    [  0, 121, "0100", ClickOnRedo,       null],        // ctrl-y
+    [  0, 122, "0100", ClickOnUndo,       null]         // ctrl-z
 ];
 
 //****************************************************************************
@@ -76,9 +88,6 @@ function Init(a_event)
         var flag = $("meta[name='alpheios-sentenceNavigation']", document);
         if (flag.size() == 0)
             $("div#sent-navigation", document).remove();
-        flag = $("meta[name='alpheios-editModes']", document);
-        if (flag.size() == 0)
-            $("form[name='sent-edit-mode']", document).remove();
 
         // set state variables
         if (navigator.userAgent.indexOf("Firefox") != -1)
@@ -86,6 +95,7 @@ function Init(a_event)
         var form = $("form[name='sent-edit-mode']", document); 
         if (form.size() > 0)
             s_mode = $("input[checked]", form).attr("value");
+        $("body", document).attr("alpheios-mode", s_mode);
 
         // get parameters from call
         s_params = location.search.substr(1).split("&");
@@ -121,12 +131,18 @@ function Init(a_event)
                            document).attr("content");
         if (getInfoURL)
         {
-            var buildMenus = $("meta[name='alpheios-buildMenus']",
-                               document).size() > 0;
+            // build list of content to be built
+            var toBuild = $("meta[name='alpheios-buildContent']",
+                            document).attr("content");
+            toBuild = (toBuild && toBuild.length) ? toBuild.split(' ') : [];
+            for (i in toBuild)
+                toBuild[toBuild[i]] = toBuild[i];
+
+            // get info on format
             req.open("GET",
                      getInfoURL +
                         "?doc=" + s_params["doc"] +
-                        (buildMenus ? "&desc=y" : ""),
+                        ((toBuild.length > 0) ? "&desc=y" : ""),
                      false);
             req.send(null);
             var root = $(req.responseXML.documentElement);
@@ -144,14 +160,30 @@ function Init(a_event)
             s_params["lang"] = root.attr("xml:lang");
             s_direction = root.attr("direction");
 
-            // if we need to build menus
-            if (buildMenus)
+            // build various content
+            if (toBuild["menus"])
             {
                 s_editTransform.setParameter(null, "e_mode", "menus");
                 var menus =
                         s_editTransform.transformToDocument(req.responseXML);
                 var menuContent = $(menus.documentElement).children();
                 $("form[name='menus']", document).append(menuContent);
+            }
+            if (toBuild["style"])
+            {
+                s_editTransform.setParameter(null, "e_mode", "style");
+                var style =
+                        s_editTransform.transformToDocument(req.responseXML);
+                var styleRules = $(style).text().split('\n');
+                for (i in styleRules)
+                    document.styleSheets[0].insertRule(styleRules[i], 0);
+            }
+            if (toBuild["key"])
+            {
+                s_editTransform.setParameter(null, "e_mode", "key");
+                var key = s_editTransform.transformToDocument(req.responseXML);
+                var keyContent = $(key.documentElement);
+                $("div#key", document).append(keyContent);
             }
         }
         else
@@ -307,8 +339,63 @@ function InitNewSentence()
         });
     }
 
+    // for each elided node
+    $("g[elided]", document).each(
+    function(i)
+    {
+        // set index and label to i
+        $(this).attr("elided", i);
+        $("> text.node-label", this).text("[" + i + "]");
+
+        // set id from first word in subtree
+        var words = $(this).find("g.tree-node:not([elided])");
+        var first = words.get(0);
+        words.each(
+        function ()
+        {
+            if (compareById(first, this) > 0)
+                first = this;
+        });
+        $(this).attr("id", $(first).attr("id") + "-" + i);
+    });
+
+    // initialize handlers
+    InitHandlers(document, false);
+
+    // for text group
+    $("g.text", document).each(
+    function()
+    {
+        // turn off highlighting when we leave
+        $(this).bind(
+            "mouseleave",
+            function() { highlightWord(this.ownerDocument, null); }
+        );
+    });
+
+    // bind mouse events
+    $("body", document).bind("click", Click);
+    $("body", document).bind("mousemove", Drag);
+
+    // set/reset buttons
+    $("#undo-button", document).attr("disabled", "disabled");
+    $("#redo-button", document).attr("disabled", "disabled");
+    $("#save-button", document).attr("disabled", "disabled");
+
+    Reposition();
+};
+
+/**
+ * Initialize handlers for node or nodes
+ * @parameter {Node} a_node root node
+ * @parameter {Boolean} a_single whether to do single node
+ */
+function InitHandlers(a_node, a_single)
+{
+    var prefix = a_single ? "> ": "";
+
     // for each text word
-    $("text.text-word", document).each(
+    $(prefix + "text.text-word", a_node).each(
     function()
     {
         var thisNode = $(this);
@@ -334,7 +421,7 @@ function InitNewSentence()
     });
 
     // for each label
-    $("text.node-label, rect.highlight", document).each(
+    $(prefix + "text.node-label, " + prefix + "rect.highlight", a_node).each(
     function()
     {
         var thisNode = $(this);
@@ -358,17 +445,18 @@ function InitNewSentence()
     });
 
     // for each arc highlight
-    $("text.arc-label, rect.arc-highlight", document).each(
+    $(prefix + "text.arc-label, " + prefix + "rect.arc-highlight",
+      a_node).each(
     function()
     {
         // highlight while hovering
         $(this).hover(
             function()
             {
-                if (!s_dragObj)
+                if (s_mode == "label")
                 {
                     var label =
-                      $(this).parent().children("rect.arc-highlight");
+                        $(this).parent().children("rect.arc-highlight");
                     AlphEdit.addClass(label[0], "hovering");
                 }
             },
@@ -381,7 +469,7 @@ function InitNewSentence()
     });
 
     // for each expansion control
-    $("g.expand", document).each(
+    $(prefix + "g.expand", a_node).each(
     function()
     {
         // highlight while hovering
@@ -395,36 +483,18 @@ function InitNewSentence()
         );
     });
 
-    // for text group
-    $("g.text", document).each(
-    function()
-    {
-        // turn off highlighting when we leave
-        $(this).bind(
-            "mouseleave",
-            function() { highlightWord(this.ownerDocument, null); }
-        );
-    });
-
     // bind mouse events
-    $("body", document).bind("click", Click);
-    $("body", document).bind("mousemove", Drag);
-    $("text.text-word, text.node-label", document).bind("mouseover", Enter);
-    $("text.text-word, text.node-label", document).bind("mouseout", Leave);
-    $("text.arc-label", document).bind("click", ClickOnArcLabel);
-    $("g.expand rect, g.expand text", document).each(
+    $(prefix + "text.text-word, " + prefix + "text.node-label",
+      a_node).bind("mouseover", Enter);
+    $(prefix + "text.text-word, " + prefix + "text.node-label",
+      a_node).bind("mouseout", Leave);
+    $(prefix + "text.arc-label", a_node).bind("click", ClickOnArcLabel);
+    $(prefix + "g.expand rect, " + prefix + "g.expand text", a_node).each(
     function()
     {
         $(this).attr("pointer-events", "all");
         $(this).bind("click", Expand);
     });
-
-    // set/reset buttons
-    $("#undo-button", document).attr("disabled", "disabled");
-    $("#redo-button", document).attr("disabled", "disabled");
-    $("#save-button", document).attr("disabled", "disabled");
-
-    Reposition();
 };
 
 /**
@@ -488,15 +558,12 @@ function Click(a_event)
 
     switch (s_mode)
     {
-      case "old":
-      case "struct":
+      case "tree":
         (s_dragObj ? Drop(event) : Grab(event));
         break;
 
-      case "label":
-        s_currentId = $("g.tree > g.tree-node", document).attr("id");
-        highlightWord(document, s_currentId);
-        break;
+      case "ellipsis":
+        DoElidedNode();
     }
 };
 
@@ -607,7 +674,8 @@ function Drop(a_event)
     Log("Drop");
 
     // if dropping on a word
-    if (s_currentId)
+    // (null a_event means we're aborting)
+    if (a_event && s_currentId)
     {
         // ignore word if it's in subtree being dragged
         // but don't stop dragging
@@ -710,15 +778,18 @@ function ShowExpansionControls(a_event)
  */
 function ClickOnArcLabel(a_event)
 {
+    // only allow if in label editing mode
+    if (s_mode != "label")
+        return;
+
     var event = AlphEdit.getEvent(a_event);
     var target = AlphEdit.getEventTarget(event);
-
-    // only allow if in label editing mode
-    if ((s_mode != "label") && (s_mode != "old"))
-        return;
-    s_currentArcLabelId = target.parentNode.getAttribute("id");
+    var label = $(target.parentNode);
+    s_currentArcLabelId = label.attr("id");
 
     var div = $("#arc-label-menus", document);
+    div.find("form div").text(
+        "Change " + label.children("text.arc-label").text() + " to:");
     var scroll =
     [
         document.body.scrollLeft ? document.body.scrollLeft :
@@ -731,10 +802,8 @@ function ClickOnArcLabel(a_event)
                                      document.documentElement.scrollBottom
     ];
     div.css("display", "none");
-    div.css("left",
-            (event.clientX + scroll[0] - 7) + "px");
-    div.css("top",
-            (event.clientY + scroll[1] + 7 - div.height()) + "px");
+    div.css("left", (event.clientX + scroll[0] - 7) + "px");
+    div.css("top", (event.clientY + scroll[1] + 7 - div.height()) + "px");
     div.css("display", "block");
 };
 
@@ -853,7 +922,19 @@ function ClickOnGoTo(a_event)
  */
 function ClickOnMode(a_event)
 {
-    s_mode = AlphEdit.getEventTarget(a_event).value;
+    DoSetMode(AlphEdit.getEventTarget(a_event).value);
+};
+
+function DoSetMode(a_mode)
+{
+    // set mode
+    s_mode = a_mode;
+    $("body", document).attr("alpheios-mode", s_mode);
+
+    // make sure buttons reflect mode
+    var modeForm = $("form[name='sent-edit-mode']", document);
+    $("[checked]", modeForm).removeAttr("checked");
+    $("[value='" + s_mode + "']", modeForm).attr("checked", "checked");
 };
 
 /**
@@ -864,20 +945,20 @@ function Keypress(a_event)
 {
     var event = AlphEdit.getEvent(a_event);
 
-    Log("alt/ctrl/shift/meta=" +
-        (event.altKey ? "1" : "0") +
-        (event.ctrlKey ? "1" : "0") +
-        (event.shiftKey ? "1" : "0") +
-        (event.metaKey ? "1" : "0") +
-        "\nchar=" + event.charCode +
-        "\nkey=" + event.keyCode +
-        "\ntype=" + event.type);
+    var keyCode = event.keyCode ? event.keyCode : 0;
+    var charCode = event.charCode ? event.charCode : 0;
+    var modifiers = (event.altKey ? "1" : "0") +
+                    (event.ctrlKey ? "1" : "0") +
+                    (event.shiftKey ? "1" : "0") +
+                    (event.metaKey ? "1" : "0");
+    Log("Key [" + keyCode + ", " + charCode + ", " + modifiers + "]");
     for (var i = 0; i < s_keyTable.length; ++i)
     {
-        if ((s_keyTable[i][0] == event.keyCode) &&
-            (s_keyTable[i][1] == event.charCode))
+        if ((s_keyTable[i][0] == keyCode) &&
+            (s_keyTable[i][1] == charCode) &&
+            (s_keyTable[i][2] == modifiers))
         {
-            s_keyTable[i][2]();
+            s_keyTable[i][3](s_keyTable[i][4]);
             return;
         }
     }
@@ -972,6 +1053,176 @@ function DoLabelArc(a_id, a_label, a_push)
 };
 
 /**
+ * Perform elided node action
+ */
+function DoElidedNode()
+{
+    // do nothing if not over a node
+    if (!s_currentId)
+        return;
+
+    if ($("#" + s_currentId, document).attr("elided"))
+        DoDelElidedNode(true);
+    else
+        DoAddElidedNode(true);
+
+    Reposition();
+};
+
+/**
+ * Destroy elided node
+ * @param {Boolean} a_push whether to push event onto history
+ */
+function DoDelElidedNode(a_push)
+{
+    var currentNode = $("#" + s_currentId, document);
+    s_currentId = null;
+    var parent = currentNode.parent();
+    var args = [currentNode.attr("id"),
+                parent.attr("id"),
+                currentNode.attr("elided"),
+                currentNode.children("text.arc-label").text()];
+    var children = currentNode.children("g.tree-node");
+    children.appendTo(parent);
+    currentNode.remove();
+
+    // push event if requested
+    if (a_push)
+    {
+        // add list of child ids
+        children.each(
+        function()
+        {
+            args.push($(this).attr("id"));
+        });
+
+        AlphEdit.pushHistory(Array("del", args, null));
+    }
+};
+
+/**
+ * Create elided node
+ * @param {Boolean} a_push whether to push event onto history
+ */
+function DoAddElidedNode(a_push)
+{
+    var currentNode = $("#" + s_currentId, document);
+    s_currentId = null;
+
+    // can't add node above root
+    if (!currentNode.parent().is(".tree-node"))
+        return;
+
+    // find lowest unused elided node number
+    // there has to be one between 0 and #elided
+    var elided = $("g[elided]", document);
+    var i;
+    for (i = 0; i <= elided.size(); ++i)
+    {
+        if (!elided.is("[elided = '" + i + "']"))
+            break;
+    }
+
+    // create new elided node
+    var newNode = $(document.createElementNS(s_svgns, "g"));
+    AlphEdit.addClass(newNode[0], "tree-node");
+    newNode.attr("elided", i);
+    newNode.attr("expanded", "yes");
+
+    // set id from first word in subtree
+    var words = currentNode.find("g.tree-node:not([elided])").andSelf();
+    var first = words.get(0);
+    words.each(
+    function ()
+    {
+        if (compareById(first, this) > 0)
+            first = this;
+    });
+    newNode.attr("id", $(first).attr("id") + "-" + i);
+
+    // clone displayable children from current node
+    var children;
+    var displayableChildren =
+        currentNode.children("rect, line, text, g.expand");
+
+    // add displayable children to new node
+    displayableChildren.clone().appendTo(newNode);
+    newNode.children("text.arc-label").text("nil");
+    newNode.children("text.node-label").text("[" + i + "]");
+    newNode.find("> g.expand text").text(s_contractionSymbol);
+    newNode.find("text.node-label").removeAttr("pos");
+
+    // add node to tree
+    newNode.appendTo(currentNode.parent());
+    currentNode.appendTo(newNode);
+
+    // add handlers
+    InitHandlers(newNode, true);
+
+    // push event if requested
+    if (a_push)
+    {
+        AlphEdit.pushHistory(
+            Array("add", Array(currentNode.attr("id"), i)), null);
+    }
+};
+
+/**
+ * Recreate elided node
+ * @param {Number} a_elided elided node number
+ * @param {String} a_label arc label
+ * @param {Array} a_childIds children to add to new node
+ */
+function DoReAddElidedNode(a_elided, a_label, a_childIds)
+{
+    // we are recreating a previously
+    // deleted node that will be child of current node
+    var parentNode = $("#" + s_currentId, document);
+    s_currentId = null;
+
+    // create new elided node
+    var newNode = $(document.createElementNS(s_svgns, "g"));
+    AlphEdit.addClass(newNode[0], "tree-node");
+    newNode.attr("elided", a_elided);
+    newNode.attr("expanded", "yes");
+
+    // get child subtrees/nodes
+    var childIds = "";
+    for (i in a_childIds)
+        childIds += ((i > 0) ? ", " : "") + "#" + a_childIds[i] + " ";
+
+    // set id from first word in subtree
+    var children = parentNode.find(childIds);
+    var words = children.find("g.tree-node:not([elided])").andSelf();
+    var first = words.get(0);
+    words.each(
+    function ()
+    {
+        if (compareById(first, this) > 0)
+            first = this;
+    });
+    newNode.attr("id", $(first).attr("id") + "-" + a_elided);
+
+    // clone displayable children from first child
+    var displayableChildren =
+          children.eq(0).children("rect, line, text, g.expand");
+
+    // add displayable children to new node
+    displayableChildren.clone().appendTo(newNode);
+    newNode.children("text.arc-label").text(a_label);
+    newNode.children("text.node-label").text("[" + a_elided + "]");
+    newNode.find("> g.expand text").text(s_contractionSymbol);
+    newNode.find("text.node-label").removeAttr("pos");
+
+    // add node to tree
+    newNode.appendTo(parentNode);
+    children.appendTo(newNode);
+
+    // add handlers
+    InitHandlers(newNode, true);
+};
+
+/**
  * Save contents
  */
 function DoSave()
@@ -994,12 +1245,18 @@ function DoSave()
 function DoAbortAction()
 {
     // if labeling arc
-    if (s_currentArcLabelId)
+    if (s_mode == "label")
     {
         // hide menu
         var div = $("#arc-label-menus", document);
         div.css("display", "none");
         s_currentArcLabelId = null;
+    }
+    // if dragging
+    else if (s_mode == "tree")
+    {
+        // drop outside of node
+        Drop(null);
     }
 };
 
@@ -1075,6 +1332,38 @@ function ReplayEvent(a_hEvent, a_forward)
         DoMove(eventArgs[0], a_forward ? eventArgs[2] : eventArgs[1], false);
         break;
 
+      case "add":
+        // add elided node
+        if (a_forward)
+        {
+            s_currentId = eventArgs[0];
+            DoAddElidedNode(false);
+        }
+        else
+        {
+            s_currentId =
+                $("[elided='" + eventArgs[1] + "']", document).attr("id");
+            DoDelElidedNode(false);
+        }
+        break;
+
+      case "del":
+        // delete elided node
+        if (a_forward)
+        {
+            s_currentId = eventArgs[0];
+            DoDelElidedNode(false);
+        }
+        else
+        {
+            s_currentId = eventArgs[1];
+            DoReAddElidedNode(eventArgs[2],
+                              eventArgs[3],
+                              eventArgs.slice(4),
+                              false);
+        }
+        break;
+
       default:
         // ignore unknown type
     }
@@ -1123,7 +1412,7 @@ function positionTree(a_container, a_fontSize)
                                  children("g.tree-node");
     var numChildren = childNodes.size();
     var childNodeArray = childNodes.get();
-    childNodeArray.sort(sortByIdDir);
+    childNodeArray.sort(compareByIdDir);
 
     // set expansion status of children
     // calculate size of tree
@@ -1335,16 +1624,16 @@ function positionTree(a_container, a_fontSize)
 /**
  * Comparison functions for id values
  *
- * sortById - sort ascending
- * sortByIdDir - sort ascending if LTR text, descending if RTL
- * sortByIdBase - do actual comparison
+ * compareById - sort ascending
+ * compareByIdDir - sort ascending if LTR text, descending if RTL
+ * compareByIdBase - do actual comparison
  * @param {Element} a_a first element to compare
  * @param {Element} a_b second element to compare
  * @param {int} a_mult multiplier (1=increasing, -1=decreasing)
  * @return <0, =0, >0 as a < b, a = b, a > b, respectively
  * @type Number
  */
-function sortByIdBase(a_a, a_b, a_mult)
+function compareByIdBase(a_a, a_b, a_mult)
 {
     var id1 = $(a_a).attr("id").split('-');
     var id2 = $(a_b).attr("id").split('-');
@@ -1359,14 +1648,14 @@ function sortByIdBase(a_a, a_b, a_mult)
     return a_mult * (id2.length - id1.length);
 };
 
-function sortById(a_a, a_b)
+function compareById(a_a, a_b)
 {
-    return sortByIdBase(a_a, a_b, 1);
+    return compareByIdBase(a_a, a_b, 1);
 };
 
-function sortByIdDir(a_a, a_b)
+function compareByIdDir(a_a, a_b)
 {
-    return sortByIdBase(a_a, a_b, (s_direction == "rtl") ? -1 : 1);
+    return compareByIdBase(a_a, a_b, (s_direction == "rtl") ? -1 : 1);
 };
 
 /**
@@ -1461,8 +1750,8 @@ function positionAll(a_doc, a_treeSize, a_textSize, a_fontSize)
     if (a_fontSize + a_treeSize[0] > width)
         width = a_fontSize + a_treeSize[0];
     var height = a_textSize[1] + a_treeSize[1];
-    $("#dependency-tree", a_doc)[0].setAttribute("width", 2 * width);
-    $("#dependency-tree", a_doc)[0].setAttribute("height", 2 * height);
+    $("#dependency-tree", a_doc)[0].setAttribute("width", 1.1 * width);
+    $("#dependency-tree", a_doc)[0].setAttribute("height", 1.1 * height);
 };
 
 /**
@@ -1512,8 +1801,6 @@ function highlightWord(a_doc, a_id)
         });
         return;
     }
-
-    focusNode[0].setAttribute("focus-node",true);
 
     // gray everything out in tree
     $("#dependency-tree g.tree text", a_doc).attr("showme", "grayed");

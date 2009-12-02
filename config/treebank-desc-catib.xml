@@ -15,6 +15,8 @@
           <short> = single-letter value in postag
           <long> = equivalent human-readable name
           <lex> = equivalent name in lexicon schema, if different from <long>
+          <color> = color to associate with entry
+          <style> = style to associate with entry
     <table> = table of dependency relations
       @type = relation
       <entry> = dependency relation
@@ -22,88 +24,102 @@
         <disp> = displayable form, if different from treebank form
         <help dir="up"> = help text for head direction
         <help dir="dn"> = help text for dependent direction
+
+    text color according to part of speech:
+    POS             color
+    n nominal       black
+    p proper noun   bold black
+    v active verb   bold red
+    w passive verb  red
+    g particle      pale blue
 -->
 <desc xmlns="http://alpheios.net/namespaces/treebank-desc" tb="catib">
-  <table type="morphology">
+    <table type="morphology">
 
     <!-- part of speech -->
-    <category id="pos" n="1">
-      <entry>
-        <short>n</short>
-        <long>nominal</long>
-      </entry>
-      <entry>
-        <short>p</short>
-        <long>proper noun</long>
-      </entry>
-      <entry>
-        <short>v</short>
-        <long>active verb</long>
-      </entry>
-      <entry>
-        <short>w</short>
-        <long>passive verb</long>
-      </entry>
-      <entry>
-        <short>g</short>
-        <long>particle</long>
-      </entry>
-      <entry>
-        <short>u</short>
-        <long>punctuation</long>
-      </entry>
-      <entry>
-        <short>e</short>
-        <long>error</long>
-      </entry>
-      <entry>
-        <short>x</short>
-        <long>unknown</long>
-      </entry>
-    </category>
-  </table>
-  <table type="relation">
-    <entry>
-      <tb>MOD</tb>
-      <menu>MODifier</menu>
-    </entry>
-    <entry>
-      <tb>SBJ</tb>
-      <menu>SuBJect</menu>
-      <disp>SUBJ</disp>
-    </entry>
-    <entry>
-      <tb>OBJ</tb>
-      <menu>OBJect</menu>
-    </entry>
-    <entry>
-      <tb>PRD</tb>
-      <menu>PReDicate</menu>
-      <disp>PRED</disp>
-    </entry>
-    <entry>
-      <tb>IDF</tb>
-      <menu>IDaFa</menu>
-      <disp>IDAFA</disp>
-    </entry>
-    <entry>
-      <tb>TMZ</tb>
-      <menu>TaMyiZ</menu>
-      <disp>TAMYIZ</disp>
-    </entry>
-    <entry>
-      <tb>TPC</tb>
-      <menu>ToPiC</menu>
-      <disp>TOPIC</disp>
-    </entry>
-    <entry>
-      <tb>---</tb>
-      <menu>--- (flat)</menu>
-      <disp>FLAT</disp>
-    </entry>
-    <entry>
-      <tb>UNK</tb>
-      <menu>UNKnown</menu>
-    </entry>
-  </table>
+        <category id="pos" n="1">
+            <entry>
+                <short>n</short>
+                <long>nominal</long>
+                <color>black</color>
+            </entry>
+            <entry>
+                <short>p</short>
+                <long>proper noun</long>
+                <color>black</color>
+                <style>font-weight: bold</style>
+            </entry>
+            <entry>
+                <short>v</short>
+                <long>active verb</long>
+                <color>red</color>
+                <style>font-weight: bold</style>
+            </entry>
+            <entry>
+                <short>w</short>
+                <long>passive verb</long>
+                <color>red</color>
+            </entry>
+            <entry>
+                <short>g</short>
+                <long>particle</long>
+            </entry>
+            <entry>
+                <short>u</short>
+                <long>punctuation</long>
+            </entry>
+            <entry>
+                <short>e</short>
+                <long>error</long>
+            </entry>
+            <entry>
+                <short>x</short>
+                <long>unknown</long>
+            </entry>
+        </category>
+    </table>
+    <table type="relation">
+        <entry>
+            <tb>MOD</tb>
+            <menu>MODifier</menu>
+        </entry>
+        <entry>
+            <tb>SBJ</tb>
+            <menu>SuBJect</menu>
+            <disp>SUBJ</disp>
+        </entry>
+        <entry>
+            <tb>OBJ</tb>
+            <menu>OBJect</menu>
+        </entry>
+        <entry>
+            <tb>PRD</tb>
+            <menu>PReDicate</menu>
+            <disp>PRED</disp>
+        </entry>
+        <entry>
+            <tb>IDF</tb>
+            <menu>IDaFa</menu>
+            <disp>IDAFA</disp>
+        </entry>
+        <entry>
+            <tb>TMZ</tb>
+            <menu>TaMyiZ</menu>
+            <disp>TAMYIZ</disp>
+        </entry>
+        <entry>
+            <tb>TPC</tb>
+            <menu>ToPiC</menu>
+            <disp>TOPIC</disp>
+        </entry>
+        <entry>
+            <tb>---</tb>
+            <menu>--- (flat)</menu>
+            <disp>FLAT</disp>
+        </entry>
+        <entry>
+            <tb>UNK</tb>
+            <menu>UNKnown</menu>
+        </entry>
+    </table>
 </desc>

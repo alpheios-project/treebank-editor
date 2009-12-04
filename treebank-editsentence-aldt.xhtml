@@ -207,6 +207,18 @@
         <input id="expansion-checkbox" type="checkbox"
           onclick="ShowExpansionControls(event)" checked="checked"/>
       </form>
+      <form name="sent-edit-mode">
+        <span>Tool: </span>
+        <input type="radio" id="mode-tree" name="mode" value="tree"
+          checked="checked" onclick="ClickOnMode(event)"/>
+        <label for="mode-tree">Tree</label>
+        <input type="radio" id="mode-label" name="mode" value="label"
+          onclick="ClickOnMode(event)"/>
+        <label for="mode-label">Label</label>
+        <input type="radio" id="mode-ellipsis" name="mode" value="ellipsis"
+          onclick="ClickOnMode(event)"/>
+        <label for="mode-ellipsis">Ellipsis</label>
+      </form>
       <!-- Provide menus here if buildContent param does not contain "menus" -->
       <div id="label-menus">
         <div id="arc-label-menus" class="cmenu" style="display: none">
@@ -248,18 +260,6 @@
             >Quit</button>
         </div>
       </div>
-      <form name="sent-edit-mode">
-        <span>Tool: </span>
-        <input type="radio" id="mode-tree" name="mode" value="tree"
-          checked="checked" onclick="ClickOnMode(event)"/>
-        <label for="mode-tree">Tree</label>
-        <input type="radio" id="mode-label" name="mode" value="label"
-          onclick="ClickOnMode(event)"/>
-        <label for="mode-label">Label</label>
-        <input type="radio" id="mode-ellipsis" name="mode" value="ellipsis"
-          onclick="ClickOnMode(event)"/>
-        <label for="mode-ellipsis">Ellipsis</label>
-      </form>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
     <!-- Provide key here if buildContent param does not contain "key" -->
@@ -284,9 +284,6 @@
           <tr>
             <td showme="focus-descendant">Other words that depend on focus
               word</td>
-          </tr>
-          <tr>
-            <td first="yes">First selected word(s)</td>
           </tr>
         </tbody>
         <br/>

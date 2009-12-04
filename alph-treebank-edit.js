@@ -27,15 +27,15 @@ var s_getSentenceURL = null;          // where to get treebank sentence from
 var s_putSentenceURL = null;          // where to put modified treebank sentence
 var s_editTransform = null;           // transform between SVG and XML, etc.
 var s_editTransformDoc = null;        // transform document
-var s_params = null;                  // treebank parameters
-var s_direction = null;               // text direction
+var s_param = [];                     // treebank parameters and metadata
 
 var s_showExpansionControls = true;
 var s_contractionSymbol = "-";
 var s_expansionSymbol = "+";
 
 var s_currentId = null;               // current target id
-var s_currentArcLabelId = null;       // id of current arc label
+var s_currentLabelId = null;          // id of current label
+var s_currentLabelType = null;        // type of current label
 var s_dragId = null;                  // dragged word id
 var s_dragObj = null;                 // object being dragged
 var s_dragStartTrans = null;          // initial transform of group
@@ -43,6 +43,9 @@ var s_dragTransX = 0;                 // X translation of group
 var s_dragTransY = 0;                 // Y translation of group
 var s_dragX = 0;                      // mouse X
 var s_dragY = 0;                      // mouse Y
+
+var s_posIndex = 0;                   // index of part of speech in morphology
+var s_minWidth = 300;                 // minimum text width
 
 var s_firebug = true;                 // using firebug
 var s_firefox = false;                // in Firefox
@@ -84,10 +87,27 @@ function Init(a_event)
 {
     try
     {
-        // modify html based on metadata flags
-        var flag = $("meta[name='alpheios-sentenceNavigation']", document);
-        if (flag.size() == 0)
-            $("div#sent-navigation", document).remove();
+        // get parameters from html metadata of form
+        //  <meta name="alpheios-param-<name>" content="<value>"/>
+        var prefix = "alpheios-param-";
+        $("meta[name^='" + prefix + "']", document).each(
+        function ()
+        {
+            var name = $(this).attr("name").substr(prefix.length);
+            s_param[name] = $(this).attr("content");
+        });
+
+        // get parameters from call
+        // Note: processed after parameters in metadata, so that
+        // call parameters can override
+        var callParams = location.search.substr(1).split("&");
+        var numParams = callParams.length;
+        for (i in callParams)
+        {
+            s_param[i] = callParams[i].split("=");
+            s_param[s_param[i][0]] = s_param[i][1];
+        }
+        s_param["numParams"] = numParams;
 
         // set state variables
         if (navigator.userAgent.indexOf("Firefox") != -1)
@@ -96,16 +116,6 @@ function Init(a_event)
         if (form.size() > 0)
             s_mode = $("input[checked]", form).attr("value");
         $("body", document).attr("alpheios-mode", s_mode);
-
-        // get parameters from call
-        s_params = location.search.substr(1).split("&");
-        var numParams = s_params.length;
-        for (i in s_params)
-        {
-            s_params[i] = s_params[i].split("=");
-            s_params[s_params[i][0]] = s_params[i][1];
-        }
-        s_params["numParams"] = numParams;
 
         // get treebank transform
         var req = new XMLHttpRequest();
@@ -132,8 +142,7 @@ function Init(a_event)
         if (getInfoURL)
         {
             // build list of content to be built
-            var toBuild = $("meta[name='alpheios-buildContent']",
-                            document).attr("content");
+            var toBuild = s_param["buildContent"];
             toBuild = (toBuild && toBuild.length) ? toBuild.split(' ') : [];
             for (i in toBuild)
                 toBuild[toBuild[i]] = toBuild[i];
@@ -141,7 +150,7 @@ function Init(a_event)
             // get info on format
             req.open("GET",
                      getInfoURL +
-                        "?doc=" + s_params["doc"] +
+                        "?doc=" + s_param["doc"] +
                         ((toBuild.length > 0) ? "&desc=y" : ""),
                      false);
             req.send(null);
@@ -150,15 +159,22 @@ function Init(a_event)
             {
                 var msg = root.is("error") ?
                             root.text() :
-                            "Error getting info for treebank " + s_params["doc"];
+                            "Error getting info for treebank " + s_param["doc"];
                 alert(msg);
                 throw(msg);
             }
 
             // save treebank attributes
-            s_params["maxSentId"] = Number(root.attr("numSentences"));
-            s_params["lang"] = root.attr("xml:lang");
-            s_direction = root.attr("direction");
+            s_param["numSentences"] = Number(root.attr("numSentences"));
+            s_param["lang"] = root.attr("xml:lang");
+            s_param["direction"] = root.attr("direction");
+
+            // save treebank metadata
+            $("meta", root).each(
+            function ()
+            {
+                s_param[$(this).attr("name")] = $(this).attr("value");
+            });
 
             // build various content
             if (toBuild["menus"])
@@ -167,7 +183,7 @@ function Init(a_event)
                 var menus =
                         s_editTransform.transformToDocument(req.responseXML);
                 var menuContent = $(menus.documentElement).children();
-                $("form[name='menus']", document).append(menuContent);
+                $("div#label-menus", document).append(menuContent);
             }
             if (toBuild["style"])
             {
@@ -186,27 +202,51 @@ function Init(a_event)
                 $("div#key", document).append(keyContent);
             }
         }
-        else
+
+        // adjust html structure
+        if (s_param["app"] == "viewer")
         {
-            // get values from html
-            s_params["maxSentId"] =
-                Number($("meta[name='alpheios-numSentences']", document).
-                       attr("content"));
-            s_params["lang"] =
-                $("meta[name='alpheios-lang']", document).attr("content");
-            s_params["direction"] =
-                $("meta[name='alpheios-direction']", document).attr("content");
+            $("#edit-controls", document).remove();
+            $("#alph-page-header", document).remove();
+        }
+        if (!s_param["sentenceNavigation"] ||
+            (s_param["sentenceNavigation"] == "no"))
+        {
+            $("div#sent-navigation", document).remove();
+        }
+        var arcEditing =  s_param["arcEditing"] &&
+                         (s_param["arcEditing"] == "yes");
+        if (!arcEditing)
+            $("div#arc-label-menus", document).remove();
+        var nodeEditing =  s_param["nodeEditing"] &&
+                          (s_param["nodeEditing"] == "yes");
+        if (!nodeEditing)
+            $("div#node-label-menus", document).remove();
+        if (!arcEditing && !nodeEditing)
+        {
+            $("input#mode-label", document).remove();
+            $("label[for=mode-label]", document).remove();
+        }
+        if (!s_param["ellipsis"] || (s_param["ellipsis"] == "no"))
+        {
+            $("input#mode-ellipsis", document).remove();
+            $("label[for=mode-ellipsis]", document).remove();
         }
 
-        // fix various values in html
+        // some miscellaneous values
+        s_posIndex =
+            Number($("select[name='node-label-pos']", document).attr("n")) - 1;
+        s_minWidth = (s_param["app"] == "viewer") ? 300 : (screen.width * .75);
+
+        // set various values in html
         var exitForm = $("form[name='sent-navigation-exit']", document);
         var exitURL = $("meta[name='alpheios-exitURL']", document);
         var exitLabel = $("meta[name='alpheios-exitLabel']", document);
         exitForm.attr("action", exitURL.attr("content"));
-        $("input[name='doc']", exitForm).attr("value", s_params["doc"]);
+        $("input[name='doc']", exitForm).attr("value", s_param["doc"]);
         $("button", exitForm).text(exitLabel.attr("content"));
-        $("html", document).attr("xml:lang", s_params["lang"]);
-        $("svg", document).attr("alph-doc", s_params["doc"]);
+        $("html", document).attr("xml:lang", s_param["lang"]);
+        $("svg", document).attr("alph-doc", s_param["doc"]);
 
         // get URLs from header
         s_getSentenceURL =
@@ -236,29 +276,29 @@ function InitNewSentence()
 
     // get and transform treebank sentence
     var sentence = AlphEdit.getContents(s_getSentenceURL,
-                                        s_params["doc"],
-                                        s_params["s"]);
+                                        s_param["doc"],
+                                        s_param["s"]);
     var root = $(sentence.documentElement);
-    s_params["document_id"] = root.attr("document_id");
-    s_params["subdoc"] = root.attr("subdoc");
+    s_param["document_id"] = root.attr("document_id");
+    s_param["subdoc"] = root.attr("subdoc");
     s_editTransform.setParameter(null, "e_mode", "xml-to-svg");
     var svg = s_editTransform.transformToDocument(sentence);
     $("svg", document).empty().append($(svg.documentElement).children());
 
     // sentence id in <svg>
-    $("svg", document).attr("alph-sentid", s_params["s"]);
+    $("svg", document).attr("alph-sentid", s_param["s"]);
 
     // fix numeric sentence number
-    s_params["snum"] = Number(s_params["s"]);
-    if (isNaN(s_params["snum"]))
-        s_params["snum"] = 1;
-    else if (s_params["snum"] <= 0)
-        s_params["snum"] = 1;
-    if (s_params["snum"] > s_params["maxSentId"])
-        s_params["snum"] = s_params["maxSentId"];
+    s_param["snum"] = Number(s_param["s"]);
+    if (isNaN(s_param["snum"]))
+        s_param["snum"] = 1;
+    else if (s_param["snum"] <= 0)
+        s_param["snum"] = 1;
+    if (s_param["snum"] > s_param["numSentences"])
+        s_param["snum"] = s_param["numSentences"];
 
-    var s = s_params["snum"];
-    var maxSentId = s_params["maxSentId"];
+    var s = s_param["snum"];
+    var numSentences = s_param["numSentences"];
 
     // first sentence button
     var button = $("#first-button", document);
@@ -285,31 +325,31 @@ function InitNewSentence()
     // next sentence button
     button = $("#next-button", document);
     button.attr("value", s + 1);
-    if (s >= maxSentId)
+    if (s >= numSentences)
         button.attr("disabled", "disabled");
     else
         button.removeAttr("disabled");
-    if (s >= maxSentId)
-        button.text("\u25B8\u00A0" + maxSentId);
+    if (s >= numSentences)
+        button.text("\u25B8\u00A0" + numSentences);
     else
         button.text("\u25B8\u00A0" + (s + 1));
 
     // last sentence button
     button = $("#last-button", document);
-    button.attr("value", maxSentId);
-    if (s >= maxSentId)
+    button.attr("value", numSentences);
+    if (s >= numSentences)
         button.attr("disabled", "disabled");
     else
         button.removeAttr("disabled");
-    button.text("\u25B8\u25B8\u00A0" + maxSentId);
+    button.text("\u25B8\u25B8\u00A0" + numSentences);
 
     // html fixes
     $("head title", document).text("Alpheios:Edit Treebank Sentence: " +
-                                   s_params["document_id"] +
+                                   s_param["document_id"] +
                                    ": " +
-                                   s_params["subdoc"]);
+                                   s_param["subdoc"]);
     $("form[name='sent-navigation-exit'] input[name='s']",
-      document).attr("value", s_params["s"]);
+      document).attr("value", s_param["s"]);
 
     // set initial state of controls
     $("form[name='sent-navigation-goto'] input", document).removeAttr("value");
@@ -318,7 +358,7 @@ function InitNewSentence()
 
     // right-to-left doesn't seem to be working in firefox svg
     // reverse strings by hand, but ignore strings containing digits
-    if (s_firefox && (s_direction == "rtl"))
+    if (s_firefox && (s_param["direction"] == "rtl"))
     {
         $("text.node-label, text.text-word", document).each(
         function()
@@ -489,6 +529,7 @@ function InitHandlers(a_node, a_single)
     $(prefix + "text.text-word, " + prefix + "text.node-label",
       a_node).bind("mouseout", Leave);
     $(prefix + "text.arc-label", a_node).bind("click", ClickOnArcLabel);
+    $(prefix + "text.node-label", a_node).bind("click", ClickOnNodeLabel);
     $(prefix + "g.expand rect, " + prefix + "g.expand text", a_node).each(
     function()
     {
@@ -785,26 +826,35 @@ function ClickOnArcLabel(a_event)
     var event = AlphEdit.getEvent(a_event);
     var target = AlphEdit.getEventTarget(event);
     var label = $(target.parentNode);
-    s_currentArcLabelId = label.attr("id");
 
-    var div = $("#arc-label-menus", document);
-    div.find("form div").text(
-        "Change " + label.children("text.arc-label").text() + " to:");
-    var scroll =
-    [
-        document.body.scrollLeft ? document.body.scrollLeft :
-                                   document.documentElement.scrollLeft,
-        document.body.scrollTop ? document.body.scrollTop :
-                                  document.documentElement.scrollTop,
-        document.body.scrollRight ? document.body.scrollRight :
-                                   document.documentElement.scrollRight,
-        document.body.scrollBottom ? document.body.scrollBottom :
-                                     document.documentElement.scrollBottom
-    ];
-    div.css("display", "none");
-    div.css("left", (event.clientX + scroll[0] - 7) + "px");
-    div.css("top", (event.clientY + scroll[1] + 7 - div.height()) + "px");
-    div.css("display", "block");
+    DoStartLabelling("arc", label, event.clientX, event.clientY);
+};
+
+/**
+ * Event handler for clicking on node label
+ * @param {Event} a_event the event
+ */
+function ClickOnNodeLabel(a_event)
+{
+    var event = AlphEdit.getEvent(a_event);
+
+    switch (s_mode)
+    {
+      case "tree":
+        (s_dragObj ? Drop(event) : Grab(event));
+        break;
+
+      case "label":
+        var event = AlphEdit.getEvent(a_event);
+        var target = AlphEdit.getEventTarget(event);
+        var label = $(target.parentNode);
+
+        DoStartLabelling("node", label, event.clientX, event.clientY);
+        break;
+
+      case "ellipsis":
+        DoElidedNode();
+    }
 };
 
 /**
@@ -813,25 +863,61 @@ function ClickOnArcLabel(a_event)
  */
 function ClickOnLabelButton(a_event)
 {
-    // hide menu
-    var div = $("#arc-label-menus", document);
-    div.css("display", "none");
-
     var target = AlphEdit.getEventTarget(a_event);
-    if ($(target).is("#arc-label-apply"))
+
+    switch (s_currentLabelType)
     {
-        var newLabel = "";
-        var label = $('select[name="arcrel1"]', div);
-        if (label.size() > 0)
-            newLabel += label[0].value;
-        label = $('select[name="arcrel2"]', div);
-        if (label.size() > 0)
-            newLabel += label[0].value;
-        DoLabelArc(s_currentArcLabelId, newLabel, true);
-        Reposition();
+      case "arc":
+        // hide menu
+        var div = $("#arc-label-menus", document);
+        div.css("display", "none");
+
+        if ($(target).attr("id") == "arc-label-apply")
+        {
+            var newLabel = "";
+            var label = $('select[name="arc-label-1"]', div);
+            if (label.size() > 0)
+                newLabel += label[0].value;
+            label = $('select[name="arc-label-2"]', div);
+            if (label.size() > 0)
+                newLabel += label[0].value;
+            DoLabelArc(s_currentLabelId, newLabel, true);
+            Reposition();
+        }
+
+        s_currentLabelId = null;
+        s_currentLabelType = null;
+        break;
+
+      case "node":
+        var action = $(target).attr("id");
+        var div = $("#node-label-menus", document);
+        var label = $("#" + s_currentLabelId, document);
+
+        if (action != "node-label-reset")
+        {
+            // hide menu
+            div.css("display", "none");
+        }
+
+        switch (action)
+        {
+          case "node-label-reset":
+            DoSetFormFromLabel(label, div);
+            break;
+
+          case "node-label-apply":
+            DoSetLabelFromForm(label, div);
+            break;
+        }
+
+        if (action != "node-label-reset")
+        {
+            s_currentLabelId = null;
+            s_currentLabelType = null;
+        }
+        break;
     }
-    
-    s_currentArcLabelId = null;
 };
 
 /**
@@ -877,9 +963,9 @@ function SubmitGoTo(a_form)
 {
     // if value is out of bounds
     if ((Number(a_form.s.value) <= 0) ||
-        (Number(a_form.s.value) > s_params["maxSentId"]))
+        (Number(a_form.s.value) > s_param["numSentences"]))
     {
-        alert("Sentence must between 1 and " + s_params["maxSentId"]);
+        alert("Sentence must between 1 and " + s_param["numSentences"]);
         return false;
     }
 
@@ -891,7 +977,7 @@ function SubmitGoTo(a_form)
     }
 
     // go to new sentence
-    s_params["s"] = a_form.s.value;
+    s_param["s"] = a_form.s.value;
     InitNewSentence();
 
     // always return false - we've already done the action
@@ -912,7 +998,7 @@ function ClickOnGoTo(a_event)
     }
 
     // go to new sentence
-    s_params["s"] = AlphEdit.getEventTarget(a_event).value;
+    s_param["s"] = AlphEdit.getEventTarget(a_event).value;
     InitNewSentence();
 };
 
@@ -923,18 +1009,6 @@ function ClickOnGoTo(a_event)
 function ClickOnMode(a_event)
 {
     DoSetMode(AlphEdit.getEventTarget(a_event).value);
-};
-
-function DoSetMode(a_mode)
-{
-    // set mode
-    s_mode = a_mode;
-    $("body", document).attr("alpheios-mode", s_mode);
-
-    // make sure buttons reflect mode
-    var modeForm = $("form[name='sent-edit-mode']", document);
-    $("[checked]", modeForm).removeAttr("checked");
-    $("[value='" + s_mode + "']", modeForm).attr("checked", "checked");
 };
 
 /**
@@ -967,6 +1041,26 @@ function Keypress(a_event)
 //****************************************************************************
 // actions
 //****************************************************************************
+
+/**
+ * Set tool mode
+ * @param {String} a_mode new mode
+ */
+function DoSetMode(a_mode)
+{
+    // if mode does not exist, don't try to set it
+    if ($("input#mode-" + a_mode, document).size() == 0)
+        return;
+
+    // set mode
+    s_mode = a_mode;
+    $("body", document).attr("alpheios-mode", s_mode);
+
+    // make sure buttons reflect mode
+    var modeForm = $("form[name='sent-edit-mode']", document);
+    $("[checked]", modeForm).removeAttr("checked");
+    $("[value='" + s_mode + "']", modeForm).attr("checked", "checked");
+};
 
 /**
  * Move node in tree
@@ -1018,6 +1112,143 @@ function DoExpand(a_id, a_expand, a_push)
     {
         AlphEdit.pushHistory(Array("expand", Array(a_id, a_expand)), null);
     }
+};
+
+/**
+ * Start labelling action
+ * @param {String} a_type entity being labelled (arc/node)
+ * @param {jQuery} a_label label node
+ * @param {Number} a_x x location of mouse
+ * @param {Number} a_y y location of mouse
+ */
+function DoStartLabelling(a_type, a_label, a_x, a_y)
+{
+    // nothing to do if menus don't exist
+    var div = $("#" + a_type + "-label-menus", document);
+    if (div.size() == 0)
+        return;
+
+    s_currentLabelId = a_label.attr("id");
+    s_currentLabelType = a_type;
+
+    if (a_type == "arc")
+    {
+        div.find("form div").text(
+            "Change " + a_label.children("text.arc-label").text() + " to:");
+    }
+    else if (a_type == "node")
+    {
+        DoSetFormFromLabel(a_label, div);
+    }
+        
+    var scroll =
+    [
+        document.body.scrollLeft ? document.body.scrollLeft :
+                                   document.documentElement.scrollLeft,
+        document.body.scrollTop ? document.body.scrollTop :
+                                  document.documentElement.scrollTop,
+        document.body.scrollRight ? document.body.scrollRight :
+                                   document.documentElement.scrollRight,
+        document.body.scrollBottom ? document.body.scrollBottom :
+                                     document.documentElement.scrollBottom
+    ];
+    div.css("display", "none");
+    div.css("left", (a_x + scroll[0] - 7) + "px");
+    div.css("top", (a_y + scroll[1] + 7 - div.height()) + "px");
+    div.css("display", "block");
+};
+
+/**
+ * Set and select form values from label
+ * @param {jQuery} a_label label node
+ * @param {jQuery} a_form form
+ */
+function DoSetFormFromLabel(a_label, a_form)
+{
+    // set lemma from label
+    $("input[name='node-lemma']", a_form).attr("value", a_label.attr("lemma"));
+
+    // clear all existing selections
+    $("select option", a_form).removeAttr("selected");
+
+    // for each category
+    $("select", a_form).each(
+    function()
+    {
+        // select option corresponding to current value in label postag
+        var thisNode = $(this);
+        var n = Number(thisNode.attr("n"));
+        var val = a_label.attr("postag").substr(n - 1, 1);
+        val = (val.length > 0) ? val : "-";
+        thisNode.find("option[value='" + val + "']").attr("selected",
+                                                          "selected");
+    });
+};
+
+/**
+ * Set label values from form
+ * @param {jQuery} a_label label node
+ * @param {jQuery} a_form form
+ */
+function DoSetLabelFromForm(a_label, a_form)
+{
+    // get old and new lemmas
+    var oldLemma = a_label.attr("lemma");
+    var newLemma = $("input[name='node-lemma']", a_form);
+    newLemma = (newLemma.size() > 0) ? newLemma.attr("value") : null;
+    if (!newLemma)
+        newLemma = oldLemma;
+
+    // get old morphology and break it apart
+    var oldPostag = a_label.attr("postag");
+    var postag = [];
+    for (var i = 0; i < oldPostag.length; ++i)
+        postag[i] = oldPostag[i];
+
+    // get new morphology
+    $("select", a_form).each(
+    function()
+    {
+        var n = Number($(this).attr("n"));
+        if (n > postag.length)
+        {
+            for (var i = postag.length; i < n - 1; ++i)
+                postag[i] = '-';
+        }
+        postag[n - 1] = (this.value)[0];
+    });
+    var newPostag = postag.join("");
+
+    // if anything changed
+    if ((oldLemma != newLemma) || (oldPostag != newPostag))
+    {
+        if (newLemma)
+            a_label.attr("lemma", newLemma);
+        a_label.attr("postag", newPostag);
+        a_label.find("> text.node-label").attr("pos", newPostag[s_posIndex]);
+        AlphEdit.pushHistory(Array("node",
+                                   Array(a_label.attr("id"),
+                                         oldLemma,
+                                         oldPostag,
+                                         newLemma,
+                                         newPostag)),
+                             null);
+    }
+};
+
+/**
+ * Set label from values
+ * @param {String} a_id id of label
+ * @param {String} a_lemma new lemma
+ * @param {String} a_postag new postag string
+ */
+function DoSetLabelFromValues(a_id, a_lemma, a_postag)
+{
+    var label = $("#" + a_id, document);
+    if (a_lemma)
+        label.attr("lemma", a_lemma);
+    label.attr("postag", a_postag);
+    label.find("> text.node-label").attr("pos", a_postag[s_posIndex]);
 };
 
 /**
@@ -1235,8 +1466,8 @@ function DoSave()
 
     AlphEdit.putContents(xml.documentElement,
                          s_putSentenceURL,
-                         s_params["doc"],
-                         s_params["s"]);
+                         s_param["doc"],
+                         s_param["s"]);
 };
 
 /**
@@ -1248,9 +1479,10 @@ function DoAbortAction()
     if (s_mode == "label")
     {
         // hide menu
-        var div = $("#arc-label-menus", document);
+        var div = $("#" + s_currentLabelType + "-label-menus", document);
         div.css("display", "none");
-        s_currentArcLabelId = null;
+        s_currentLabelId = null;
+        s_currentLabelType = null;
     }
     // if dragging
     else if (s_mode == "tree")
@@ -1259,10 +1491,6 @@ function DoAbortAction()
         Drop(null);
     }
 };
-
-//****************************************************************************
-// reposition elements
-//****************************************************************************
 
 /**
  * Reposition everything in tree
@@ -1307,6 +1535,13 @@ function ReplayEvent(a_hEvent, a_forward)
         DoLabelArc(eventArgs[0],
                    a_forward ? eventArgs[2] : eventArgs[1],
                    false);
+        break;
+
+      case "node":
+        // restore node values
+        DoSetLabelFromValues(eventArgs[0],
+                             a_forward ? eventArgs[3] : eventArgs[1],
+                             a_forward ? eventArgs[4] : eventArgs[2]);
         break;
 
       case "expand":
@@ -1655,7 +1890,9 @@ function compareById(a_a, a_b)
 
 function compareByIdDir(a_a, a_b)
 {
-    return compareByIdBase(a_a, a_b, (s_direction == "rtl") ? -1 : 1);
+    return compareByIdBase(a_a,
+                           a_b,
+                           (s_param["direction"] == "rtl") ? -1 : 1);
 };
 
 /**
@@ -1663,8 +1900,8 @@ function compareByIdDir(a_a, a_b)
  *
  * The text words are placed underneath the tree itself, wrapping
  * at the width of the tree (except if the tree is narrow, wrapping
- * at 300 pixels).
- 
+ * at s_minWidth pixels).
+ *
  * The height and width including the text are set as the values for
  * the parent svg element.
  *
@@ -1682,8 +1919,8 @@ function positionText(a_doc, a_width, a_fontSize)
     if (words.size() == 0)
         return Array(0, 0);
 
-    // 300 = minimum width allowed for text to avoid excessive wrapping
-    var width = (a_width > 300) ? a_width : 300;
+    // s_minWidth = minimum width allowed for text to avoid excessive wrapping
+    var width = (a_width > s_minWidth) ? a_width : s_minWidth;
     var textHeight = (5 * a_fontSize) / 4;
     var x = 0;
     var y = textHeight;
@@ -1712,7 +1949,7 @@ function positionText(a_doc, a_width, a_fontSize)
         }
 
         // position word and bounding rectangle
-        var xx = (s_direction == "rtl") ? (width - x - wlen) : x;
+        var xx = (s_param["direction"] == "rtl") ? (width - x - wlen) : x;
         word.setAttribute("x", xx);
         word.setAttribute("y", y);
         rect.setAttribute("x", xx);
@@ -1918,13 +2155,15 @@ function highlightFirst(a_doc, a_ids)
 function traverseTreeLeft()
 {
     var current = $("#" + s_currentId, document);
-    var neighbor = (s_direction == "rtl") ? current.next("g.tree-node") :
-                                            current.prev("g.tree-node");
+    var neighbor = (s_param["direction"] == "rtl") ?
+                        current.next("g.tree-node") :
+                        current.prev("g.tree-node");
     if (neighbor.size() == 0)
     {
         neighbor = current.siblings("g.tree-node");
-        neighbor =
-            neighbor.eq((s_direction == "rtl") ? 0 : (neighbor.size() - 1));
+        neighbor = neighbor.eq((s_param["direction"] == "rtl") ?
+                                    0 :
+                                    (neighbor.size() - 1));
     }
 
     if (neighbor.size() > 0)
@@ -1937,13 +2176,15 @@ function traverseTreeLeft()
 function traverseTreeRight()
 {
     var current = $("#" + s_currentId, document);
-    var neighbor = (s_direction == "rtl") ? current.prev("g.tree-node") :
-                                            current.next("g.tree-node");
+    var neighbor = (s_param["direction"] == "rtl") ?
+                        current.prev("g.tree-node") :
+                        current.next("g.tree-node");
     if (neighbor.size() == 0)
     {
         neighbor = current.siblings("g.tree-node");
-        neighbor =
-            neighbor.eq((s_direction == "rtl") ? (neighbor.size() - 1) : 0);
+        neighbor = neighbor.eq((s_param["direction"] == "rtl") ?
+                                    (neighbor.size() - 1) :
+                                    0);
     }
 
     if (neighbor.size() > 0)

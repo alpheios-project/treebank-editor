@@ -32,44 +32,65 @@
     <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
     <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
 
-    <!-- Either a URL should be supplied that can be used to retrieve
-         information about the treebank or the information should be
-         included directly in the metadata:
-            alpheios-numSentences = number of sentences in treebank
-              (needed only if sentence navigation controls are included below)
-            alpheios-lang = language of contents of treebank
-            alpheios-direction = text display direction ('ltr' or 'rtl')
-         If the URL is present, it will take precedence over the metadata items.
-         If the metadata are to be used, the URL should be commented out.
+    <!-- A URL can be supplied that can be used to retrieve information about
+         the document and treebank or else the following information should be
+         supplied directly in metadata parameters or URL call parameters:
+            numSentences (if sentence navigation is desired), lang, direction
+         (See below for descriptions of parameters.)
+         If the URL is present then it will take precedence over the parameter
+         values, so if the parameters are to be used then the URL should be
+         commented out.
     -->
-    <!-- Alternative 1: URL to retrieve treebank info -->
     <!-- <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq"/> -->
-    <!-- Alternative 2: metadata for treebank info -->
-    <meta name="alpheios-numSentences" content="1"/>
-    <meta name="alpheios-lang" content="la"/>
-    <meta name="alpheios-direction" content="ltr"/>
-
-    <!-- Flags controlling behavior of the editor.
-         Comment out to disable the described behavior.
-            alpheios-buildContent:
-              Build content from treebank description.  This can only be done
-              if the URL to retrieve treebank info is supplied above.
-              The content is a space-separated list of possible values:
-                menus = menus of relation and morphology values
+    
+    <!-- Parameters controlling behavior of the editor
+         All names are prefixed in the <meta> tags with "alpheios-param-".
+         All can be overridden by parameters supplied at invocation time to
+         the url, using the names below without the "alpheios-param-" prefix.
+            app: [editor|viewer]
+              Whether we're editing or just viewing the tree.
+              If set to "viewer", other parameters controlling editing
+              behavior will be ignored.
+            numSentences: integer > 0
+              Number of sentences in the document.  Only needed if sentence
+              navigation is enabled (sentenceNavigation = "yes").
+            lang:
+              Language of the sentence.
+            direction: [ltr|rtl]
+              Direction of text flow.
+            arcEditing: [yes|no]
+              If "yes", allow arc label editing
+              and div#label-menus > div#arc-label-menus should be defined
+              either explicitly or built from the format description.
+            nodeEditing: [yes|no]
+              If "yes", allow node label editing
+              and div#label-menus > div#node-label-menus should be defined
+              either explicitly or built from the format description.
+            buildContent:
+              What content to build from treebank description.
+              This can only be done if the URL to retrieve treebank info
+              is supplied above.
+              Contains a space-separated list of possible values:
+                menus = menus for arc and/or node label editing
                 style = style sheet controlling display of values
                 key = key describing values
               If not enabled, the content must be supplied directly in this
-              file.  Search for "alpheios-buildContent" to find the locations.
-            alpheios-sentenceNavigation:
-              Include controls to allow navigation between sentences within the
-              editor.  For this to work, the sentence ids must be integers
-              running from 1 to maxSentId, where maxSentId is obtained either
-              from invoking the alpheios-getInfoURL or from the
-              alpheios-numSentence metadatum.
+              file.  Search for "buildContent" to find the locations.
+            sentenceNavigation: [yes|no]
+              If "yes", include controls to allow navigation between sentences
+              within the editor.  For this to work, the sentence ids must be
+              integers running from 1 to maxSentId, where maxSentId is obtained
+              either from invoking the alpheios-getInfoURL or from the
+              numSentences parameter.
     -->
-    <!-- <meta name="alpheios-buildContent" content=""/> -->
-    <!-- <meta name="alpheios-sentenceNavigation" content=""/> -->
-    <!-- <meta name="alpheios-editModes" content=""/> -->
+    <meta name="alpheios-param-app" content="editor"/>
+    <meta name="alpheios-param-numSentences" content="1"/>
+    <meta name="alpheios-param-lang" content="la"/>
+    <meta name="alpheios-param-direction" content="ltr"/>
+    <meta name="alpheios-param-arcEditing" content="yes"/>
+    <meta name="alpheios-param-nodeEditing" content="no"/>
+    <meta name="alpheios-param-buildContent" content=""/>
+    <meta name="alpheios-param-sentenceNavigation" content="no"/>
 
     <!-- URLs to get and put a single sentence in treebank XML -->
     <meta name="alpheios-getSentenceURL"
@@ -82,41 +103,79 @@
       content="http://nlp.perseus.tufts.edu/hopper/annotate/displaySentence.jsp"/>
     <meta name="alpheios-exitLabel" content="Return to table editor"/>
 
-    <!-- Provide style here if alpheios-buildContent metadatum
-         does not contain "style".
+    <!-- Provide style here if buildContent param does not contain "style".
          Styles should be provided for
             g text[pos=<pos>]     words in text and tree
             td[pos=<pos>]         words in key
          for each part of speech <pos>.
     -->
     <style type="text/css">
-      g text[pos=n] { fill:black }
-      td[pos=n] { color:black }
-      g text[pos=v] { fill:red }
-      td[pos=v] { color:red }
-      g text[pos=a] { fill:blue }
-      td[pos=a] { color:blue }
-      g text[pos=d] { fill:darkorange }
-      td[pos=d] { color:darkorange }
-      g text[pos=c] { fill:deeppink }
-      td[pos=c] { color:deeppink }
-      g text[pos=l] { fill:skyblue }
-      td[pos=l] { color:skyblue }
-      g text[pos=r] { fill:green }
-      td[pos=r] { color:green }
-      g text[pos=p] { fill:purple }
-      td[pos=p] { color:purple }
-      g text[pos=i] { fill:gold }
-      td[pos=i] { color:gold }
-      g text[pos=e] { fill:gold }
-      td[pos=e] { color:gold }
-    </style>
+      g text[pos=n] {
+         fill:black 
+      }
+      td[pos=n] {
+         color:black 
+      }
+      g text[pos=v] {
+         fill:red 
+      }
+      td[pos=v] {
+         color:red 
+      }
+      g text[pos=a] {
+         fill:blue 
+      }
+      td[pos=a] {
+         color:blue 
+      }
+      g text[pos=d] {
+         fill:darkorange 
+      }
+      td[pos=d] {
+         color:darkorange 
+      }
+      g text[pos=c] {
+         fill:deeppink 
+      }
+      td[pos=c] {
+         color:deeppink 
+      }
+      g text[pos=l] {
+         fill:skyblue 
+      }
+      td[pos=l] {
+         color:skyblue 
+      }
+      g text[pos=r] {
+         fill:green 
+      }
+      td[pos=r] {
+         color:green 
+      }
+      g text[pos=p] {
+         fill:purple 
+      }
+      td[pos=p] {
+         color:purple 
+      }
+      g text[pos=i] {
+         fill:gold 
+      }
+      td[pos=i] {
+         color:gold 
+      }
+      g text[pos=e] {
+         fill:gold 
+      }
+      td[pos=e] {
+         color:gold 
+      }</style>
   </head>
   <body onkeypress="Keypress(event)" onload="Init(event)">
     <div class="alpheios-ignore" id="alph-page-header">
       <img src="../image/alpheios.png" alt="Alpheios"/>
     </div>
-    <div class="controls alpheios-ignore">
+    <div class="controls alpheios-ignore" id="edit-controls">
       <div id="sent-navigation">
         <form onsubmit="return SubmitGoTo(this)" name="sent-navigation-goto">
           <label>Go to sentence number</label>
@@ -148,46 +207,46 @@
         <input id="expansion-checkbox" type="checkbox"
           onclick="ShowExpansionControls(event)" checked="checked"/>
       </form>
-      <!-- Provide menus here (in form[name="menus"] if alpheios-buildContent
-           metadatum does not contain "menus".
-      -->
-      <div id="arc-label-menus" class="cmenu" style="display: none">
-        <form name="menus">
-          <div>Dependency Relation: </div>
-          <select name="arcrel1">
-            <option value="PRED">PRED</option>
-            <option value="SBJ">SBJ</option>
-            <option value="OBJ">OBJ</option>
-            <option value="ATR">ATR</option>
-            <option value="ADV">ADV</option>
-            <option value="ATV">ATV</option>
-            <option value="AtvV">AtvV</option>
-            <option value="PNOM">PNOM</option>
-            <option value="OCOMP">OCOMP</option>
-            <option value="APOS">APOS</option>
-            <option value="COORD">COORD</option>
-            <option value="AuxP">AuxP (prep)</option>
-            <option value="AuxC">AuxC (conj)</option>
-            <option value="AuxR">AuxR (refl passive)</option>
-            <option value="AuxY">AuxY (sent adv)</option>
-            <option value="AuxX">AuxX (comma)</option>
-            <option value="AuxG">AuxG (bracketing)</option>
-            <option value="AuxK">AuxK (terminal)</option>
-            <option value="AuxV">AuxV (aux verb)</option>
-            <option value="AuxZ">AuxZ (emph)</option>
-            <option value="ExD">ExD</option>
-          </select>
-          <select name="arcrel2">
-            <option value="">- -</option>
-            <option value="_AP">_AP</option>
-            <option value="_CO">_CO</option>
-            <option value="_AP_CO">_AP_CO</option>
-          </select>
-        </form>
-        <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
-          >Apply</button>
-        <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
-          >Quit</button>
+      <!-- Provide menus here if buildContent param does not contain "menus" -->
+      <div id="label-menus">
+        <div id="arc-label-menus" class="cmenu" style="display: none">
+          <form name="menus">
+            <div>Dependency Relation: </div>
+            <select name="arcrel1">
+              <option value="PRED">PRED</option>
+              <option value="SBJ">SBJ</option>
+              <option value="OBJ">OBJ</option>
+              <option value="ATR">ATR</option>
+              <option value="ADV">ADV</option>
+              <option value="ATV">ATV</option>
+              <option value="AtvV">AtvV</option>
+              <option value="PNOM">PNOM</option>
+              <option value="OCOMP">OCOMP</option>
+              <option value="APOS">APOS</option>
+              <option value="COORD">COORD</option>
+              <option value="AuxP">AuxP (prep)</option>
+              <option value="AuxC">AuxC (conj)</option>
+              <option value="AuxR">AuxR (refl passive)</option>
+              <option value="AuxY">AuxY (sent adv)</option>
+              <option value="AuxX">AuxX (comma)</option>
+              <option value="AuxG">AuxG (bracketing)</option>
+              <option value="AuxK">AuxK (terminal)</option>
+              <option value="AuxV">AuxV (aux verb)</option>
+              <option value="AuxZ">AuxZ (emph)</option>
+              <option value="ExD">ExD</option>
+            </select>
+            <select name="arcrel2">
+              <option value="">- -</option>
+              <option value="_AP">_AP</option>
+              <option value="_CO">_CO</option>
+              <option value="_AP_CO">_AP_CO</option>
+            </select>
+          </form>
+          <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
+            >Apply</button>
+          <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
+            >Quit</button>
+        </div>
       </div>
       <form name="sent-edit-mode">
         <span>Tool: </span>
@@ -199,24 +258,36 @@
         <label for="mode-label">Label</label>
         <input type="radio" id="mode-ellipsis" name="mode" value="ellipsis"
           onclick="ClickOnMode(event)"/>
-        <label for="mode-label">Ellipsis</label>
+        <label for="mode-ellipsis">Ellipsis</label>
       </form>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
-    <!-- Provide key here if alpheios-buildContent metadatum
-         does not contain "key".
-    -->
+    <!-- Provide key here if buildContent param does not contain "key" -->
     <div id="key">
       <table>
         <thead>
-          <tr><th>Key to Background Colors</th></tr>
+          <tr>
+            <th>Key to Background Colors</th>
+          </tr>
         </thead>
         <tbody>
-          <tr><td showme="focus">Focus word</td></tr>
-          <tr><td showme="focus-parent">Word that focus word depends on</td></tr>
-          <tr><td showme="focus-child">Words that immediately depend on focus word</td></tr>
-          <tr><td showme="focus-descendant">Other words that depend on focus word</td></tr>
-          <tr><td first="yes">First selected word(s)</td></tr>
+          <tr>
+            <td showme="focus">Focus word</td>
+          </tr>
+          <tr>
+            <td showme="focus-parent">Word that focus word depends on</td>
+          </tr>
+          <tr>
+            <td showme="focus-child">Words that immediately depend on focus
+              word</td>
+          </tr>
+          <tr>
+            <td showme="focus-descendant">Other words that depend on focus
+              word</td>
+          </tr>
+          <tr>
+            <td first="yes">First selected word(s)</td>
+          </tr>
         </tbody>
         <br/>
         <thead>
@@ -225,22 +296,48 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td pos="a">Adjective</td></tr>
-          <tr><td pos="d">Adverb</td></tr>
-          <tr><td pos="l">Article</td></tr>
-          <tr><td pos="c">Conjunction</td></tr>
-          <tr><td pos="e">Exclamation</td></tr>
-          <tr><td pos="i">Interjection</td></tr>
-          <tr><td pos="n">Noun</td></tr>
-          <tr><td pos="r">Preposition</td></tr>
-          <tr><td pos="p">Pronoun</td></tr>
-          <tr><td pos="v">Verb</td></tr>
-          <tr><td pos="other">Other parts of speech</td></tr>
+          <tr>
+            <td pos="a">Adjective</td>
+          </tr>
+          <tr>
+            <td pos="d">Adverb</td>
+          </tr>
+          <tr>
+            <td pos="l">Article</td>
+          </tr>
+          <tr>
+            <td pos="c">Conjunction</td>
+          </tr>
+          <tr>
+            <td pos="e">Exclamation</td>
+          </tr>
+          <tr>
+            <td pos="i">Interjection</td>
+          </tr>
+          <tr>
+            <td pos="n">Noun</td>
+          </tr>
+          <tr>
+            <td pos="r">Preposition</td>
+          </tr>
+          <tr>
+            <td pos="p">Pronoun</td>
+          </tr>
+          <tr>
+            <td pos="v">Verb</td>
+          </tr>
+          <tr>
+            <td pos="other">Other parts of speech</td>
+          </tr>
         </tbody>
         <br/>
         <tbody>
-          <tr><td>LABEL on arc = dependency relation</td></tr>
-          <tr><td>[0], [1], etc. = implied (elided) words</td></tr>
+          <tr>
+            <td>LABEL on arc = dependency relation</td>
+          </tr>
+          <tr>
+            <td>[0], [1], etc. = implied (elided) words</td>
+          </tr>
         </tbody>
       </table>
     </div>

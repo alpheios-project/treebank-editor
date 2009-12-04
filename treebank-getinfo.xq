@@ -33,6 +33,7 @@
       @numWords
       @format
       @xml:lang
+      <meta> = metadata from format description file
       if desc param present, contents of format description file
  :)
 
@@ -55,18 +56,20 @@ return
   else
     let $doc := doc($docName)
     let $format := $doc/*:treebank/@*:format
+    let $format := if ($format) then $format else "aldt"
     let $lang := $doc/*:treebank/@*:lang
     return
       element info
       {
         attribute numSentences { count($doc//*:sentence) },
         attribute numWords { count($doc//*:word) },
-        attribute format { if ($format) then $format else "aldt" },
+        attribute format { $format },
         attribute direction { if ($lang eq "ara") then "rtl" else "ltr" },
         attribute xml:lang { $lang },
 
         if ($desc)
         then
           tbu:get-format-description($format, "/db/xq/config")
-        else ()
+        else
+          tbu:get-format-metadata($format, "/db/xq/config")
       }

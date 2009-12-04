@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+  Copyright 2008-2009 Cantus Foundation
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+--><!--
   Description for Pragmatic Resources in Old Indo-European Languages (PROIEL) format
 
   Tables of morphology categories and values
 
   <desc>
-    @tb = treebank format
+    <meta>* = metadatum
+      @name = name of metadatum
+      @value = value of metadatum
     <table> = table of morphology categories
       @type = morphology
       <category> = morphology category
@@ -45,479 +65,481 @@
     C conjunction   pink
     I interjection  yellow
 -->
-<desc xmlns="http://alpheios.net/namespaces/treebank-desc" tb="proiel">
-    <table type="morphology">
-
+<desc xmlns="http://alpheios.net/namespaces/treebank-desc">
+  <meta name="format" value="proiel"/>
+  <meta name="ellipsis" value="no"/>
+  <meta name="has-lemmas" value="yes"/>
+  <table type="morphology">
     <!-- part of speech -->
-        <category id="pos" n="1">
-            <entry>
-                <short>N</short>
-                <long>noun</long>
-                <color>black</color>
-            </entry>
-            <entry>
-                <short>P</short>
-                <long>pronoun</long>
-                <color>purple</color>
-            </entry>
-            <entry>
-                <short>M</short>
-                <long>numeral</long>
-            </entry>
-            <entry>
-                <short>V</short>
-                <long>verb</long>
-                <color>red</color>
-            </entry>
-            <entry>
-                <short>A</short>
-                <long>adjective</long>
-                <color>blue</color>
-            </entry>
-            <entry>
-                <short>S</short>
-                <long>article</long>
-                <color>skyblue</color>
-            </entry>
-            <entry>
-                <short>D</short>
-                <long>adverb</long>
-                <color>darkorange</color>
-            </entry>
-            <entry>
-                <short>R</short>
-                <long>preposition</long>
-                <color>green</color>
-            </entry>
-            <entry>
-                <short>C</short>
-                <long>conjunction</long>
-                <color>deeppink</color>
-            </entry>
-            <entry>
-                <short>G</short>
-                <long>subjunction</long>
-            </entry>
-            <entry>
-                <short>F</short>
-                <long>foreign word</long>
-            </entry>
-            <entry>
-                <short>I</short>
-                <long>interjection</long>
-                <color>gold</color>
-            </entry>
-        </category>
-        <category id="minor" n="2">
+    <category id="pos" n="1" name="Part of Speech">
+      <entry>
+        <short>N</short>
+        <long>noun</long>
+        <color>black</color>
+      </entry>
+      <entry>
+        <short>P</short>
+        <long>pronoun</long>
+        <color>purple</color>
+      </entry>
+      <entry>
+        <short>M</short>
+        <long>numeral</long>
+      </entry>
+      <entry>
+        <short>V</short>
+        <long>verb</long>
+        <color>red</color>
+      </entry>
+      <entry>
+        <short>A</short>
+        <long>adjective</long>
+        <color>blue</color>
+      </entry>
+      <entry>
+        <short>S</short>
+        <long>article</long>
+        <color>skyblue</color>
+      </entry>
+      <entry>
+        <short>D</short>
+        <long>adverb</long>
+        <color>darkorange</color>
+      </entry>
+      <entry>
+        <short>R</short>
+        <long>preposition</long>
+        <color>green</color>
+      </entry>
+      <entry>
+        <short>C</short>
+        <long>conjunction</long>
+        <color>deeppink</color>
+      </entry>
+      <entry>
+        <short>G</short>
+        <long>subjunction</long>
+      </entry>
+      <entry>
+        <short>F</short>
+        <long>foreign word</long>
+      </entry>
+      <entry>
+        <short>I</short>
+        <long>interjection</long>
+        <color>gold</color>
+      </entry>
+    </category>
+    <category id="minor" n="2" name="Minor">
       <!-- P -->
-            <entry>
-                <short>p</short>
-                <long>personal</long>
-            </entry>
-            <entry>
-                <short>r</short>
-                <long>relative</long>
-            </entry>
-            <entry>
-                <short>d</short>
-                <long>demonstrative</long>
-            </entry>
-            <entry>
-                <short>s</short>
-                <long>possessive</long>
-            </entry>
-            <entry>
-                <short>k</short>
-                <long>personal reflexive</long>
-            </entry>
-            <entry>
-                <short>t</short>
-                <long>possessive reflexive</long>
-            </entry>
-            <entry>
-                <short>c</short>
-                <long>reciprocal</long>
-            </entry>
-            <entry>
-                <short>i</short>
-                <long>interrogative</long>
-            </entry>
-            <entry>
-                <short>x</short>
-                <long>indefinite</long>
-            </entry>
+      <entry>
+        <short>p</short>
+        <long>personal</long>
+      </entry>
+      <entry>
+        <short>r</short>
+        <long>relative</long>
+      </entry>
+      <entry>
+        <short>d</short>
+        <long>demonstrative</long>
+      </entry>
+      <entry>
+        <short>s</short>
+        <long>possessive</long>
+      </entry>
+      <entry>
+        <short>k</short>
+        <long>personal reflexive</long>
+      </entry>
+      <entry>
+        <short>t</short>
+        <long>possessive reflexive</long>
+      </entry>
+      <entry>
+        <short>c</short>
+        <long>reciprocal</long>
+      </entry>
+      <entry>
+        <short>i</short>
+        <long>interrogative</long>
+      </entry>
+      <entry>
+        <short>x</short>
+        <long>indefinite</long>
+      </entry>
 
       <!-- M -->
-            <entry>
-                <short>a</short>
-                <long>cardinal</long>
-            </entry>
-            <entry>
-                <short>g</short>
-                <long>cardinal, indeclinable</long>
-            </entry>
-            <entry>
-                <short>o</short>
-                <long>ordinal</long>
-            </entry>
+      <entry>
+        <short>a</short>
+        <long>cardinal</long>
+      </entry>
+      <entry>
+        <short>g</short>
+        <long>cardinal, indeclinable</long>
+      </entry>
+      <entry>
+        <short>o</short>
+        <long>ordinal</long>
+      </entry>
 
       <!-- N -->
-            <entry>
-                <short>b</short>
-                <long>common</long>
-            </entry>
-            <entry>
-                <short>h</short>
-                <long>common, indeclinable</long>
-            </entry>
-            <entry>
-                <short>e</short>
-                <long>proper</long>
-            </entry>
-            <entry>
-                <short>j</short>
-                <long>proper, indeclinable</long>
-            </entry>
+      <entry>
+        <short>b</short>
+        <long>common</long>
+      </entry>
+      <entry>
+        <short>h</short>
+        <long>common, indeclinable</long>
+      </entry>
+      <entry>
+        <short>e</short>
+        <long>proper</long>
+      </entry>
+      <entry>
+        <short>j</short>
+        <long>proper, indeclinable</long>
+      </entry>
 
       <!-- D -->
-            <entry>
-                <short>f</short>
-                <long>comparable</long>
-            </entry>
-            <entry>
-                <short>n</short>
-                <long>non-comparable</long>
-            </entry>
-            <entry>
-                <short>q</short>
-                <long>relative</long>
-            </entry>
-            <entry>
-                <short>u</short>
-                <long>interrogative</long>
-            </entry>
-        </category>
-        <category id="person" n="3">
-            <entry>
-                <short>1</short>
-                <long>first person</long>
-                <lex>1st</lex>
-            </entry>
-            <entry>
-                <short>2</short>
-                <long>second person</long>
-                <lex>2nd</lex>
-            </entry>
-            <entry>
-                <short>3</short>
-                <long>third person</long>
-                <lex>3rd</lex>
-            </entry>
-        </category>
-        <category id="number" n="4">
-            <entry>
-                <short>s</short>
-                <long>singular</long>
-            </entry>
-            <entry>
-                <short>d</short>
-                <long>dual</long>
-            </entry>
-            <entry>
-                <short>p</short>
-                <long>plural</long>
-            </entry>
-        </category>
-        <category id="tense" n="5">
-            <entry>
-                <short>p</short>
-                <long>present</long>
-            </entry>
-            <entry>
-                <short>i</short>
-                <long>imperfect</long>
-            </entry>
-            <entry>
-                <short>l</short>
-                <long>pluperfect</long>
-            </entry>
-            <entry>
-                <short>a</short>
-                <long>aorist</long>
-            </entry>
-            <entry>
-                <short>f</short>
-                <long>future</long>
-            </entry>
-            <entry>
-                <short>r</short>
-                <long>perfect</long>
-            </entry>
-            <entry>
-                <short>t</short>
-                <long>future perfect</long>
-            </entry>
-            <entry>
-                <short>s</short>
-                <long>resultative</long>
-            </entry>
-            <entry>
-                <short>u</short>
-                <long>past</long>
-            </entry>
-        </category>
-        <category id="mood" n="6">
-            <entry>
-                <short>i</short>
-                <long>indicative</long>
-            </entry>
-            <entry>
-                <short>s</short>
-                <long>subjunctive</long>
-            </entry>
-            <entry>
-                <short>m</short>
-                <long>imperative</long>
-            </entry>
-            <entry>
-                <short>o</short>
-                <long>optative</long>
-            </entry>
-            <entry>
-                <short>n</short>
-                <long>infinitive</long>
-            </entry>
-            <entry>
-                <short>p</short>
-                <long>participle</long>
-            </entry>
-            <entry>
-                <short>d</short>
-                <long>gerund</long>
-            </entry>
-            <entry>
-                <short>g</short>
-                <long>gerundive</long>
-            </entry>
-            <entry>
-                <short>u</short>
-                <long>supine</long>
-            </entry>
-        </category>
-        <category id="voice" n="7">
-            <entry>
-                <short>a</short>
-                <long>active</long>
-            </entry>
-            <entry>
-                <short>e</short>
-                <long>middle or passive</long>
-                <lex>mediopassive</lex>
-            </entry>
-            <entry>
-                <short>m</short>
-                <long>middle</long>
-            </entry>
-            <entry>
-                <short>p</short>
-                <long>passive</long>
-            </entry>
-        </category>
-        <category id="gender" n="8">
-            <entry>
-                <short>o</short>
-                <long>masculine or neuter</long>
-            </entry>
-            <entry>
-                <short>p</short>
-                <long>masculine or feminine</long>
-            </entry>
-            <entry>
-                <short>q</short>
-                <long>masculine, feminine or neuter</long>
-            </entry>
-            <entry>
-                <short>r</short>
-                <long>feminine or neuter</long>
-            </entry>
-            <entry>
-                <short>m</short>
-                <long>masculine</long>
-            </entry>
-            <entry>
-                <short>f</short>
-                <long>feminine</long>
-            </entry>
-            <entry>
-                <short>n</short>
-                <long>neuter</long>
-            </entry>
-        </category>
-        <category id="case" n="9">
-            <entry>
-                <short>n</short>
-                <long>nominative</long>
-            </entry>
-            <entry>
-                <short>v</short>
-                <long>vocative</long>
-            </entry>
-            <entry>
-                <short>a</short>
-                <long>accusative</long>
-            </entry>
-            <entry>
-                <short>g</short>
-                <long>genitive</long>
-            </entry>
-            <entry>
-                <short>d</short>
-                <long>dative</long>
-            </entry>
-            <entry>
-                <short>b</short>
-                <long>ablative</long>
-            </entry>
-            <entry>
-                <short>i</short>
-                <long>instrumental</long>
-            </entry>
-            <entry>
-                <short>l</short>
-                <long>locative</long>
-            </entry>
-            <entry>
-                <short>c</short>
-                <long>genitive or dative</long>
-            </entry>
-        </category>
-        <category id="degree" n="10">
-            <entry>
-                <short>p</short>
-                <long>positive</long>
-            </entry>
-            <entry>
-                <short>c</short>
-                <long>comparative</long>
-            </entry>
-            <entry>
-                <short>s</short>
-                <long>superlative</long>
-            </entry>
-        </category>
-        <category id="animacy" n="11">
-            <entry>
-                <short>i</short>
-                <long>inanimate</long>
-            </entry>
-            <entry>
-                <short>a</short>
-                <long>animate</long>
-            </entry>
-        </category>
-        <category id="strength" n="12">
-            <entry>
-                <short>w</short>
-                <long>weak</long>
-            </entry>
-            <entry>
-                <short>s</short>
-                <long>strong</long>
-            </entry>
-            <entry>
-                <short>t</short>
-                <long>weak or strong</long>
-            </entry>
-        </category>
-    </table>
-    <table type="relation">
-        <entry>
-            <tb>pred</tb>
-            <menu>PREDicate</menu>
-        </entry>
-        <entry>
-            <tb>sub</tb>
-            <menu>SUBject</menu>
-        </entry>
-        <entry>
-            <tb>obj</tb>
-            <menu>OBJect</menu>
-        </entry>
-        <entry>
-            <tb>obl</tb>
-            <menu>OBLique</menu>
-        </entry>
-        <entry>
-            <tb>part</tb>
-            <menu>PARTitive</menu>
-        </entry>
-        <entry>
-            <tb>piv</tb>
-            <menu>PredicatIVe</menu>
-        </entry>
-        <entry>
-            <tb>atr</tb>
-            <menu>ATtRibute</menu>
-        </entry>
-        <entry>
-            <tb>apos</tb>
-            <menu>APpOSition</menu>
-        </entry>
-        <entry>
-            <tb>rel</tb>
-            <menu>REL (apposition or attribute)</menu>
-        </entry>
-        <entry>
-            <tb>ag</tb>
-            <menu>AGens</menu>
-        </entry>
-        <entry>
-            <tb>adv</tb>
-            <menu>ADVerbial</menu>
-        </entry>
-        <entry>
-            <tb>aux</tb>
-            <menu>AUXiliary</menu>
-        </entry>
-        <entry>
-            <tb>arg</tb>
-            <menu>ARGument (object or oblique)</menu>
-        </entry>
-        <entry>
-            <tb>per</tb>
-            <menu>PERipheral (oblique or adverbial)</menu>
-        </entry>
-        <entry>
-            <tb>nonsub</tb>
-            <menu>NON-SUBject (object, oblique or adverbial)</menu>
-        </entry>
-        <entry>
-            <tb>xadv</tb>
-            <menu>XADV (open adverbial complement)</menu>
-        </entry>
-        <entry>
-            <tb>xobj</tb>
-            <menu>XOBJ (open objective complement)</menu>
-        </entry>
-        <entry>
-            <tb>voc</tb>
-            <menu>VOCative</menu>
-        </entry>
-        <entry>
-            <tb>parpred</tb>
-            <menu>PARenthetical PREDication</menu>
-        </entry>
-        <entry>
-            <tb>narg</tb>
-            <menu>adNominal ARGument</menu>
-        </entry>
-        <entry>
-            <tb>adnom</tb>
-            <menu>ADNOMinal</menu>
-        </entry>
-        <entry>
-            <tb>comp</tb>
-            <menu>COMPlement</menu>
-        </entry>
-    </table>
+      <entry>
+        <short>f</short>
+        <long>comparable</long>
+      </entry>
+      <entry>
+        <short>n</short>
+        <long>non-comparable</long>
+      </entry>
+      <entry>
+        <short>q</short>
+        <long>relative</long>
+      </entry>
+      <entry>
+        <short>u</short>
+        <long>interrogative</long>
+      </entry>
+    </category>
+    <category id="person" n="3" name="Person">
+      <entry>
+        <short>1</short>
+        <long>first person</long>
+        <lex>1st</lex>
+      </entry>
+      <entry>
+        <short>2</short>
+        <long>second person</long>
+        <lex>2nd</lex>
+      </entry>
+      <entry>
+        <short>3</short>
+        <long>third person</long>
+        <lex>3rd</lex>
+      </entry>
+    </category>
+    <category id="number" n="4" name="Number">
+      <entry>
+        <short>s</short>
+        <long>singular</long>
+      </entry>
+      <entry>
+        <short>d</short>
+        <long>dual</long>
+      </entry>
+      <entry>
+        <short>p</short>
+        <long>plural</long>
+      </entry>
+    </category>
+    <category id="tense" n="5" name="Tense">
+      <entry>
+        <short>p</short>
+        <long>present</long>
+      </entry>
+      <entry>
+        <short>i</short>
+        <long>imperfect</long>
+      </entry>
+      <entry>
+        <short>l</short>
+        <long>pluperfect</long>
+      </entry>
+      <entry>
+        <short>a</short>
+        <long>aorist</long>
+      </entry>
+      <entry>
+        <short>f</short>
+        <long>future</long>
+      </entry>
+      <entry>
+        <short>r</short>
+        <long>perfect</long>
+      </entry>
+      <entry>
+        <short>t</short>
+        <long>future perfect</long>
+      </entry>
+      <entry>
+        <short>s</short>
+        <long>resultative</long>
+      </entry>
+      <entry>
+        <short>u</short>
+        <long>past</long>
+      </entry>
+    </category>
+    <category id="mood" n="6" name="Mood">
+      <entry>
+        <short>i</short>
+        <long>indicative</long>
+      </entry>
+      <entry>
+        <short>s</short>
+        <long>subjunctive</long>
+      </entry>
+      <entry>
+        <short>m</short>
+        <long>imperative</long>
+      </entry>
+      <entry>
+        <short>o</short>
+        <long>optative</long>
+      </entry>
+      <entry>
+        <short>n</short>
+        <long>infinitive</long>
+      </entry>
+      <entry>
+        <short>p</short>
+        <long>participle</long>
+      </entry>
+      <entry>
+        <short>d</short>
+        <long>gerund</long>
+      </entry>
+      <entry>
+        <short>g</short>
+        <long>gerundive</long>
+      </entry>
+      <entry>
+        <short>u</short>
+        <long>supine</long>
+      </entry>
+    </category>
+    <category id="voice" n="7" name="Voice">
+      <entry>
+        <short>a</short>
+        <long>active</long>
+      </entry>
+      <entry>
+        <short>e</short>
+        <long>middle or passive</long>
+        <lex>mediopassive</lex>
+      </entry>
+      <entry>
+        <short>m</short>
+        <long>middle</long>
+      </entry>
+      <entry>
+        <short>p</short>
+        <long>passive</long>
+      </entry>
+    </category>
+    <category id="gender" n="8" name="Gender">
+      <entry>
+        <short>o</short>
+        <long>masculine or neuter</long>
+      </entry>
+      <entry>
+        <short>p</short>
+        <long>masculine or feminine</long>
+      </entry>
+      <entry>
+        <short>q</short>
+        <long>masculine, feminine or neuter</long>
+      </entry>
+      <entry>
+        <short>r</short>
+        <long>feminine or neuter</long>
+      </entry>
+      <entry>
+        <short>m</short>
+        <long>masculine</long>
+      </entry>
+      <entry>
+        <short>f</short>
+        <long>feminine</long>
+      </entry>
+      <entry>
+        <short>n</short>
+        <long>neuter</long>
+      </entry>
+    </category>
+    <category id="case" n="9" name="Case">
+      <entry>
+        <short>n</short>
+        <long>nominative</long>
+      </entry>
+      <entry>
+        <short>v</short>
+        <long>vocative</long>
+      </entry>
+      <entry>
+        <short>a</short>
+        <long>accusative</long>
+      </entry>
+      <entry>
+        <short>g</short>
+        <long>genitive</long>
+      </entry>
+      <entry>
+        <short>d</short>
+        <long>dative</long>
+      </entry>
+      <entry>
+        <short>b</short>
+        <long>ablative</long>
+      </entry>
+      <entry>
+        <short>i</short>
+        <long>instrumental</long>
+      </entry>
+      <entry>
+        <short>l</short>
+        <long>locative</long>
+      </entry>
+      <entry>
+        <short>c</short>
+        <long>genitive or dative</long>
+      </entry>
+    </category>
+    <category id="degree" n="10" name="Degree">
+      <entry>
+        <short>p</short>
+        <long>positive</long>
+      </entry>
+      <entry>
+        <short>c</short>
+        <long>comparative</long>
+      </entry>
+      <entry>
+        <short>s</short>
+        <long>superlative</long>
+      </entry>
+    </category>
+    <category id="animacy" n="11" name="Animacy">
+      <entry>
+        <short>i</short>
+        <long>inanimate</long>
+      </entry>
+      <entry>
+        <short>a</short>
+        <long>animate</long>
+      </entry>
+    </category>
+    <category id="strength" n="12" name="Strength">
+      <entry>
+        <short>w</short>
+        <long>weak</long>
+      </entry>
+      <entry>
+        <short>s</short>
+        <long>strong</long>
+      </entry>
+      <entry>
+        <short>t</short>
+        <long>weak or strong</long>
+      </entry>
+    </category>
+  </table>
+  <table type="relation">
+    <entry>
+      <tb>pred</tb>
+      <menu>PREDicate</menu>
+    </entry>
+    <entry>
+      <tb>sub</tb>
+      <menu>SUBject</menu>
+    </entry>
+    <entry>
+      <tb>obj</tb>
+      <menu>OBJect</menu>
+    </entry>
+    <entry>
+      <tb>obl</tb>
+      <menu>OBLique</menu>
+    </entry>
+    <entry>
+      <tb>part</tb>
+      <menu>PARTitive</menu>
+    </entry>
+    <entry>
+      <tb>piv</tb>
+      <menu>PredicatIVe</menu>
+    </entry>
+    <entry>
+      <tb>atr</tb>
+      <menu>ATtRibute</menu>
+    </entry>
+    <entry>
+      <tb>apos</tb>
+      <menu>APpOSition</menu>
+    </entry>
+    <entry>
+      <tb>rel</tb>
+      <menu>REL (apposition or attribute)</menu>
+    </entry>
+    <entry>
+      <tb>ag</tb>
+      <menu>AGens</menu>
+    </entry>
+    <entry>
+      <tb>adv</tb>
+      <menu>ADVerbial</menu>
+    </entry>
+    <entry>
+      <tb>aux</tb>
+      <menu>AUXiliary</menu>
+    </entry>
+    <entry>
+      <tb>arg</tb>
+      <menu>ARGument (object or oblique)</menu>
+    </entry>
+    <entry>
+      <tb>per</tb>
+      <menu>PERipheral (oblique or adverbial)</menu>
+    </entry>
+    <entry>
+      <tb>nonsub</tb>
+      <menu>NON-SUBject (object, oblique or adverbial)</menu>
+    </entry>
+    <entry>
+      <tb>xadv</tb>
+      <menu>XADV (open adverbial complement)</menu>
+    </entry>
+    <entry>
+      <tb>xobj</tb>
+      <menu>XOBJ (open objective complement)</menu>
+    </entry>
+    <entry>
+      <tb>voc</tb>
+      <menu>VOCative</menu>
+    </entry>
+    <entry>
+      <tb>parpred</tb>
+      <menu>PARenthetical PREDication</menu>
+    </entry>
+    <entry>
+      <tb>narg</tb>
+      <menu>adNominal ARGument</menu>
+    </entry>
+    <entry>
+      <tb>adnom</tb>
+      <menu>ADNOMinal</menu>
+    </entry>
+    <entry>
+      <tb>comp</tb>
+      <menu>COMPlement</menu>
+    </entry>
+  </table>
 </desc>

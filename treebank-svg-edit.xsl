@@ -41,6 +41,9 @@
 
   desc-to-style:
   Builds style from treebank description
+
+  desc-to-key:
+  Builds key from treebank description
  -->
 <xsl:stylesheet xmlns="http://www.w3.org/2000/svg"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -59,10 +62,10 @@
                       menus       generate menus from format description
                       style       generate style from format description
                       key         generate key from format description
-      e_app     application ("edit" or "view")
+      e_app     application ("editor" or "viewer")
   -->
   <xsl:param name="e_mode"/>
-  <xsl:param name="e_app" select="edit"/>
+  <xsl:param name="e_app" select="editor"/>
 
   <!--
     Template for external calls
@@ -298,6 +301,7 @@
   -->
   <xsl:template name="fix-words">
     <xsl:param name="a_words"/>
+
     <xsl:for-each select="$a_words">
       <xsl:choose>
         <xsl:when test="contains(@relation, '_ExD')">
@@ -433,6 +437,7 @@
   -->
   <xsl:template name="reverse-string">
     <xsl:param name="a_in"/>
+
     <xsl:variable name="len" select="string-length($a_in)"/>
     <xsl:if test="$len &gt; 0">
       <xsl:value-of select="substring($a_in, $len, 1)"/>
@@ -453,6 +458,7 @@
   -->
   <xsl:template name="svg-to-xml">
     <xsl:param name="a_sentence"/>
+
     <xsl:element name="sentence" namespace="">
       <xsl:copy-of select="$a_sentence/@alph-doc"/>
       <xsl:copy-of select="$a_sentence/@alph-sentid"/>
@@ -521,6 +527,7 @@
   <xsl:template name="get-dependency-info">
     <xsl:param name="a_relation"/>
     <xsl:param name="a_head"/>
+
     <xsl:choose>
       <!-- if this is an elided word -->
       <xsl:when test="$a_head/@elided">
@@ -559,60 +566,110 @@
   <xsl:template name="desc-to-menus">
     <xsl:param name="a_desc"/>
 
-    <xsl:element name="form" namespace="http://www.w3.org/1999/xhtml">
-      <xsl:attribute name="name">menus</xsl:attribute>
-      <xsl:element name="div" namespace="http://www.w3.org/1999/xhtml">
-        <xsl:text>Dependency Relation: </xsl:text>
-      </xsl:element>
+    <xhtml:div id="label-menus" xmlns="http://www.w3.org/1999/xhtml">
       <xsl:variable name="entries1"
         select="$a_desc/tbd:table[@type = 'relation']/tbd:entry"/>
-      <xsl:if test="count($entries1)">
-        <xsl:element name="select" namespace="http://www.w3.org/1999/xhtml">
-          <xsl:attribute name="name">
-            <xsl:text>arcrel1</xsl:text>
-          </xsl:attribute>
-          <xsl:for-each select="$entries1">
-            <xsl:element name="option" namespace="http://www.w3.org/1999/xhtml">
-              <xsl:attribute name="value">
-                <xsl:value-of select="./tbd:tb"/>
-              </xsl:attribute>
-              <xsl:choose>
-                <xsl:when test="./tbd:menu">
-                  <xsl:value-of select="./tbd:menu"/>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:value-of select="./tbd:tb"/>
-                </xsl:otherwise>
-              </xsl:choose>
-            </xsl:element>
-          </xsl:for-each>
-        </xsl:element>
+      <xsl:if test="count($entries1) > 0">
+        <div id="arc-label-menus" class="cmenu" style="display: none">
+          <form name="arc-label-menus">
+            <div>Dependency Relation: </div>
+            <xsl:if test="count($entries1)">
+              <select name="arc-label-1">
+                <xsl:for-each select="$entries1">
+                  <xsl:element name="option">
+                    <xsl:attribute name="value">
+                      <xsl:value-of select="./tbd:tb"/>
+                    </xsl:attribute>
+                    <xsl:choose>
+                      <xsl:when test="./tbd:menu">
+                        <xsl:value-of select="./tbd:menu"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:value-of select="./tbd:tb"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                  </xsl:element>
+                </xsl:for-each>
+              </select>
+            </xsl:if>
+            <xsl:variable name="entries2"
+              select="$a_desc/tbd:table[@type = 'subrelation']/tbd:entry"/>
+            <xsl:if test="count($entries2) > 0">
+              <select name="arc-label-2">
+                <xsl:for-each select="$entries2">
+                  <xsl:element name="option">
+                    <xsl:attribute name="value">
+                      <xsl:value-of select="./tbd:tb"/>
+                    </xsl:attribute>
+                    <xsl:choose>
+                      <xsl:when test="./tbd:menu">
+                        <xsl:value-of select="./tbd:menu"/>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <xsl:value-of select="./tbd:tb"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                  </xsl:element>
+                </xsl:for-each>
+              </select>
+            </xsl:if>
+          </form>
+          <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
+            >Apply</button>
+          <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
+            >Quit</button>
+        </div>
       </xsl:if>
-      <xsl:variable name="entries2"
-        select="$a_desc/tbd:table[@type = 'subrelation']/tbd:entry"/>
-      <xsl:if test="count($entries2)">
-        <xsl:element name="select" namespace="http://www.w3.org/1999/xhtml">
-          <xsl:attribute name="name">
-            <xsl:text>arcrel2</xsl:text>
-          </xsl:attribute>
-          <xsl:for-each select="$entries2">
-            <xsl:element name="option" namespace="http://www.w3.org/1999/xhtml">
-              <xsl:attribute name="value">
-                <xsl:value-of select="./tbd:tb"/>
-              </xsl:attribute>
-              <xsl:choose>
-                <xsl:when test="./tbd:menu">
-                  <xsl:value-of select="./tbd:menu"/>
-                </xsl:when>
-                <xsl:otherwise>
-                  <xsl:value-of select="./tbd:tb"/>
-                </xsl:otherwise>
-              </xsl:choose>
-            </xsl:element>
-          </xsl:for-each>
-        </xsl:element>
+      <xsl:variable name="categories"
+        select="$a_desc/tbd:table[@type = 'morphology']/tbd:category"/>
+      <xsl:if test="count($categories) > 0">
+        <div id="node-label-menus" class="cmenu" style="display: none">
+          <form name="node-label-menus">
+            <table style="border: none">
+              <xsl:if test="$a_desc/tbd:meta[@name='has-lemmas']/@value = 'yes'">
+                <tr>
+                  <td><input type="text" name="node-lemma"/></td>
+                  <td>Lemma</td>
+                </tr>
+              </xsl:if>
+              <!-- for each morphological category -->
+              <xsl:for-each select="$categories">
+                <tr>
+                  <td>
+                    <!-- make menu -->
+                    <xsl:element name="select">
+                      <xsl:attribute name="name">
+                        <xsl:value-of select="concat('node-label-', ./@id)"/>
+                      </xsl:attribute>
+                      <xsl:attribute name="n">
+                        <xsl:value-of select="./@n"/>
+                      </xsl:attribute>
+                      <option value="-">- -</option>
+                      <!-- of entries in category -->
+                      <xsl:for-each select="./tbd:entry">
+                        <xsl:element name="option">
+                          <xsl:attribute name="value">
+                            <xsl:value-of select="./tbd:short"/>
+                          </xsl:attribute>
+                          <xsl:value-of select="./tbd:long"/>
+                        </xsl:element>
+                      </xsl:for-each>
+                    </xsl:element>
+                  </td>
+                  <td><xsl:value-of select="./@name"/></td>
+                </tr>
+              </xsl:for-each>
+            </table>
+          </form>
+          <button id="node-label-apply" onclick="ClickOnLabelButton(event)"
+            >Apply</button>
+          <button id="node-label-reset" onclick="ClickOnLabelButton(event)"
+            >Reset</button>
+          <button id="node-label-quit" onclick="ClickOnLabelButton(event)"
+            >Quit</button>
+        </div>
       </xsl:if>
-    </xsl:element>
+    </xhtml:div>
   </xsl:template>
 
   <!--
@@ -628,9 +685,7 @@
     <xsl:param name="a_desc"/>
 
     <xsl:variable name="entries"
-      select="$a_desc/tbd:table[@type = 'morphology']/
-              tbd:category[@id = 'pos']/tbd:entry"/>
-
+      select="$a_desc/tbd:table[@type = 'morphology']/tbd:category[@id = 'pos']/tbd:entry"/>
     <xsl:element name="style" namespace="http://www.w3.org/1999/xhtml">
       <xsl:attribute name="type">text/css</xsl:attribute>
       <!-- for each part of speech -->
@@ -642,22 +697,22 @@
           <!-- svg -->
           <xsl:value-of select="concat('g text', $subselector, '{')"/>
           <xsl:value-of select="concat('fill:', ./tbd:color)"/>
-          <xsl:value-of select="'}&#10;'"/>
+          <xsl:value-of select="'}&#xA;'"/>
           <!-- key -->
           <xsl:value-of select="concat('td', $subselector, '{')"/>
           <xsl:value-of select="concat('color:', ./tbd:color)"/>
-          <xsl:value-of select="'}&#10;'"/>
+          <xsl:value-of select="'}&#xA;'"/>
         </xsl:if>
         <!-- if additional style specified -->
         <xsl:if test="./tbd:style">
           <!-- svg -->
           <xsl:value-of select="concat('g text', $subselector, '{')"/>
           <xsl:value-of select="./tbd:style"/>
-          <xsl:value-of select="'}&#10;'"/>
+          <xsl:value-of select="'}&#xA;'"/>
           <!-- key -->
           <xsl:value-of select="concat('td', $subselector, '{')"/>
           <xsl:value-of select="./tbd:style"/>
-          <xsl:value-of select="'}&#10;'"/>
+          <xsl:value-of select="'}&#xA;'"/>
         </xsl:if>
       </xsl:for-each>
     </xsl:element>
@@ -668,6 +723,7 @@
 
     Parameters:
       $a_desc     treebank format description
+      $a_app      application (viewing or editing)
 
     Return value:
       html table containing key
@@ -675,27 +731,40 @@
   <xsl:template name="desc-to-key">
     <xsl:param name="a_desc"/>
     <xsl:param name="a_app"/>
-
     <xsl:variable name="entries"
-      select="$a_desc/tbd:table[@type = 'morphology']/
-      tbd:category[@id = 'pos']/tbd:entry"/>
-
+      select="$a_desc/tbd:table[@type = 'morphology']/tbd:category[@id = 'pos']/tbd:entry"/>
     <table xmlns="http://www.w3.org/1999/xhtml">
       <thead>
-        <tr><th>Key to Background Colors</th></tr>
+        <tr>
+          <th>Key to Background Colors</th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td showme="focus">Focus word</td></tr>
-        <tr><td showme="focus-parent">Word that focus word depends on</td></tr>
-        <tr><td showme="focus-child">Words that immediately depend on focus word</td></tr>
-        <tr><td showme="focus-descendant">Other words that depend on focus word</td></tr>
-        <xsl:if test="$e_app = 'view'">
-          <tr><td first="yes">First selected word(s)</td></tr>
+        <tr>
+          <td showme="focus">Focus word</td>
+        </tr>
+        <tr>
+          <td showme="focus-parent">Word that focus word depends on</td>
+        </tr>
+        <tr>
+          <td showme="focus-child">Words that immediately depend on focus
+            word</td>
+        </tr>
+        <tr>
+          <td showme="focus-descendant">Other words that depend on focus
+            word</td>
+        </tr>
+        <xsl:if test="$e_app = 'viewer'">
+          <tr>
+            <td first="yes">First selected word(s)</td>
+          </tr>
         </xsl:if>
       </tbody>
       <br/>
       <thead>
-        <tr><th>Key to Text Colors</th></tr>
+        <tr>
+          <th>Key to Text Colors</th>
+        </tr>
       </thead>
       <tbody>
         <!-- for each part of speech -->
@@ -717,14 +786,19 @@
             </xsl:element>
           </xsl:if>
         </xsl:for-each>
-        <tr><td pos="other">Other parts of speech</td></tr>
+        <tr>
+          <td pos="other">Other parts of speech</td>
+        </tr>
       </tbody>
       <br/>
       <tbody>
-        <tr><td>LABEL on arc = dependency relation</td></tr>
-        <tr><td>[0], [1], etc. = implied (elided) words</td></tr>
+        <tr>
+          <td>LABEL on arc = dependency relation</td>
+        </tr>
+        <tr>
+          <td>[0], [1], etc. = implied (elided) words</td>
+        </tr>
       </tbody>
     </table>
   </xsl:template>
-
 </xsl:stylesheet>

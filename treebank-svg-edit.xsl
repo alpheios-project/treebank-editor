@@ -615,9 +615,9 @@
             </xsl:if>
           </form>
           <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
-            >Apply</button>
+            >OK</button>
           <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
-            >Quit</button>
+            >Cancel</button>
         </div>
       </xsl:if>
       <xsl:variable name="categories"
@@ -662,11 +662,11 @@
             </table>
           </form>
           <button id="node-label-apply" onclick="ClickOnLabelButton(event)"
-            >Apply</button>
+            >OK</button>
           <button id="node-label-reset" onclick="ClickOnLabelButton(event)"
             >Reset</button>
           <button id="node-label-quit" onclick="ClickOnLabelButton(event)"
-            >Quit</button>
+            >Cancel</button>
         </div>
       </xsl:if>
     </xhtml:div>

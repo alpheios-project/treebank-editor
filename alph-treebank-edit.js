@@ -47,7 +47,6 @@ var s_dragY = 0;                      // mouse Y
 var s_posIndex = 0;                   // index of part of speech in morphology
 var s_minWidth = 300;                 // minimum text width
 
-var s_firebug = true;                 // using firebug
 var s_firefox = false;                // in Firefox
 var s_mode = "tree";                  // edit mode: tree/label/ellipsis
 
@@ -87,6 +86,9 @@ function Init(a_event)
 {
     try
     {
+        // initialize internal params
+        s_param["firebug"] = "no";
+
         // get parameters from html metadata of form
         //  <meta name="alpheios-param-<name>" content="<value>"/>
         var prefix = "alpheios-param-";
@@ -544,7 +546,7 @@ function InitHandlers(a_node, a_single)
  */
 function Log(a_msg)
 {
-    if (s_firebug)
+    if (s_param["firebug"] == "yes")
         console.log(a_msg);
 };
 

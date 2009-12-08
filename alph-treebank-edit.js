@@ -1164,8 +1164,8 @@ function StartLabelling(a_type, a_label, a_x, a_y)
                                      document.documentElement.scrollBottom
     ];
     div.css("display", "none");
-    div.css("left", (a_x + scroll[0] - 7) + "px");
-    div.css("top", (a_y + scroll[1] + 7 - div.height()) + "px");
+    div.css("left", Math.max(a_x + scroll[0] - 7, 0) + "px");
+    div.css("top", Math.max(a_y + scroll[1] + 7 - div.height(), 0) + "px");a
     div.css("display", "block");
 };
 

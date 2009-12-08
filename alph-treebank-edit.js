@@ -1294,13 +1294,13 @@ function SetHoverText(a_node, a_form)
             {
                 if (postag[i] != '-')
                 {
-                    if (!first)
-                        value += ", ";
                     var option = $("select[n='" + (i + 1) + "'] " +
                                    "option[value='" + postag[i] + "']",
                                    a_form);
                     if (option.size() > 0)
                     {
+                        if (!first)
+                            value += ", ";
                         value += option.text();
                         first = false;
                     }

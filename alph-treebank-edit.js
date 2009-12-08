@@ -63,13 +63,14 @@ var s_keyTable =
     [  0, 108, "0000", traverseTreeRight, null],        // l
     [  0, 106, "0000", traverseTreeDown,  null],        // j
     [  0, 107, "0000", traverseTreeUp,    null],        // k
-    [ 27,   0, "0000", AbortAction,       null],        // <ESC>
+    [ 27,   0, "0000", AbortAction,       null],        // <Esc>
     [112,   0, "0100", SetMode,           "tree"],      // ctrl-F1
     [113,   0, "0100", SetMode,           "label"],     // ctrl-F2
     [114,   0, "0100", SetMode,           "ellipsis"],  // ctrl-F3
     [  0, 121, "0100", ClickOnRedo,       null],        // ctrl-y
     [  0, 122, "0100", ClickOnUndo,       null],        // ctrl-z
-    [  0, 118, "0100", ShowHistory,       null]         // ctrl-v
+    [  0, 118, "0100", ShowHistory,       null],        // ctrl-v
+    [ 13,   0, "0000", FinishAction,      null]         // <Enter>
 ];
 
 //****************************************************************************
@@ -1167,6 +1168,7 @@ function StartLabelling(a_type, a_label, a_x, a_y)
     div.css("left", Math.max(a_x + scroll[0] - 7, 0) + "px");
     div.css("top", Math.max(a_y + scroll[1] + 7 - div.height(), 0) + "px");
     div.css("display", "block");
+    div.find("input, select")[0].focus();
 };
 
 /**
@@ -1567,7 +1569,7 @@ function SaveContents()
  */
 function AbortAction()
 {
-    // if labeling arc
+    // if labelling
     if (s_mode == "label")
     {
         // hide menu
@@ -1582,6 +1584,56 @@ function AbortAction()
         // drop outside of node
         Drop(null);
     }
+};
+
+/**
+ * Finish current action
+ */
+function FinishAction()
+{
+    // if labelling
+    if (s_mode == "label")
+    {
+        switch (s_currentLabelType)
+        {
+          // if labelling arc
+          case "arc":
+            // hide menu
+            var div = $("#arc-label-menus", document);
+            div.css("display", "none");
+
+            // set new label
+            var newLabel = "";
+            var label = $('select[name="arc-label-1"]', div);
+            if (label.size() > 0)
+                newLabel += label[0].value;
+            label = $('select[name="arc-label-2"]', div);
+            if (label.size() > 0)
+                newLabel += label[0].value;
+            LabelArc(s_currentLabelId, newLabel, true);
+            Reposition();
+
+            break;
+
+          // if labelling node
+          case "node":
+            // hide menu
+            var div = $("#node-label-menus", document);
+            var label = $("#" + s_currentLabelId, document);
+            div.css("display", "none");
+
+            // set new label
+            SetLabelFromForm(label, div);
+
+            s_currentLabelId = null;
+            s_currentLabelType = null;
+            break;
+        }
+
+        s_currentLabelId = null;
+        s_currentLabelType = null;
+    }
+
 };
 
 /**

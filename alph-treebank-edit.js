@@ -219,11 +219,11 @@ function Init(a_event)
         var arcEditing =  s_param["arcEditing"] &&
                          (s_param["arcEditing"] == "yes");
         if (!arcEditing)
-            $("div#arc-label-menus", document).remove();
+            $("#arc-label-menus", document).remove();
         var nodeEditing =  s_param["nodeEditing"] &&
                           (s_param["nodeEditing"] == "yes");
         if (!nodeEditing)
-            $("div#node-label-menus", document).remove();
+            $("#node-label-menus", document).remove();
         if (!arcEditing && !nodeEditing)
         {
             $("input#mode-label", document).remove();
@@ -399,6 +399,14 @@ function InitNewSentence()
                 first = this;
         });
         $(this).attr("id", $(first).attr("id") + "-" + i);
+    });
+
+    // add hover text
+    var nodeForm = $("#node-label-menus", document);
+    $("g.tree-node[lemma], g.tree-node[postag]", document).each(
+    function()
+    {
+        DoSetHoverText($(this), nodeForm);
     });
 
     // initialize handlers
@@ -874,7 +882,7 @@ function ClickOnLabelButton(a_event)
         var div = $("#arc-label-menus", document);
         div.css("display", "none");
 
-        if ($(target).attr("id") == "arc-label-apply")
+        if ($(target).attr("id") == "arc-label-ok")
         {
             var newLabel = "";
             var label = $('select[name="arc-label-1"]', div);
@@ -908,7 +916,7 @@ function ClickOnLabelButton(a_event)
             DoSetFormFromLabel(label, div);
             break;
 
-          case "node-label-apply":
+          case "node-label-ok":
             DoSetLabelFromForm(label, div);
             break;
         }
@@ -1235,6 +1243,7 @@ function DoSetLabelFromForm(a_label, a_form)
                                          newLemma,
                                          newPostag)),
                              null);
+        DoSetHoverText(a_label, a_form);
     }
 };
 
@@ -1251,6 +1260,61 @@ function DoSetLabelFromValues(a_id, a_lemma, a_postag)
         label.attr("lemma", a_lemma);
     label.attr("postag", a_postag);
     label.find("> text.node-label").attr("pos", a_postag[s_posIndex]);
+    DoSetHoverText(label, null);
+};
+
+/**
+ * Set lemma/postag hover text
+ * @param {jQuery} a_node node to set text for
+ * @param {jQuery} a_form form with morphology menus
+ */
+function DoSetHoverText(a_node, a_form)
+{
+    var value = null;
+    if (a_node.attr("lemma"))
+    {
+        value = a_node.attr("lemma");
+        if (a_node.attr("postag"))
+            value += ": ";
+    }
+
+    if (a_node.attr("postag"))
+    {
+        // try to get node menus, if not supplied
+        if (!a_form)
+            a_form = $("#node-label-menus", document);
+
+        // if node menus available, translate categories to text
+        if (a_form)
+        {
+            var postag = a_node.attr("postag");
+            var first = true;
+            for (var i = 0; i < postag.length; ++i)
+            {
+                if (postag[i] != '-')
+                {
+                    if (!first)
+                        value += ", ";
+                    value += $("select[n='" + (i + 1) + "'] " +
+                               "option[value='" + postag[i] + "']",
+                               a_form).text();
+                    first = false;
+                }
+            }
+        }
+        // if node menus not available, just use raw value
+        else
+        {
+            value += a_node.attr("postag");
+        }
+    }
+
+    if (value)
+    {
+        a_node[0].setAttributeNS(s_xlinkns, "title", value);
+        var textNode = $("text[tbref='" + a_node.attr("id") + "']", document)[0];
+        textNode.setAttributeNS(s_xlinkns, "title", value);
+    }
 };
 
 /**

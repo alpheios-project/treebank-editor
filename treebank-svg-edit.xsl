@@ -614,9 +614,9 @@
               </select>
             </xsl:if>
           </form>
-          <button id="arc-label-apply" onclick="ClickOnLabelButton(event)"
+          <button id="arc-label-ok" onclick="ClickOnLabelButton(event)"
             >OK</button>
-          <button id="arc-label-quit" onclick="ClickOnLabelButton(event)"
+          <button id="arc-label-cancel" onclick="ClickOnLabelButton(event)"
             >Cancel</button>
         </div>
       </xsl:if>
@@ -661,11 +661,11 @@
               </xsl:for-each>
             </table>
           </form>
-          <button id="node-label-apply" onclick="ClickOnLabelButton(event)"
+          <button id="node-label-ok" onclick="ClickOnLabelButton(event)"
             >OK</button>
           <button id="node-label-reset" onclick="ClickOnLabelButton(event)"
             >Reset</button>
-          <button id="node-label-quit" onclick="ClickOnLabelButton(event)"
+          <button id="node-label-cancel" onclick="ClickOnLabelButton(event)"
             >Cancel</button>
         </div>
       </xsl:if>

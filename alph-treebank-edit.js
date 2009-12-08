@@ -1312,8 +1312,11 @@ function SetHoverText(a_node, a_form)
 
     if (value)
     {
-        a_node[0].setAttributeNS(s_xlinkns, "title", value);
-        var textNode = $("text[tbref='" + a_node.attr("id") + "']", document)[0];
+        $("> text.node-label", a_node)[0].setAttributeNS(s_xlinkns,
+                                                         "title",
+                                                         value);
+        var textNode =
+              $("text[tbref='" + a_node.attr("id") + "']", document)[0];
         textNode.setAttributeNS(s_xlinkns, "title", value);
     }
 };

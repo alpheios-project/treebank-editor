@@ -231,6 +231,59 @@ saved : function()
     $("#save-button", document).attr("disabled", "yes");
 },
 
+/**
+ * Show formatted history in separate window
+ * @param {function} a_formatCallback function to format single event
+ */
+showHistory : function(a_formatCallback)
+{
+    var history = window.open("",
+                              "editor_history",
+                              "dependent=yes," +
+                              "location=no," +
+                              "toolbar=no," +
+                              "menubar=no," +
+                              "directories=no," +
+                              "status=no," +
+                              "resizable=yes," +
+                              "scrollbars=yes," +
+                              "height=480," +
+                              "width=640",
+                              false).document;
+    $("head title", history).text("Alpheios Edit History");
+    $("body", history).append(
+            "<table>" +
+              "<thead>" +
+                "<tr>" +
+                  "<td></td>" +
+                  "<td>C</td>" +
+                  "<td>S</td>" +
+                  "<td>Event</td>" +
+                "</tr>" +
+              "</thead>" +
+            "</table>");
+    var i;
+    for (i = 0; i < this.d_history.length; ++i)
+    {
+        $("table", history).append(
+            "<tr>" +
+              "<td>" + (i + 1) + "</td>" +
+              "<td>" + ((i == this.d_historyCursor) ? "x" : "") + "</td>" +
+              "<td>" + ((i == this.d_saveCursor) ? "x" : "") + "</td>" +
+              "<td>" + a_formatCallback(this.d_history[i]) + "</td>" +
+            "</tr>");
+    }
+    if ((this.d_historyCursor >= i) || (this.d_saveCursor >= i))
+    {
+        $("table", history).append(
+            "<tr>" +
+              "<td>" + (i + 1) + "</td>" +
+              "<td>" + ((i == this.d_historyCursor) ? "x" : "") + "</td>" +
+              "<td>" + ((i == this.d_saveCursor) ? "x" : "") + "</td>" +
+            "</tr>");
+    }
+},
+
 //****************************************************************************
 // save
 //****************************************************************************

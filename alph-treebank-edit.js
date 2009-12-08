@@ -63,12 +63,13 @@ var s_keyTable =
     [  0, 108, "0000", traverseTreeRight, null],        // l
     [  0, 106, "0000", traverseTreeDown,  null],        // j
     [  0, 107, "0000", traverseTreeUp,    null],        // k
-    [ 27,   0, "0000", DoAbortAction,     null],        // <ESC>
-    [112,   0, "0100", DoSetMode,         "tree"],      // ctrl-F1
-    [113,   0, "0100", DoSetMode,         "label"],     // ctrl-F2
-    [114,   0, "0100", DoSetMode,         "ellipsis"],  // ctrl-F3
+    [ 27,   0, "0000", AbortAction,       null],        // <ESC>
+    [112,   0, "0100", SetMode,           "tree"],      // ctrl-F1
+    [113,   0, "0100", SetMode,           "label"],     // ctrl-F2
+    [114,   0, "0100", SetMode,           "ellipsis"],  // ctrl-F3
     [  0, 121, "0100", ClickOnRedo,       null],        // ctrl-y
-    [  0, 122, "0100", ClickOnUndo,       null]         // ctrl-z
+    [  0, 122, "0100", ClickOnUndo,       null],        // ctrl-z
+    [  0, 118, "0100", ShowHistory,       null]         // ctrl-v
 ];
 
 //****************************************************************************
@@ -406,7 +407,7 @@ function InitNewSentence()
     $("g.tree-node[lemma], g.tree-node[postag]", document).each(
     function()
     {
-        DoSetHoverText($(this), nodeForm);
+        SetHoverText($(this), nodeForm);
     });
 
     // initialize handlers
@@ -614,7 +615,7 @@ function Click(a_event)
         break;
 
       case "ellipsis":
-        DoElidedNode();
+        ElidedNode();
     }
 };
 
@@ -739,7 +740,7 @@ function Drop(a_event)
         }
 
         // move node
-        DoMove(s_dragId, s_currentId, true);
+        MoveNode(s_dragId, s_currentId, true);
     }
     else
     {
@@ -783,9 +784,9 @@ function Expand(a_event)
     var expanded = $(node).attr("expanded");
 
     // set new expansion
-    DoExpand(node.getAttribute("id"),
-             (expanded == "yes") ? "no" : "yes",
-             true);
+    ExpandNode(node.getAttribute("id"),
+               (expanded == "yes") ? "no" : "yes",
+               true);
 
     // redraw tree
     Reposition();
@@ -837,7 +838,7 @@ function ClickOnArcLabel(a_event)
     var target = AlphEdit.getEventTarget(event);
     var label = $(target.parentNode);
 
-    DoStartLabelling("arc", label, event.clientX, event.clientY);
+    StartLabelling("arc", label, event.clientX, event.clientY);
 };
 
 /**
@@ -859,11 +860,11 @@ function ClickOnNodeLabel(a_event)
         var target = AlphEdit.getEventTarget(event);
         var label = $(target.parentNode);
 
-        DoStartLabelling("node", label, event.clientX, event.clientY);
+        StartLabelling("node", label, event.clientX, event.clientY);
         break;
 
       case "ellipsis":
-        DoElidedNode();
+        ElidedNode();
     }
 };
 
@@ -891,7 +892,7 @@ function ClickOnLabelButton(a_event)
             label = $('select[name="arc-label-2"]', div);
             if (label.size() > 0)
                 newLabel += label[0].value;
-            DoLabelArc(s_currentLabelId, newLabel, true);
+            LabelArc(s_currentLabelId, newLabel, true);
             Reposition();
         }
 
@@ -913,11 +914,11 @@ function ClickOnLabelButton(a_event)
         switch (action)
         {
           case "node-label-reset":
-            DoSetFormFromLabel(label, div);
+            SetFormFromLabel(label, div);
             break;
 
           case "node-label-ok":
-            DoSetLabelFromForm(label, div);
+            SetLabelFromForm(label, div);
             break;
         }
 
@@ -936,7 +937,7 @@ function ClickOnLabelButton(a_event)
  */
 function ClickOnSave(a_event)
 {
-    DoSave();
+    SaveContents();
 };
 
 /**
@@ -959,7 +960,7 @@ function SubmitExit(a_form)
     if (AlphEdit.unsavedChanges())
     {
         if (confirm("Save changes before continuing?"))
-            DoSave();
+            SaveContents();
     }
 
     return true;
@@ -983,7 +984,7 @@ function SubmitGoTo(a_form)
     if (AlphEdit.unsavedChanges())
     {
         if (confirm("Save changes before going to new sentence?"))
-            DoSave();
+            SaveContents();
     }
 
     // go to new sentence
@@ -1004,7 +1005,7 @@ function ClickOnGoTo(a_event)
     if (AlphEdit.unsavedChanges())
     {
         if (confirm("Save changes before going to new sentence?"))
-            DoSave();
+            SaveContents();
     }
 
     // go to new sentence
@@ -1018,7 +1019,7 @@ function ClickOnGoTo(a_event)
  */
 function ClickOnMode(a_event)
 {
-    DoSetMode(AlphEdit.getEventTarget(a_event).value);
+    SetMode(AlphEdit.getEventTarget(a_event).value);
 };
 
 /**
@@ -1056,7 +1057,7 @@ function Keypress(a_event)
  * Set tool mode
  * @param {String} a_mode new mode
  */
-function DoSetMode(a_mode)
+function SetMode(a_mode)
 {
     // if mode does not exist, don't try to set it
     if ($("input#mode-" + a_mode, document).size() == 0)
@@ -1078,7 +1079,7 @@ function DoSetMode(a_mode)
  * @param {String} a_newHeadId id new head element
  * @param {Boolean} a_push whether to push event onto history
  */
-function DoMove(a_moveId, a_newHeadId, a_push)
+function MoveNode(a_moveId, a_newHeadId, a_push)
 {
     Log("Moving " + a_moveId + " to " + a_newHeadId);
 
@@ -1109,7 +1110,7 @@ function DoMove(a_moveId, a_newHeadId, a_push)
  * @param {String} a_expand "yes" to expand, else contract
  * @param {Boolean} a_push whether to push event onto history
  */
-function DoExpand(a_id, a_expand, a_push)
+function ExpandNode(a_id, a_expand, a_push)
 {
     Log((a_expand == "yes") ? "Expanding " : "Contracting ", a_id);
 
@@ -1131,7 +1132,7 @@ function DoExpand(a_id, a_expand, a_push)
  * @param {Number} a_x x location of mouse
  * @param {Number} a_y y location of mouse
  */
-function DoStartLabelling(a_type, a_label, a_x, a_y)
+function StartLabelling(a_type, a_label, a_x, a_y)
 {
     // nothing to do if menus don't exist
     var div = $("#" + a_type + "-label-menus", document);
@@ -1148,7 +1149,7 @@ function DoStartLabelling(a_type, a_label, a_x, a_y)
     }
     else if (a_type == "node")
     {
-        DoSetFormFromLabel(a_label, div);
+        SetFormFromLabel(a_label, div);
     }
         
     var scroll =
@@ -1173,7 +1174,7 @@ function DoStartLabelling(a_type, a_label, a_x, a_y)
  * @param {jQuery} a_label label node
  * @param {jQuery} a_form form
  */
-function DoSetFormFromLabel(a_label, a_form)
+function SetFormFromLabel(a_label, a_form)
 {
     // set lemma from label
     $("input[name='node-lemma']", a_form).attr("value", a_label.attr("lemma"));
@@ -1200,7 +1201,7 @@ function DoSetFormFromLabel(a_label, a_form)
  * @param {jQuery} a_label label node
  * @param {jQuery} a_form form
  */
-function DoSetLabelFromForm(a_label, a_form)
+function SetLabelFromForm(a_label, a_form)
 {
     // get old and new lemmas
     var oldLemma = a_label.attr("lemma");
@@ -1243,7 +1244,7 @@ function DoSetLabelFromForm(a_label, a_form)
                                          newLemma,
                                          newPostag)),
                              null);
-        DoSetHoverText(a_label, a_form);
+        SetHoverText(a_label, a_form);
     }
 };
 
@@ -1253,14 +1254,14 @@ function DoSetLabelFromForm(a_label, a_form)
  * @param {String} a_lemma new lemma
  * @param {String} a_postag new postag string
  */
-function DoSetLabelFromValues(a_id, a_lemma, a_postag)
+function SetLabelFromValues(a_id, a_lemma, a_postag)
 {
     var label = $("#" + a_id, document);
     if (a_lemma)
         label.attr("lemma", a_lemma);
     label.attr("postag", a_postag);
     label.find("> text.node-label").attr("pos", a_postag[s_posIndex]);
-    DoSetHoverText(label, null);
+    SetHoverText(label, null);
 };
 
 /**
@@ -1268,7 +1269,7 @@ function DoSetLabelFromValues(a_id, a_lemma, a_postag)
  * @param {jQuery} a_node node to set text for
  * @param {jQuery} a_form form with morphology menus
  */
-function DoSetHoverText(a_node, a_form)
+function SetHoverText(a_node, a_form)
 {
     var value = null;
     if (a_node.attr("lemma"))
@@ -1323,7 +1324,7 @@ function DoSetHoverText(a_node, a_form)
  * @param {String} a_label new label
  * @param {Boolean} a_push whether to push event onto history
  */
-function DoLabelArc(a_id, a_label, a_push)
+function LabelArc(a_id, a_label, a_push)
 {
     var arcLabel = $("#" + a_id + " > text.arc-label", document);
     var oldLabel = arcLabel.text();
@@ -1352,16 +1353,16 @@ function DoLabelArc(a_id, a_label, a_push)
 /**
  * Perform elided node action
  */
-function DoElidedNode()
+function ElidedNode()
 {
     // do nothing if not over a node
     if (!s_currentId)
         return;
 
     if ($("#" + s_currentId, document).attr("elided"))
-        DoDelElidedNode(true);
+        DelElidedNode(true);
     else
-        DoAddElidedNode(true);
+        AddElidedNode(true);
 
     Reposition();
 };
@@ -1370,7 +1371,7 @@ function DoElidedNode()
  * Destroy elided node
  * @param {Boolean} a_push whether to push event onto history
  */
-function DoDelElidedNode(a_push)
+function DelElidedNode(a_push)
 {
     var currentNode = $("#" + s_currentId, document);
     s_currentId = null;
@@ -1401,7 +1402,7 @@ function DoDelElidedNode(a_push)
  * Create elided node
  * @param {Boolean} a_push whether to push event onto history
  */
-function DoAddElidedNode(a_push)
+function AddElidedNode(a_push)
 {
     var currentNode = $("#" + s_currentId, document);
     s_currentId = null;
@@ -1470,7 +1471,7 @@ function DoAddElidedNode(a_push)
  * @param {String} a_label arc label
  * @param {Array} a_childIds children to add to new node
  */
-function DoReAddElidedNode(a_elided, a_label, a_childIds)
+function ReAddElidedNode(a_elided, a_label, a_childIds)
 {
     // we are recreating a previously
     // deleted node that will be child of current node
@@ -1519,10 +1520,28 @@ function DoReAddElidedNode(a_elided, a_label, a_childIds)
     InitHandlers(newNode, true);
 };
 
+function ShowHistory()
+{
+    AlphEdit.showHistory(FormatHistoryEntry);
+};
+
+function FormatHistoryEntry(a_hEvent)
+{
+    var value = a_hEvent[0] + "(";
+    for (i in a_hEvent[1])
+    {
+        if (i > 0)
+            value += ", ";
+        value += a_hEvent[1][i];
+    }
+    value += ")";
+    return value;
+};
+
 /**
  * Save contents
  */
-function DoSave()
+function SaveContents()
 {
     // transform sentence
     s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
@@ -1539,7 +1558,7 @@ function DoSave()
 /**
  * Abort current action
  */
-function DoAbortAction()
+function AbortAction()
 {
     // if labeling arc
     if (s_mode == "label")
@@ -1598,16 +1617,14 @@ function ReplayEvent(a_hEvent, a_forward)
       case "arc":
         // relabel arc
         // event args are (id, old label, new label)
-        DoLabelArc(eventArgs[0],
-                   a_forward ? eventArgs[2] : eventArgs[1],
-                   false);
+        LabelArc(eventArgs[0], a_forward ? eventArgs[2] : eventArgs[1], false);
         break;
 
       case "node":
         // restore node values
-        DoSetLabelFromValues(eventArgs[0],
-                             a_forward ? eventArgs[3] : eventArgs[1],
-                             a_forward ? eventArgs[4] : eventArgs[2]);
+        SetLabelFromValues(eventArgs[0],
+                           a_forward ? eventArgs[3] : eventArgs[1],
+                           a_forward ? eventArgs[4] : eventArgs[2]);
         break;
 
       case "expand":
@@ -1621,7 +1638,7 @@ function ReplayEvent(a_hEvent, a_forward)
             var expanded = eventArgs[1];
             if (!a_forward)
                 expanded = (expanded == "yes") ? "no" : "yes";
-            DoExpand(eventArgs[0], expanded, false);
+            ExpandNode(eventArgs[0], expanded, false);
         }
         break;
 
@@ -1630,7 +1647,7 @@ function ReplayEvent(a_hEvent, a_forward)
         // event args are (id being moved, old parent, new parent)
         // if replaying forward, move to new parent
         // if replaying backward, move to old parent
-        DoMove(eventArgs[0], a_forward ? eventArgs[2] : eventArgs[1], false);
+        MoveNode(eventArgs[0], a_forward ? eventArgs[2] : eventArgs[1], false);
         break;
 
       case "add":
@@ -1638,13 +1655,13 @@ function ReplayEvent(a_hEvent, a_forward)
         if (a_forward)
         {
             s_currentId = eventArgs[0];
-            DoAddElidedNode(false);
+            AddElidedNode(false);
         }
         else
         {
             s_currentId =
                 $("[elided='" + eventArgs[1] + "']", document).attr("id");
-            DoDelElidedNode(false);
+            DelElidedNode(false);
         }
         break;
 
@@ -1653,15 +1670,15 @@ function ReplayEvent(a_hEvent, a_forward)
         if (a_forward)
         {
             s_currentId = eventArgs[0];
-            DoDelElidedNode(false);
+            DelElidedNode(false);
         }
         else
         {
             s_currentId = eventArgs[1];
-            DoReAddElidedNode(eventArgs[2],
-                              eventArgs[3],
-                              eventArgs.slice(4),
-                              false);
+            ReAddElidedNode(eventArgs[2],
+                            eventArgs[3],
+                            eventArgs.slice(4),
+                            false);
         }
         break;
 

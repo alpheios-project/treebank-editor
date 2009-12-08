@@ -1296,10 +1296,14 @@ function SetHoverText(a_node, a_form)
                 {
                     if (!first)
                         value += ", ";
-                    value += $("select[n='" + (i + 1) + "'] " +
-                               "option[value='" + postag[i] + "']",
-                               a_form).text();
-                    first = false;
+                    var option = $("select[n='" + (i + 1) + "'] " +
+                                   "option[value='" + postag[i] + "']",
+                                   a_form);
+                    if (option.size() > 0)
+                    {
+                        value += option.text();
+                        first = false;
+                    }
                 }
             }
         }
@@ -1312,12 +1316,12 @@ function SetHoverText(a_node, a_form)
 
     if (value)
     {
-        $("> text.node-label", a_node)[0].setAttributeNS(s_xlinkns,
-                                                         "title",
-                                                         value);
-        var textNode =
-              $("text[tbref='" + a_node.attr("id") + "']", document)[0];
-        textNode.setAttributeNS(s_xlinkns, "title", value);
+        var labelNode = $("> text.node-label", a_node);
+        if (labelNode.size() > 0)
+            labelNode[0].setAttributeNS(s_xlinkns, "title", value);
+        var textNode = $("text[tbref='" + a_node.attr("id") + "']", document);
+        if (textNode.size() > 0)
+            textNode[0].setAttributeNS(s_xlinkns, "title", value);
     }
 };
 

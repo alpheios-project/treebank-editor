@@ -821,7 +821,7 @@ function ShowExpansionControls(a_event)
             ($("#expansion-checkbox:checked", document).size() > 0);
     $("g.tree-node", document).attr("expanded", "yes");
     $("g.expand", document).
-        attr("visibility", s_showExpansionControls ? "visible" : "hidden");
+        attr("display", s_showExpansionControls ? "inline" : "none");
     Reposition();
 };
 

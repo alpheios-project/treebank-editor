@@ -32,33 +32,53 @@ import module namespace request="http://exist-db.org/xquery/request";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $docStem := request:get-parameter("doc", ())
-let $sentId := request:get-parameter("s", ())
+let $sentNum := request:get-parameter("s", ())
+let $sentId := request:get-parameter("id", ())
 let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
 
 return
   if (not($docStem))
   then
     element error { "Treebank not specified" }
-  else if (not($sentId))
+  else if (not($sentNum) and not($sentId))
   then
     element error { "Sentence not specified" }
+  else if ($sentNum and $sentId)
+  then
+    element error
+    {
+      concat("Can't specify both id (",
+             $sentId,
+             ") and number (",
+             $sentNum,
+             ") for sentence")
+    }
   else if (not(doc-available($docName)))
   then
     element error { concat("Treebank for ", $docStem, " not available") }
   else
     let $doc := doc($docName)
-    let $sentence := $doc//*:sentence[@*:id = $sentId]
+    let $sentence :=
+      if ($sentNum)
+      then
+        let $num := number($sentNum)
+        return ($doc//sentence)[$num]
+      else
+        $doc//sentence[@*:id = $sentId]
     return
       if ($sentence)
       then
         element sentence
         {
-          attribute maxSentId { count($doc//*:sentence) },
+          attribute maxSentId { count($doc//sentence) },
           $sentence/@*,
           $sentence/*
         }
       else
         element error
         {
-          concat("Sentence number ", $sentId, " not found")
+          concat("Sentence",
+                 if ($sentNum) then " number " else " with id ",
+                 if ($sentNum) then $sentNum   else $sentId,
+                 " not found")
         }

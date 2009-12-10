@@ -1273,7 +1273,7 @@ function SetLabelFromValues(a_id, a_lemma, a_postag)
  */
 function SetHoverText(a_node, a_form)
 {
-    var value = null;
+    var value = "";
     if (a_node.attr("lemma"))
     {
         value = a_node.attr("lemma");
@@ -1316,7 +1316,7 @@ function SetHoverText(a_node, a_form)
         }
     }
 
-    if (value)
+    if (value.length > 0)
     {
         var labelNode = $("> text.node-label", a_node);
         if (labelNode.size() > 0)

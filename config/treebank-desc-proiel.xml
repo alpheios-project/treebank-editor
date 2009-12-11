@@ -17,7 +17,8 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
---><!--
+-->
+<!--
   Description for Pragmatic Resources in Old Indo-European Languages (PROIEL) format
 
   Tables of morphology categories and values
@@ -37,6 +38,7 @@
           <lex> = equivalent name in lexicon schema, if different from <long>
           <color> = color to associate with entry
           <style> = style to associate with entry
+          <mask> = mask of allowable categories
     <table> = table of dependency relations
       @type = relation
       <entry> = dependency relation
@@ -76,58 +78,70 @@
         <short>N</short>
         <long>noun</long>
         <color>black</color>
+        <mask>++-+---++++-+</mask>
       </entry>
       <entry>
         <short>P</short>
         <long>pronoun</long>
         <color>purple</color>
+        <mask>++++---++-+-+</mask>
       </entry>
       <entry>
         <short>M</short>
         <long>numeral</long>
+        <mask>++-+---++-+-+</mask>
       </entry>
       <entry>
         <short>V</short>
         <long>verb</long>
         <color>red</color>
+        <mask>+-+++++++-+++</mask>
       </entry>
       <entry>
         <short>A</short>
         <long>adjective</long>
         <color>blue</color>
+        <mask>+--+---++++++</mask>
       </entry>
       <entry>
         <short>S</short>
         <long>article</long>
         <color>skyblue</color>
+        <mask>+--+---++---+</mask>
       </entry>
       <entry>
         <short>D</short>
         <long>adverb</long>
         <color>darkorange</color>
+        <mask>++-------+--+</mask>
       </entry>
       <entry>
         <short>R</short>
         <long>preposition</long>
         <color>green</color>
+        <mask>+-----------+</mask>
       </entry>
       <entry>
         <short>C</short>
         <long>conjunction</long>
         <color>deeppink</color>
+        <mask>+-----------+</mask>
       </entry>
       <entry>
         <short>G</short>
         <long>subjunction</long>
+        <mask>+-----------+</mask>
       </entry>
       <entry>
         <short>F</short>
         <long>foreign word</long>
+        <mask>+-----------+</mask>
       </entry>
       <entry>
         <short>I</short>
         <long>interjection</long>
         <color>gold</color>
+        <mask>+-----------+</mask>
       </entry>
     </category>
     <category id="minor" n="2" name="Minor">

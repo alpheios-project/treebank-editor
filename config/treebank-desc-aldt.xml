@@ -17,7 +17,8 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
---><!--
+-->
+<!--
   Description for Ancient Language Dependency Treebank (ALDT) format
 
   Tables of morphology categories and values
@@ -37,6 +38,7 @@
           <lex> = equivalent name in lexicon schema, if different from <long>
           <color> = color to associate with entry
           <style> = style to associate with entry
+          <mask> = mask of allowable categories
     <table> = table of dependency relations
       @type = relation
       <entry> = dependency relation
@@ -78,80 +80,97 @@
         <short>n</short>
         <long>noun</long>
         <color>black</color>
+        <mask>+-+---++</mask>
       </entry>
       <entry>
         <short>v</short>
         <long>verb</long>
         <color>red</color>
+        <mask>++++++</mask>
       </entry>
       <entry>
         <short>t</short>
         <long>participle</long>
         <lex>verb participle</lex>
+        <mask>+-+++++++</mask>
       </entry>
       <entry>
         <short>a</short>
         <long>adjective</long>
         <color>blue</color>
+        <mask>+-+---+++</mask>
       </entry>
       <entry>
         <short>d</short>
         <long>adverb</long>
         <color>darkorange</color>
+        <mask>+-------+</mask>
       </entry>
       <entry>
         <short>c</short>
         <long>conjunction</long>
         <color>deeppink</color>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>l</short>
         <long>article</long>
         <color>skyblue</color>
+        <mask>+-+---++</mask>
       </entry>
       <entry>
         <short>g</short>
         <long>particle</long>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>r</short>
         <long>preposition</long>
         <color>green</color>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>p</short>
         <long>pronoun</long>
         <color>purple</color>
+        <mask>+-+---++</mask>
       </entry>
       <entry>
         <short>m</short>
         <long>numeral</long>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>i</short>
         <long>interjection</long>
         <color>gold</color>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>e</short>
         <long>exclamation</long>
         <color>gold</color>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>x</short>
         <long>irregular</long>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>u</short>
         <long>punctuation</long>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>f</short>
         <long>functional</long>
+        <mask>+</mask>
       </entry>
       <entry>
         <short>z</short>
         <long>determiner</long>
+        <mask>+</mask>
       </entry>
     </category>
     <category id="person" n="2" name="Person">

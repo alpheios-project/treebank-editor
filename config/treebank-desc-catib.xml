@@ -38,6 +38,7 @@
           <lex> = equivalent name in lexicon schema, if different from <long>
           <color> = color to associate with entry
           <style> = style to associate with entry
+          <mask> = mask of allowable categories
     <table> = table of dependency relations
       @type = relation
       <entry> = dependency relation

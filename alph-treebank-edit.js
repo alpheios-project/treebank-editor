@@ -867,6 +867,21 @@ function ShowExpansionControls(a_event)
 };
 
 /**
+ * Event handler for change of label menu
+ * @param {Event} a_event the event
+ */
+function FormChanged(a_event)
+{
+    Log("Form changed");
+
+    // do nothing if mask doesn't exist
+    var target = AlphEdit.getEventTarget(a_event);
+    var mask = $("option:selected", target).attr("mask");
+    if (mask)
+        SetFormDisplay($(target).parents("form"), mask);
+};
+
+/**
  * Event handler for clicking on arc label
  * @param {Event} a_event the event
  */
@@ -961,6 +976,7 @@ function ClickOnLabelButton(a_event)
         {
           case "node-label-reset":
             SetFormFromLabel(label, div);
+            SetFormDisplay($("form", div), null);
             break;
 
           case "node-label-ok":
@@ -1197,6 +1213,7 @@ function StartLabelling(a_type, a_label, a_x, a_y)
     else if (a_type == "node")
     {
         SetFormFromLabel(a_label, div);
+        SetFormDisplay($("form", div), null);
     }
         
     var scroll =
@@ -1265,17 +1282,29 @@ function SetLabelFromForm(a_label, a_form)
     for (var i = 0; i < oldPostag.length; ++i)
         postag[i] = oldPostag[i];
 
+    // get mask for categories
+    var menu = $("option[mask]", a_form).parents("select");
+    var mask = $("option:selected", menu).attr("mask");
+
     // get new morphology
     $("select", a_form).each(
     function()
     {
+        // get index of category
         var n = Number($(this).attr("n"));
+
+        // extend array of necessary
         if (n > postag.length)
         {
             for (var i = postag.length; i < n - 1; ++i)
                 postag[i] = '-';
         }
-        postag[n - 1] = (this.value)[0];
+
+        // if no mask or mask allows category, set from menu, else no value
+        if (!mask || ((mask.length >= n) && (mask[n - 1] == "+")))
+            postag[n - 1] = (this.value)[0];
+        else
+            postag[n - 1] = '-';
     });
     var newPostag = postag.join("");
 
@@ -1311,6 +1340,39 @@ function SetLabelFromValues(a_id, a_lemma, a_postag)
     label.attr("postag", a_postag);
     label.find("> text.node-label").attr("pos", a_postag[s_posIndex]);
     SetHoverText(label, null);
+};
+
+/**
+ * Set form displayability according to mask
+ * @param {jQuery} a_form form to adjust
+ * @param {String} a_mask mask of categories to display
+ */
+function SetFormDisplay(a_form, a_mask)
+{
+    // if no mask, get current value from category with masks
+    if (!a_mask)
+    {
+        var menu = $("option[mask]", a_form).parents("select");
+        a_mask = $("option:selected", menu).attr("mask");
+    }
+
+    // do nothing if mask doesn't exist
+    if (!a_mask)
+        return;
+
+    // for each menu in form
+    $("select", a_form).each(
+    function()
+    {
+        var n = $(this).attr("n");
+        var row = $(this).parents(".cmenu-row");
+
+        // set visibility according to mask
+        if ((a_mask.length >= n) && (a_mask[Number(n) - 1] == "+"))
+            row.css("display", "table-row");
+        else
+            row.css("display", "none");
+    });
 };
 
 /**

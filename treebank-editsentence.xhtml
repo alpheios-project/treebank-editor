@@ -157,29 +157,11 @@
                   </form>
                 </td>
               </tr>
-              <tr>
-                <table style="border:1px solid black; padding:0">
-                  <tr>
-                    <td>
-                      <button id="undo-button" disabled="disabled"
-                        onclick="ClickOnUndo(event)">&lt; Undo</button>
-                    </td>
-                    <td>
-                      <button id="redo-button" disabled="disabled"
-                        onclick="ClickOnRedo(event)">Redo &gt;</button>
-                    </td>
-                    <td>
-                      <button id="save-button" onclick="ClickOnSave(event)">Save
-                        sentence</button>
-                    </td>
-                  </tr>
-                </table>
-              </tr>
             </table>
             <table style="border:none; padding:0">
               <tr>
                 <td>
-                  <table style="border:1px solid black; padding:0">
+                  <table style="border:none; padding:0">
                     <button id="mode-tree" class="icon mode-button" value="tree"
                       checked="checked" onclick="ClickOnMode(event)"
                       title="Tree tool">&#x2F4A;</button>
@@ -195,6 +177,21 @@
                   <button id="expansion-checkbox" class="icon" checked="checked"
                     onclick="ShowExpansionControls(event)"
                     title="Show expansion controls">&#x21C5;</button>
+                </td>
+                <td>
+                  <table style="border:none; padding:0">
+                    <button id="undo-button" disabled="disabled" class="icon"
+                      onclick="ClickOnUndo(event)" title="Undo"
+                      >&#x27F2;</button>
+                    <button id="redo-button" disabled="disabled" class="icon"
+                      onclick="ClickOnRedo(event)" title="Redo"
+                      >&#x27F3;</button>
+                  </table>
+                </td>
+                <td>
+                  <button id="save-button" disabled="disabled" class="icon"
+                    onclick="ClickOnSave(event)" title="Save sentence"
+                    >&#x2707;</button>
                 </td>
               </tr>
             </table>

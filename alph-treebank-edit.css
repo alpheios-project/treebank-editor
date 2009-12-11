@@ -131,15 +131,15 @@ div.cmenu {
 }
 
 /* cursors */
-body[alpheios-mode="tree"] {
+body[alpheios-mode="tree"] svg {
     cursor: move;
 }
 
-body[alpheios-mode="label"] {
+body[alpheios-mode="label"] svg {
     cursor: text;
 }
 
-body[alpheios-mode="ellipsis"] {
+body[alpheios-mode="ellipsis"] svg {
     cursor: row-resize;
 }
 

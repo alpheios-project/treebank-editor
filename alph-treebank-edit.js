@@ -50,28 +50,37 @@ var s_minWidth = 300;                 // minimum text width
 var s_firefox = false;                // in Firefox
 var s_mode = "tree";                  // edit mode: tree/label/ellipsis
 
-// table of [key, char, modifiers, function, arg]
+// table of [active?, key, char, modifiers, function, arg, name, help]
 // where modifiers is four-char string acsm, where
 //    a = 1 if altKey else 0
 //    c = 1 if ctrlKey else 0
 //    s = 1 if shiftKey else 0
 //    m = 1 if metaKey else 0
-//   
+//
 var s_keyTable =
 [
-    [  0, 104, "0000", traverseTreeLeft,  null],        // h
-    [  0, 108, "0000", traverseTreeRight, null],        // l
-    [  0, 106, "0000", traverseTreeDown,  null],        // j
-    [  0, 107, "0000", traverseTreeUp,    null],        // k
-    [ 27,   0, "0000", AbortAction,       null],        // <Esc>
-    [112,   0, "0100", SetMode,           "tree"],      // ctrl-F1
-    [113,   0, "0100", SetMode,           "label"],     // ctrl-F2
-    [114,   0, "0100", SetMode,           "ellipsis"],  // ctrl-F3
-    [  0, 121, "0100", ClickOnRedo,       null],        // ctrl-y
-    [  0, 122, "0100", ClickOnUndo,       null],        // ctrl-z
-    [  0, 118, "0100", ShowHistory,       null],        // ctrl-v
-    [ 13,   0, "0000", FinishAction,      null]         // <Enter>
+    [false,   0, 104, "0000", traverseTreeLeft,  null,       "h",             "Left"],
+    [false,   0, 108, "0000", traverseTreeRight, null,       "l",             "Right"],
+    [false,   0, 106, "0000", traverseTreeDown,  null,       "j",             "Down"],
+    [false,   0, 107, "0000", traverseTreeUp,    null,       "k",             "Up"],
+    [ true, 112,   0, "0100", SetMode,           "tree",     "Ctrl+F1",       "Tree tool"],
+    [ true, 113,   0, "0100", SetMode,           "label",    "Ctrl+F2",       "Label tool"],
+    [ true, 114,   0, "0100", SetMode,           "ellipsis", "Ctrl+F3",       "Ellipsis tool"],
+    [ true,  13,   0, "0000", FinishAction,      null,       "&lt;Enter&gt;", "Finish action"],
+    [ true,  27,   0, "0000", AbortAction,       null,       "&lt;Esc&gt;",   "Abort action"],
+    [ true,   0, 121, "0100", ClickOnRedo,       null,       "Ctrl+Y",        "Redo"],
+    [ true,   0, 122, "0100", ClickOnUndo,       null,       "Ctrl+Z",        "Undo"],
+    [ true,   0, 118, "0100", ShowHistory,       null,       "Ctrl+V",        "History"]
 ];
+// symbolic names for key table fields
+var s_ktActive = 0;
+var s_ktKey = 1;
+var s_ktChar = 2;
+var s_ktMod = 3;
+var s_ktFunc = 4;
+var s_ktArg = 5;
+var s_ktName = 6;
+var s_ktHelp = 7;
 
 //****************************************************************************
 // initialization
@@ -228,13 +237,42 @@ function Init(a_event)
             $("#node-label-menus", document).remove();
         if (!arcEditing && !nodeEditing)
         {
-            $("input#mode-label", document).remove();
-            $("label[for=mode-label]", document).remove();
+            $("button#mode-label", document).remove();
+            for (i in s_keyTable)
+            {
+                if ((s_keyTable[i][s_ktFunc] == SetMode) &&
+                    (s_keyTable[i][s_ktArg] == "label"))
+                {
+                    s_keyTable[i][s_ktActive] = false;
+                }
+            }
         }
         if (!s_param["ellipsis"] || (s_param["ellipsis"] == "no"))
         {
-            $("input#mode-ellipsis", document).remove();
-            $("label[for=mode-ellipsis]", document).remove();
+            $("button#mode-ellipsis", document).remove();
+            for (i in s_keyTable)
+            {
+                if ((s_keyTable[i][s_ktFunc] == SetMode) &&
+                    (s_keyTable[i][s_ktArg] == "ellipsis"))
+                {
+                    s_keyTable[i][s_ktActive] = false;
+                }
+            }
+        }
+
+        // add shortcuts to key
+        var shortcuts = $("#key_shortcuts", document);
+        for (i in s_keyTable)
+        {
+            // skip inactive keys
+            if (!s_keyTable[i][s_ktActive])
+                continue;
+
+            shortcuts.append(
+                "<tr>" +
+                  "<td>" + s_keyTable[i][s_ktName] + "</td>" +
+                  "<td>" + s_keyTable[i][s_ktHelp] + "</td>" +
+                "</tr>");
         }
 
         // some miscellaneous values
@@ -607,6 +645,7 @@ function Leave(a_event)
  */
 function Click(a_event)
 {
+    Log("Click");
     var event = AlphEdit.getEvent(a_event);
 
     switch (s_mode)
@@ -626,10 +665,9 @@ function Click(a_event)
  */
 function Grab(a_event)
 {
+    Log("Grab");
     var event = AlphEdit.getEvent(a_event);
     var target = AlphEdit.getEventTarget(event);
-
-    Log("Grab");
 
     // if grabbed word, either in tree or in text
     if ($(target).hasClass("node-label") ||
@@ -745,7 +783,7 @@ function Drop(a_event)
     }
     else
     {
-        Log("Dropping abandoned");
+        Log("Dragging abandoned");
     }
 
     // restore to original position, if any
@@ -817,8 +855,11 @@ function ClickOnRedo(a_event)
  */
 function ShowExpansionControls(a_event)
 {
-    s_showExpansionControls =
-            ($("#expansion-checkbox:checked", document).size() > 0);
+    s_showExpansionControls = !s_showExpansionControls;
+    if (s_showExpansionControls)
+        $("#expansion-checkbox", document).attr("checked", "checked");
+    else
+        $("#expansion-checkbox", document).removeAttr("checked");
     $("g.tree-node", document).attr("expanded", "yes");
     $("g.expand", document).
         attr("display", s_showExpansionControls ? "inline" : "none");
@@ -848,7 +889,9 @@ function ClickOnArcLabel(a_event)
  */
 function ClickOnNodeLabel(a_event)
 {
+    Log("ClickOnNodeLabel");
     var event = AlphEdit.getEvent(a_event);
+    event.stopPropagation();
 
     switch (s_mode)
     {
@@ -867,6 +910,8 @@ function ClickOnNodeLabel(a_event)
       case "ellipsis":
         ElidedNode();
     }
+
+    return false;
 };
 
 /**
@@ -1040,11 +1085,12 @@ function Keypress(a_event)
     Log("Key [" + keyCode + ", " + charCode + ", " + modifiers + "]");
     for (var i = 0; i < s_keyTable.length; ++i)
     {
-        if ((s_keyTable[i][0] == keyCode) &&
-            (s_keyTable[i][1] == charCode) &&
-            (s_keyTable[i][2] == modifiers))
+        if (s_keyTable[i][s_ktActive] &&
+            (s_keyTable[i][s_ktKey] == keyCode) &&
+            (s_keyTable[i][s_ktChar] == charCode) &&
+            (s_keyTable[i][s_ktMod] == modifiers))
         {
-            s_keyTable[i][3](s_keyTable[i][4]);
+            s_keyTable[i][s_ktFunc](s_keyTable[i][s_ktArg]);
             return;
         }
     }
@@ -1061,7 +1107,8 @@ function Keypress(a_event)
 function SetMode(a_mode)
 {
     // if mode does not exist, don't try to set it
-    if ($("input#mode-" + a_mode, document).size() == 0)
+    var button = $("#mode-" + a_mode, document);
+    if (button.size() == 0)
         return;
 
     // set mode
@@ -1069,9 +1116,8 @@ function SetMode(a_mode)
     $("body", document).attr("alpheios-mode", s_mode);
 
     // make sure buttons reflect mode
-    var modeForm = $("form[name='sent-edit-mode']", document);
-    $("[checked]", modeForm).removeAttr("checked");
-    $("[value='" + s_mode + "']", modeForm).attr("checked", "checked");
+    $("button.mode-button", document).removeAttr("checked");
+    button.attr("checked", "checked");
 };
 
 /**
@@ -1178,7 +1224,8 @@ function StartLabelling(a_type, a_label, a_x, a_y)
  */
 function SetFormFromLabel(a_label, a_form)
 {
-    // set lemma from label
+    // clear and set lemma from label
+    $("input[name='node-lemma']", a_form).attr("value", "");
     $("input[name='node-lemma']", a_form).attr("value", a_label.attr("lemma"));
 
     // clear all existing selections
@@ -1666,7 +1713,7 @@ function ReplayEvent(a_hEvent, a_forward)
     // abandon any dragging operation
     s_currentId = null;
     if (s_dragObj)
-        Drop();
+        Drop(null);
 
     // interpret event
     var eventType = a_hEvent[0];

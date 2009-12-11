@@ -172,95 +172,145 @@
       }</style>
   </head>
   <body onkeypress="Keypress(event)" onload="Init(event)">
-    <div class="alpheios-ignore" id="alph-page-header">
-      <img src="../image/alpheios.png" alt="Alpheios"/>
-    </div>
-    <div class="controls alpheios-ignore" id="edit-controls">
-      <div id="sent-navigation">
-        <form onsubmit="return SubmitGoTo(this)" name="sent-navigation-goto">
-          <label>Go to sentence number</label>
-          <input type="text" name="s" size="5"/>
-        </form>
-        <button id="first-button" onclick="ClickOnGoTo(event)"
-          >&#160;</button>
-        <button id="prev-button" onclick="ClickOnGoTo(event)"
-          >&#160;</button>
-        <label id="current-label">&#160;</label>
-        <button id="next-button" onclick="ClickOnGoTo(event)"
-          >&#160;</button>
-        <button id="last-button" onclick="ClickOnGoTo(event)"
-          >&#160;</button>
-      </div>
-      <form onsubmit="return SubmitExit(this)" name="sent-navigation-exit">
-        <input type="hidden" name="doc"/>
-        <input type="hidden" name="s"/>
-        <button type="submit">Exit</button>
-      </form>
-      <button id="save-button" onclick="ClickOnSave(event)">Save
-        sentence</button>
-      <button id="undo-button" disabled="disabled" onclick="ClickOnUndo(event)"
-        >&lt; Undo</button>
-      <button id="redo-button" disabled="disabled" onclick="ClickOnRedo(event)"
-        >Redo &gt;</button>
-      <form>
-        <label for="expansion-checkbox">Show expansion controls</label>
-        <input id="expansion-checkbox" type="checkbox"
-          onclick="ShowExpansionControls(event)" checked="checked"/>
-      </form>
-      <form name="sent-edit-mode">
-        <span>Tool: </span>
-        <input type="radio" id="mode-tree" name="mode" value="tree"
-          checked="checked" onclick="ClickOnMode(event)"/>
-        <label for="mode-tree">Tree</label>
-        <input type="radio" id="mode-label" name="mode" value="label"
-          onclick="ClickOnMode(event)"/>
-        <label for="mode-label">Label</label>
-        <input type="radio" id="mode-ellipsis" name="mode" value="ellipsis"
-          onclick="ClickOnMode(event)"/>
-        <label for="mode-ellipsis">Ellipsis</label>
-      </form>
-      <!-- Provide menus here if buildContent param does not contain "menus" -->
-      <div id="label-menus">
-        <div id="arc-label-menus" class="cmenu" style="display: none">
-          <form name="menus">
-            <div>Dependency Relation: </div>
-            <select name="arcrel1">
-              <option value="PRED">PRED</option>
-              <option value="SBJ">SBJ</option>
-              <option value="OBJ">OBJ</option>
-              <option value="ATR">ATR</option>
-              <option value="ADV">ADV</option>
-              <option value="ATV">ATV</option>
-              <option value="AtvV">AtvV</option>
-              <option value="PNOM">PNOM</option>
-              <option value="OCOMP">OCOMP</option>
-              <option value="APOS">APOS</option>
-              <option value="COORD">COORD</option>
-              <option value="AuxP">AuxP (prep)</option>
-              <option value="AuxC">AuxC (conj)</option>
-              <option value="AuxR">AuxR (refl passive)</option>
-              <option value="AuxY">AuxY (sent adv)</option>
-              <option value="AuxX">AuxX (comma)</option>
-              <option value="AuxG">AuxG (bracketing)</option>
-              <option value="AuxK">AuxK (terminal)</option>
-              <option value="AuxV">AuxV (aux verb)</option>
-              <option value="AuxZ">AuxZ (emph)</option>
-              <option value="ExD">ExD</option>
-            </select>
-            <select name="arcrel2">
-              <option value="">- -</option>
-              <option value="_AP">_AP</option>
-              <option value="_CO">_CO</option>
-              <option value="_AP_CO">_AP_CO</option>
-            </select>
-          </form>
-          <button id="arc-label-ok" onclick="ClickOnLabelButton(event)"
-            >OK</button>
-          <button id="arc-label-cancel" onclick="ClickOnLabelButton(event)"
-            >Cancel</button>
-        </div>
-      </div>
-    </div>
+    <table style="border:none; padding:0; width:100%">
+      <tr>
+        <td>
+          <div class="controls alpheios-ignore" id="edit-controls">
+            <table style="border:none; padding:0">
+              <tr>
+                <div id="sent-navigation">
+                  <table style="border:1px solid black; padding:0">
+                    <tr>
+                      <td>
+                        <button id="first-button" onclick="ClickOnGoTo(event)"
+                          >&#160;</button>
+                      </td>
+                      <td>
+                        <button id="prev-button" onclick="ClickOnGoTo(event)"
+                          >&#160;</button>
+                      </td>
+                      <td>
+                        <label id="current-label">&#160;</label>
+                      </td>
+                      <td>
+                        <button id="next-button" onclick="ClickOnGoTo(event)"
+                          >&#160;</button>
+                      </td>
+                      <td>
+                        <button id="last-button" onclick="ClickOnGoTo(event)"
+                          >&#160;</button>
+                      </td>
+                      <td>
+                        <form onsubmit="return SubmitGoTo(this)"
+                          name="sent-navigation-goto">
+                          <label>&#xA0;&#xA0;Go to sentence
+                            number</label>
+                          <input type="text" name="s" size="5"/>
+                        </form>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <td>
+                  <form onsubmit="return SubmitExit(this)"
+                    name="sent-navigation-exit">
+                    <input type="hidden" name="doc"/>
+                    <input type="hidden" name="s"/>
+                    <button type="submit">Exit</button>
+                  </form>
+                </td>
+              </tr>
+              <tr>
+                <table style="border:1px solid black; padding:0">
+                  <tr>
+                    <td>
+                      <button id="undo-button" disabled="disabled"
+                        onclick="ClickOnUndo(event)">&lt; Undo</button>
+                    </td>
+                    <td>
+                      <button id="redo-button" disabled="disabled"
+                        onclick="ClickOnRedo(event)">Redo &gt;</button>
+                    </td>
+                    <td>
+                      <button id="save-button" onclick="ClickOnSave(event)">Save
+                        sentence</button>
+                    </td>
+                  </tr>
+                </table>
+              </tr>
+            </table>
+            <table style="border:none; padding:0">
+              <tr>
+                <td>
+                  <table style="border:1px solid black; padding:0">
+                    <button id="mode-tree" class="icon mode-button" value="tree"
+                      checked="checked" onclick="ClickOnMode(event)"
+                      title="Tree tool">&#x2F4A;</button>
+                    <button id="mode-label" class="icon mode-button"
+                      value="label" onclick="ClickOnMode(event)"
+                      title="Label tool">&#x270D;</button>
+                    <button id="mode-ellipsis" class="icon mode-button"
+                      value="ellipsis" onclick="ClickOnMode(event)"
+                      title="Ellipsis tool">&#x2026;</button>
+                  </table>
+                </td>
+                <td>
+                  <button id="expansion-checkbox" class="icon" checked="checked"
+                    onclick="ShowExpansionControls(event)"
+                    title="Show expansion controls">&#x21C5;</button>
+                </td>
+              </tr>
+            </table>
+            <!-- Provide menus here if buildContent param does not contain "menus" -->
+            <div id="label-menus">
+              <div id="arc-label-menus" class="cmenu" style="display: none">
+                <form name="menus">
+                  <div>Dependency Relation: </div>
+                  <select name="arcrel1">
+                    <option value="PRED">PRED</option>
+                    <option value="SBJ">SBJ</option>
+                    <option value="OBJ">OBJ</option>
+                    <option value="ATR">ATR</option>
+                    <option value="ADV">ADV</option>
+                    <option value="ATV">ATV</option>
+                    <option value="AtvV">AtvV</option>
+                    <option value="PNOM">PNOM</option>
+                    <option value="OCOMP">OCOMP</option>
+                    <option value="APOS">APOS</option>
+                    <option value="COORD">COORD</option>
+                    <option value="AuxP">AuxP (prep)</option>
+                    <option value="AuxC">AuxC (conj)</option>
+                    <option value="AuxR">AuxR (refl passive)</option>
+                    <option value="AuxY">AuxY (sent adv)</option>
+                    <option value="AuxX">AuxX (comma)</option>
+                    <option value="AuxG">AuxG (bracketing)</option>
+                    <option value="AuxK">AuxK (terminal)</option>
+                    <option value="AuxV">AuxV (aux verb)</option>
+                    <option value="AuxZ">AuxZ (emph)</option>
+                    <option value="ExD">ExD</option>
+                  </select>
+                  <select name="arcrel2">
+                    <option value="">- -</option>
+                    <option value="_AP">_AP</option>
+                    <option value="_CO">_CO</option>
+                    <option value="_AP_CO">_AP_CO</option>
+                  </select>
+                </form>
+                <button id="arc-label-ok" onclick="ClickOnLabelButton(event)"
+                  >OK</button>
+                <button id="arc-label-cancel" onclick="ClickOnLabelButton(event)"
+                  >Cancel</button>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td style="vertical-align:top; text-align:right">
+          <div class="alpheios-ignore" id="alph-page-header">
+            <img src="../image/alpheios.png" alt="Alpheios"/>
+          </div>
+        </td>
+      </tr>
+    </table>
     <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
     <!-- Provide key here if buildContent param does not contain "key" -->
     <div id="key">

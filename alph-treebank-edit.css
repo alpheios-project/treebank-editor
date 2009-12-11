@@ -29,6 +29,10 @@ svg {
 }
 
 /* normal text attributes */
+button.icon {
+    font-size: 20px;
+}
+
 g text {
     font-family: Georgia, Times, Arial, Helvetica, Serif;
     font-size: 20px;
@@ -189,6 +193,9 @@ th {
 table {
     border: 1px solid black;
     padding: 5px;
+}
+table table {
+    border: none;
 }
 td[first] {
     background-color: #E0E0E0;

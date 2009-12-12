@@ -584,6 +584,7 @@ function InitHandlers(a_node, a_single)
       a_node).bind("mouseout", Leave);
     $(prefix + "text.arc-label", a_node).bind("click", ClickOnArcLabel);
     $(prefix + "text.node-label", a_node).bind("click", ClickOnNodeLabel);
+    $(prefix + "text.text-word", a_node).bind("click", ClickOnTextWord);
     $(prefix + "g.expand rect, " + prefix + "g.expand text", a_node).each(
     function()
     {
@@ -919,7 +920,6 @@ function ClickOnNodeLabel(a_event)
         break;
 
       case "label":
-        var event = AlphEdit.getEvent(a_event);
         var target = AlphEdit.getEventTarget(event);
         var label = $(target.parentNode);
 
@@ -931,6 +931,28 @@ function ClickOnNodeLabel(a_event)
     }
 
     return false;
+};
+
+/**
+ * Event handler for clicking on text word
+ * @param {Event} a_event the event
+ */
+function ClickOnTextWord(a_event)
+{
+    Log("ClickOnTextWord");
+    var event = AlphEdit.getEvent(a_event);
+
+    if (s_mode == "label")
+    {
+        event.stopPropagation();
+        var target = AlphEdit.getEventTarget(event);
+        var label = $("#" + $(target).attr("tbref"), document);
+        StartLabelling("node", label, event.clientX, event.clientY);
+
+        return false;
+    }
+
+    return true;
 };
 
 /**

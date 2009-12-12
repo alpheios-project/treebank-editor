@@ -97,6 +97,8 @@ function Init(a_event)
 {
     try
     {
+        $("body", document).css("display", "none");
+
         // initialize internal params
         s_param["firebug"] = "no";
 
@@ -298,6 +300,8 @@ function Init(a_event)
 
         // go to new sentence
         InitNewSentence();
+
+        $("body", document).css("display", "block");
     }
     catch(e)
     {
@@ -1750,6 +1754,7 @@ function FinishAction()
  */
 function Reposition()
 {
+    $("body", document).css("display", "block");
     var svgXML = $("#dependency-tree", document);
     var rootNode = svgXML.children("g.tree").children("g.tree-node").eq(0);
     show_tree(rootNode, true);

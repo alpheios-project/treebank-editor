@@ -167,38 +167,51 @@
                     <tr>
                       <button id="mode-tree" class="icon mode-button"
                         value="tree" checked="checked"
-                        onclick="ClickOnMode(event)" title="Tree tool"
-                        >&#x2F4A;</button>
+                        onclick="ClickOnMode(event)" title="Tree tool">
+                        <img src="../image/edit-tool-tree.png" alt="&#x2F4A;"/>
+                      </button>
                       <button id="mode-label" class="icon mode-button"
                         value="label" onclick="ClickOnMode(event)"
-                        title="Label tool">&#x270D;</button>
+                        title="Label tool">
+                        <img src="../image/edit-tool-label.png" alt="&#x270D;"/>
+                      </button>
                       <button id="mode-ellipsis" class="icon mode-button"
                         value="ellipsis" onclick="ClickOnMode(event)"
-                        title="Ellipsis tool">&#x2026;</button>
+                        title="Ellipsis tool">
+                        <img src="../image/edit-tool-ellipsis.png" alt="&#x2026;"/>
+                      </button>
                     </tr>
                   </table>
                 </td>
                 <td>
                   <button id="expansion-checkbox" class="icon" checked="checked"
                     onclick="ShowExpansionControls(event)"
-                    title="Show expansion controls">&#x21C5;</button>
+                    title="Show expansion controls">
+                    <img src="../image/edit-expansion-controls.png" alt="&#x21C5;"/>
+                  </button>
                 </td>
                 <td>
                   <table style="border:none; padding:0">
                     <tr>
                       <button id="undo-button" disabled="disabled" class="icon"
                         onclick="ClickOnUndo(event)" title="Undo"
-                        >&#x27F2;</button>
+                        base="../image/edit-undo">
+                        <img src="../image/edit-undo-disabled.png" alt="&#x27F2;"/>
+                      </button>
                       <button id="redo-button" disabled="disabled" class="icon"
                         onclick="ClickOnRedo(event)" title="Redo"
-                        >&#x27F3;</button>
+                        base="../image/edit-redo">
+                        <img src="../image/edit-redo-disabled.png" alt="&#x27F3;"/>
+                      </button>
                     </tr>
                   </table>
                 </td>
                 <td>
                   <button id="save-button" disabled="disabled" class="icon"
                     onclick="ClickOnSave(event)" title="Save sentence"
-                    >&#x2707;</button>
+                    base="../image/document-save">
+                    <img src="../image/document-save-disabled.png" alt="&#x2707;"/>
+                  </button>
                 </td>
               </tr>
             </table>

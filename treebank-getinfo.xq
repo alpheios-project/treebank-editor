@@ -55,14 +55,15 @@ return
     element error { concat("Treebank for ", $docStem, " not available") }
   else
     let $doc := doc($docName)
-    let $format := $doc/*:treebank/@*:format
+    let $format := $doc/treebank/@*:format
     let $format := if ($format) then $format else "aldt"
-    let $lang := $doc/*:treebank/@*:lang
+    let $lang := $doc/treebank/@*:lang
     return
       element info
       {
-        attribute numSentences { count($doc//*:sentence) },
-        attribute numWords { count($doc//*:word) },
+        attribute numSentences { count($doc//sentence) },
+        (: number of words not used, commented out for now
+        attribute numWords { count($doc//word) }, :)
         attribute format { $format },
         attribute direction { if ($lang eq "ara") then "rtl" else "ltr" },
         attribute xml:lang { $lang },

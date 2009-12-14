@@ -133,7 +133,7 @@ pushHistory : function(a_hEvent, a_updateCallback)
     if (this.d_historyCursor < this.d_history.length)
     {
         this.d_history.splice(this.d_historyCursor);
-        $("#redo-button", document).attr("disabled", "yes");
+        $("#redo-button", document).attr("disabled", "disabled");
 
         // if we just destroyed save point in history
         if (this.d_saveCursor > this.d_historyCursor)
@@ -151,7 +151,7 @@ pushHistory : function(a_hEvent, a_updateCallback)
     // adjust buttons
     $("#undo-button", document).removeAttr("disabled");
     if (this.d_saveCursor == this.d_historyCursor)
-      $("#save-button", document).attr("disabled", "yes");
+      $("#save-button", document).attr("disabled", "disabled");
     else
       $("#save-button", document).removeAttr("disabled");
 
@@ -175,12 +175,12 @@ popHistory : function(a_updateCallback)
     // get event and disable undo button if it's last one
     var event = this.d_history[--this.d_historyCursor];
     if (this.d_historyCursor == 0)
-        $("#undo-button", document).attr("disabled", "yes");
+        $("#undo-button", document).attr("disabled", "disabled");
 
     // adjust buttons
     document.getElementById("redo-button").removeAttribute("disabled");
     if (this.d_saveCursor == this.d_historyCursor)
-        $("#save-button", document).attr("disabled", "yes");
+        $("#save-button", document).attr("disabled", "disabled");
     else
         $("#save-button", document).removeAttr("disabled");
 
@@ -206,12 +206,12 @@ repushHistory : function(a_updateCallback)
     // get event and disable redo button if it's last one
     var event = this.d_history[this.d_historyCursor++];
     if (this.d_historyCursor == this.d_history.length)
-        $("#redo-button", document).attr("disabled", "yes");
+        $("#redo-button", document).attr("disabled", "disabled");
 
     // adjust buttons
     $("#undo-button", document).removeAttr("disabled");
     if (this.d_saveCursor == this.d_historyCursor)
-      $("#save-button", document).attr("disabled", "yes");
+      $("#save-button", document).attr("disabled", "disabled");
     else
       $("#save-button", document).removeAttr("disabled");
 
@@ -228,7 +228,7 @@ repushHistory : function(a_updateCallback)
 saved : function()
 {
     this.d_saveCursor = this.d_historyCursor;
-    $("#save-button", document).attr("disabled", "yes");
+    $("#save-button", document).attr("disabled", "disabled");
 },
 
 /**
@@ -252,34 +252,47 @@ showHistory : function(a_formatCallback)
                               false).document;
     $("head title", history).text("Alpheios Edit History");
     $("body", history).append(
-            "<table>" +
+            "<table class='edit-history'>" +
               "<thead>" +
                 "<tr>" +
-                  "<td></td>" +
-                  "<td>C</td>" +
-                  "<td>S</td>" +
+                  "<td/>" +
+                  "<td/>" +
                   "<td>Event</td>" +
                 "</tr>" +
               "</thead>" +
+              "<tbody/>" +
             "</table>");
     var i;
     for (i = 0; i < this.d_history.length; ++i)
     {
-        $("table", history).append(
-            "<tr>" +
-              "<td>" + (i + 1) + "</td>" +
-              "<td>" + ((i == this.d_historyCursor) ? "x" : "") + "</td>" +
-              "<td>" + ((i == this.d_saveCursor) ? "x" : "") + "</td>" +
-              "<td>" + a_formatCallback(this.d_history[i]) + "</td>" +
+        $("table tbody", history).append(
+            "<tr style='border-collapse:collapse'>" +
+              "<td>" +
+                ((i == this.d_historyCursor) ? "current &#x21B1;" : "") +
+              "</td>" +
+              "<td>" +
+                (i + 1) +
+              "</td>" +
+              "<td style='border:1px solid; border-collapse:collapse'>" +
+                a_formatCallback(this.d_history[i]) +
+              "</td>" +
+              "<td>" +
+                ((i == this.d_saveCursor) ? "&#x21B0; saved" : "") +
+              "</td>" +
             "</tr>");
     }
     if ((this.d_historyCursor >= i) || (this.d_saveCursor >= i))
     {
-        $("table", history).append(
+        $("table tbody", history).append(
             "<tr>" +
-              "<td>" + (i + 1) + "</td>" +
-              "<td>" + ((i == this.d_historyCursor) ? "x" : "") + "</td>" +
-              "<td>" + ((i == this.d_saveCursor) ? "x" : "") + "</td>" +
+              "<td>" +
+                ((i == this.d_historyCursor) ? "current &#x21B1;" : "") +
+              "</td>" +
+              "<td/>" +
+              "<td/>" +
+              "<td>" +
+                ((i == this.d_saveCursor) ? "&#x21B0; saved" : "") +
+              "</td>" +
             "</tr>");
     }
 },

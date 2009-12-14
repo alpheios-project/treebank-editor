@@ -475,6 +475,7 @@ function InitNewSentence()
     $("#undo-button", document).attr("disabled", "disabled");
     $("#redo-button", document).attr("disabled", "disabled");
     $("#save-button", document).attr("disabled", "disabled");
+    AdjustButtons();
 
     Reposition();
 };
@@ -842,7 +843,7 @@ function Expand(a_event)
  */
 function ClickOnUndo(a_event)
 {
-    ReplayEvent(AlphEdit.popHistory(null), false);
+    ReplayEvent(AlphEdit.popHistory(AdjustButtons), false);
 };
 
 /**
@@ -851,7 +852,7 @@ function ClickOnUndo(a_event)
  */
 function ClickOnRedo(a_event)
 {
-    ReplayEvent(AlphEdit.repushHistory(null), true);
+    ReplayEvent(AlphEdit.repushHistory(AdjustButtons), true);
 };
 
 /**
@@ -1189,7 +1190,7 @@ function MoveNode(a_moveId, a_newHeadId, a_push)
     {
         AlphEdit.pushHistory(
                     Array("move", Array(a_moveId, oldHeadId, a_newHeadId)),
-                    null);
+                    AdjustButtons);
     }
 };
 
@@ -1210,7 +1211,8 @@ function ExpandNode(a_id, a_expand, a_push)
     // push event if requested
     if (a_push)
     {
-        AlphEdit.pushHistory(Array("expand", Array(a_id, a_expand)), null);
+        AlphEdit.pushHistory(Array("expand", Array(a_id, a_expand)),
+                             AdjustButtons);
     }
 };
 
@@ -1226,6 +1228,10 @@ function StartLabelling(a_type, a_label, a_x, a_y)
     // nothing to do if menus don't exist
     var div = $("#" + a_type + "-label-menus", document);
     if (div.size() == 0)
+        return;
+
+    // nothing to do if elided node
+    if (a_label.is("[elided]"))
         return;
 
     s_currentLabelId = a_label.attr("id");
@@ -1347,7 +1353,7 @@ function SetLabelFromForm(a_label, a_form)
                                          oldPostag,
                                          newLemma,
                                          newPostag)),
-                             null);
+                             AdjustButtons);
         SetHoverText(a_label, a_form);
     }
 };
@@ -1484,7 +1490,7 @@ function LabelArc(a_id, a_label, a_push)
         if (a_push)
         {
             AlphEdit.pushHistory(Array("arc", Array(a_id, oldLabel, a_label)),
-                                 null);
+                                 AdjustButtons);
         }
     }
     // if same label
@@ -1538,7 +1544,7 @@ function DelElidedNode(a_push)
             args.push($(this).attr("id"));
         });
 
-        AlphEdit.pushHistory(Array("del", args, null));
+        AlphEdit.pushHistory(Array("del", args, null), AdjustButtons);
     }
 };
 
@@ -1605,7 +1611,7 @@ function AddElidedNode(a_push)
     if (a_push)
     {
         AlphEdit.pushHistory(
-            Array("add", Array(currentNode.attr("id"), i)), null);
+            Array("add", Array(currentNode.attr("id"), i)), AdjustButtons);
     }
 };
 
@@ -1697,6 +1703,7 @@ function SaveContents()
                          s_putSentenceURL,
                          s_param["doc"],
                          s_param["s"]);
+    AdjustButtons();
 };
 
 /**
@@ -1883,6 +1890,22 @@ function ReplayEvent(a_hEvent, a_forward)
 
     // reposition everything
     Reposition();
+};
+
+/**
+ * Adjust images on buttons for enabled/disabled status
+ */
+function AdjustButtons()
+{
+    var name = ["undo", "redo", "save"]; 
+    for (i in name)
+    {
+        var button = $("#" + name[i] + "-button", document);
+        $("img", button).attr("src",
+                              button.attr("base") +
+                              (button.attr("disabled") ? "-disabled" : "") +
+                              ".png");
+    }
 };
 
 //****************************************************************************

@@ -366,9 +366,9 @@ putContents: function(a_xml, a_url, a_doc, a_sentid)
     if ((req.status != 200) || root.is("error"))
     {
         var msg = root.is("error") ? root.text() :
-                                     "Error getting sentence " +
+                                     "Error putting sentence " +
                                        a_sentid +
-                                       " from treebank " +
+                                       " into treebank " +
                                        a_doc +
                                        ": " +
                                        (req.responseText ? req.responseText :

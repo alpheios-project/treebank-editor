@@ -50,7 +50,7 @@ var s_minWidth = 300;                 // minimum text width
 var s_firefox = false;                // in Firefox
 var s_mode = "tree";                  // edit mode: tree/label/ellipsis
 
-// table of [active?, key, char, modifiers, function, arg, name, help]
+// table of [active?, key, char, modifiers, function, arg, keyname, help]
 // where modifiers is four-char string acsm, where
 //    a = 1 if altKey else 0
 //    c = 1 if ctrlKey else 0
@@ -59,28 +59,30 @@ var s_mode = "tree";                  // edit mode: tree/label/ellipsis
 //
 var s_keyTable =
 [
-    [false,   0, 104, "0000", traverseTreeLeft,  null,       "h",             "Left"],
-    [false,   0, 108, "0000", traverseTreeRight, null,       "l",             "Right"],
-    [false,   0, 106, "0000", traverseTreeDown,  null,       "j",             "Down"],
-    [false,   0, 107, "0000", traverseTreeUp,    null,       "k",             "Up"],
-    [ true, 112,   0, "0100", SetMode,           "tree",     "Ctrl+F1",       "Tree tool"],
-    [ true, 113,   0, "0100", SetMode,           "label",    "Ctrl+F2",       "Label tool"],
-    [ true, 114,   0, "0100", SetMode,           "ellipsis", "Ctrl+F3",       "Ellipsis tool"],
-    [ true,  13,   0, "0000", FinishAction,      null,       "&lt;Enter&gt;", "Finish action"],
-    [ true,  27,   0, "0000", AbortAction,       null,       "&lt;Esc&gt;",   "Abort action"],
-    [ true,   0, 121, "0100", ClickOnRedo,       null,       "Ctrl+Y",        "Redo"],
-    [ true,   0, 122, "0100", ClickOnUndo,       null,       "Ctrl+Z",        "Undo"],
-    [ true,   0, 118, "0100", ShowHistory,       null,       "Ctrl+V",        "History"]
+    ["left",     false,   0, 104, "0000", traverseTreeLeft,  null,       "h",             "Left"],
+    ["right",    false,   0, 108, "0000", traverseTreeRight, null,       "l",             "Right"],
+    ["down",     false,   0, 106, "0000", traverseTreeDown,  null,       "j",             "Down"],
+    ["up",       false,   0, 107, "0000", traverseTreeUp,    null,       "k",             "Up"],
+    ["tree",     true,  112,   0, "0100", SetMode,           "tree",     "Ctrl+F1",       "Tree tool"],
+    ["label",    true,  113,   0, "0100", SetMode,           "label",    "Ctrl+F2",       "Label tool"],
+    ["ellipsis", true,  114,   0, "0100", SetMode,           "ellipsis", "Ctrl+F3",       "Ellipsis tool"],
+    ["finish",   true,   13,   0, "0000", FinishAction,      null,       "&lt;Enter&gt;", "Finish action"],
+    ["abort",    true,   27,   0, "0000", AbortAction,       null,       "&lt;Esc&gt;",   "Abort action"],
+    ["redo",     true,    0, 121, "0100", ClickOnRedo,       null,       "Ctrl+Y",        "Redo"],
+    ["undo",     true,    0, 122, "0100", ClickOnUndo,       null,       "Ctrl+Z",        "Undo"],
+    ["save",     true,    0, 115, "0100", SaveContents,      null,       "Ctrl+S",        "Save contents"],
+    ["history",  true,    0, 118, "0100", ShowHistory,       null,       "Ctrl+V",        "History"]
 ];
 // symbolic names for key table fields
-var s_ktActive = 0;
-var s_ktKey = 1;
-var s_ktChar = 2;
-var s_ktMod = 3;
-var s_ktFunc = 4;
-var s_ktArg = 5;
-var s_ktName = 6;
-var s_ktHelp = 7;
+var s_ktName = 0;
+var s_ktActive = 1;
+var s_ktKey = 2;
+var s_ktChar = 3;
+var s_ktMod = 4;
+var s_ktFunc = 5;
+var s_ktArg = 6;
+var s_ktKeyname = 7;
+var s_ktHelp = 8;
 
 //****************************************************************************
 // initialization
@@ -123,6 +125,10 @@ function Init(a_event)
             s_param[s_param[i][0]] = s_param[i][1];
         }
         s_param["numParams"] = numParams;
+
+        // make key table accessible by name
+        for (i in s_keyTable)
+            s_keyTable[s_keyTable[i][s_ktName]] = Number(i);
 
         // set state variables
         if (navigator.userAgent.indexOf("Firefox") != -1)
@@ -239,30 +245,16 @@ function Init(a_event)
             $("#node-label-menus", document).remove();
         if (!arcEditing && !nodeEditing)
         {
-            $("button#mode-label", document).remove();
-            for (i in s_keyTable)
-            {
-                if ((s_keyTable[i][s_ktFunc] == SetMode) &&
-                    (s_keyTable[i][s_ktArg] == "label"))
-                {
-                    s_keyTable[i][s_ktActive] = false;
-                }
-            }
+            $("#label-button", document).remove();
+            s_keyTable[s_keyTable["label"]][s_ktActive] = false;
         }
         if (!s_param["ellipsis"] || (s_param["ellipsis"] == "no"))
         {
-            $("button#mode-ellipsis", document).remove();
-            for (i in s_keyTable)
-            {
-                if ((s_keyTable[i][s_ktFunc] == SetMode) &&
-                    (s_keyTable[i][s_ktArg] == "ellipsis"))
-                {
-                    s_keyTable[i][s_ktActive] = false;
-                }
-            }
+            $("#ellipsis-button", document).remove();
+            s_keyTable[s_keyTable["ellipsis"]][s_ktActive] = false;
         }
 
-        // add shortcuts to key
+        // add shortcuts to key display
         var shortcuts = $("#key_shortcuts", document);
         for (i in s_keyTable)
         {
@@ -272,15 +264,33 @@ function Init(a_event)
 
             shortcuts.append(
                 "<tr>" +
-                  "<td>" + s_keyTable[i][s_ktName] + "</td>" +
+                  "<td>" + s_keyTable[i][s_ktKeyname] + "</td>" +
                   "<td>" + s_keyTable[i][s_ktHelp] + "</td>" +
                 "</tr>");
+        }
+
+        // add shortcuts to hover text for buttons
+        var buttonList = ["tree", "label", "ellipsis", "undo", "redo", "save"];
+        for (i in buttonList)
+        {
+            // if shortcut key is active
+            var key = s_keyTable[s_keyTable[buttonList[i]]];
+            if (key[s_ktActive])
+            {
+                // add its name to button title
+                var button = $("#" + buttonList[i] + "-button", document);
+                var title = button.attr("title");
+                button.attr("title", title + " [" + key[s_ktKeyname] + "]");
+            }
         }
 
         // some miscellaneous values
         s_posIndex =
             Number($("select[name='node-label-pos']", document).attr("n")) - 1;
         s_minWidth = (s_param["app"] == "viewer") ? 300 : (screen.width * .75);
+
+        // add event handlers
+        $("#node-label-menus select", document).change(FormChanged);
 
         // set various values in html
         var exitForm = $("form[name='sent-navigation-exit']", document);
@@ -879,12 +889,9 @@ function ShowExpansionControls(a_event)
 function FormChanged(a_event)
 {
     Log("Form changed");
-
-    // do nothing if mask doesn't exist
-    var target = AlphEdit.getEventTarget(a_event);
-    var mask = $("option:selected", target).attr("mask");
-    if (mask)
-        SetFormDisplay($(target).parents("form"), mask);
+    var target = $(AlphEdit.getEventTarget(a_event));
+    var option = target.is("option") ? target : $("option:selected", target);
+    SetFormDisplay(target.parents("form"), option.attr("mask"));
 };
 
 /**
@@ -1134,9 +1141,13 @@ function Keypress(a_event)
             (s_keyTable[i][s_ktMod] == modifiers))
         {
             s_keyTable[i][s_ktFunc](s_keyTable[i][s_ktArg]);
-            return;
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
         }
     }
+
+    return true;
 };
 
 //****************************************************************************
@@ -1150,7 +1161,7 @@ function Keypress(a_event)
 function SetMode(a_mode)
 {
     // if mode does not exist, don't try to set it
-    var button = $("#mode-" + a_mode, document);
+    var button = $("#" + a_mode + "-button", document);
     if (button.size() == 0)
         return;
 
@@ -1388,9 +1399,12 @@ function SetFormDisplay(a_form, a_mask)
         a_mask = $("option:selected", menu).attr("mask");
     }
 
-    // do nothing if mask doesn't exist
+    // if mask doesn't exist, enable everything
     if (!a_mask)
+    {
+        $(".cmenu-row", a_form).css("display", "table-row");
         return;
+    }
 
     // for each menu in form
     $("select", a_form).each(

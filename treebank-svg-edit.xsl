@@ -17,8 +17,7 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
-<!--
+--><!--
   Convert sentence between treebank format and SVG suitable for editing
 
   xml-to-svg:
@@ -130,7 +129,7 @@
           <xsl:for-each select="$rawwords">
             <xsl:variable name="newPos" select="position()"/>
             <!-- if this is preceding inflection -->
-            <xsl:if test="$curPos > $newPos">
+            <xsl:if test="$curPos &gt; $newPos">
               <!-- and same values -->
               <xsl:if test="
                 (string($rawwords[$curPos]/@id) =
@@ -244,7 +243,8 @@
               <xsl:text>arc-label alpheios-ignore</xsl:text>
             </xsl:attribute>
             <xsl:choose>
-              <xsl:when test="@relation">
+              <xsl:when
+                test="@relation and (string-length(@relation) &gt; 0)">
                 <xsl:value-of select="@relation"/>
               </xsl:when>
               <xsl:otherwise>
@@ -319,7 +319,7 @@
           <xsl:variable name="tnum" select="substring-before($tail, '_')"/>
           <xsl:variable name="num">
             <xsl:choose>
-              <xsl:when test="string-length($tnum) > 0">
+              <xsl:when test="string-length($tnum) &gt; 0">
                 <xsl:value-of select="$tnum"/>
               </xsl:when>
               <xsl:otherwise>0</xsl:otherwise>
@@ -437,7 +437,7 @@
   <xsl:template name="reverse-string">
     <xsl:param name="a_in"/>
     <xsl:variable name="len" select="string-length($a_in)"/>
-    <xsl:if test="$len > 0">
+    <xsl:if test="$len &gt; 0">
       <xsl:value-of select="substring($a_in, $len, 1)"/>
       <xsl:call-template name="reverse-string">
         <xsl:with-param name="a_in" select="substring($a_in, 1, $len - 1)"/>
@@ -543,9 +543,10 @@
       <!-- if not elided -->
       <xsl:otherwise>
         <!-- use our word number and relation so far -->
-        <xsl:value-of select="concat(substring-after($a_head/@id, '-'),
-                                     '|',
-                                     $a_relation)"/>
+        <xsl:value-of
+          select="concat(substring-after($a_head/@id, '-'),
+                         '|',
+                         $a_relation)"/>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -564,7 +565,7 @@
     <xhtml:div xmlns="http://www.w3.org/1999/xhtml" id="label-menus">
       <xsl:variable name="entries1"
         select="$a_desc/tbd:table[@type = 'relation']/tbd:entry"/>
-      <xsl:if test="count($entries1) > 0">
+      <xsl:if test="count($entries1) &gt; 0">
         <div id="arc-label-menus" class="cmenu" style="display: none">
           <form name="arc-label-menus">
             <div>Dependency Relation: </div>
@@ -589,7 +590,7 @@
             </xsl:if>
             <xsl:variable name="entries2"
               select="$a_desc/tbd:table[@type = 'subrelation']/tbd:entry"/>
-            <xsl:if test="count($entries2) > 0">
+            <xsl:if test="count($entries2) &gt; 0">
               <select name="arc-label-2">
                 <xsl:for-each select="$entries2">
                   <xsl:element name="option">
@@ -617,7 +618,7 @@
       </xsl:if>
       <xsl:variable name="categories"
         select="$a_desc/tbd:table[@type = 'morphology']/tbd:category"/>
-      <xsl:if test="count($categories) > 0">
+      <xsl:if test="count($categories) &gt; 0">
         <div id="node-label-menus" class="cmenu" style="display: none">
           <form name="node-label-menus">
             <table style="border: none">
@@ -642,8 +643,6 @@
                       <xsl:attribute name="n">
                         <xsl:value-of select="$n"/>
                       </xsl:attribute>
-                      <xsl:attribute name="onchange">
-                        FormChanged(event)</xsl:attribute>
                       <option value="-">- -</option>
                       <!-- of entries in category -->
                       <xsl:for-each select="./tbd:entry">
@@ -658,7 +657,8 @@
                             <xsl:variable name="mask2"
                               select="substring(./tbd:mask, $n + 1)"/>
                             <xsl:attribute name="mask">
-                              <xsl:value-of select="concat($mask1, '+', $mask2)"/>
+                              <xsl:value-of select="concat($mask1, '+', $mask2)"
+                              />
                             </xsl:attribute>
                           </xsl:if>
                           <xsl:value-of select="./tbd:long"/>
@@ -759,10 +759,12 @@
             <td showme="focus-parent">Word that focus word depends on</td>
           </tr>
           <tr>
-            <td showme="focus-child">Words that immediately depend on focus word</td>
+            <td showme="focus-child">Words that immediately depend on focus
+              word</td>
           </tr>
           <tr>
-            <td showme="focus-descendant">Other words that depend on focus word</td>
+            <td showme="focus-descendant">Other words that depend on focus
+              word</td>
           </tr>
           <xsl:if test="$e_app = 'viewer'">
             <tr>

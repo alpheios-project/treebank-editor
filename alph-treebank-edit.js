@@ -29,6 +29,8 @@ var s_editTransform = null;           // transform between SVG and XML, etc.
 var s_editTransformDoc = null;        // transform document
 var s_param = [];                     // treebank parameters and metadata
 
+var s_tbDesc = null;                  // treebank description
+
 var s_showExpansionControls = true;
 var s_contractionSymbol = "-";
 var s_expansionSymbol = "+";
@@ -46,9 +48,10 @@ var s_dragY = 0;                      // mouse Y
 
 var s_posIndex = 0;                   // index of part of speech in morphology
 var s_minWidth = 300;                 // minimum text width
+var s_expandFactor = 1.1;             // how much to expand window for dragging
 
 var s_firefox = false;                // in Firefox
-var s_mode = "tree";                  // edit mode: tree/label/ellipsis
+var s_mode = "tree";                  // edit mode: view/tree/label/ellipsis
 
 // table of [active?, key, char, modifiers, function, arg, keyname, help]
 // where modifiers is four-char string acsm, where
@@ -172,10 +175,13 @@ function Init(a_event)
             req.open("GET",
                      getInfoURL +
                         "?doc=" + s_param["doc"] +
-                        ((toBuild.length > 0) ? "&desc=y" : ""),
+                        (((toBuild.length > 0) ||
+                          (s_param["app"] == "viewer")) ? "&desc=y" : ""),
                      false);
             req.send(null);
             var root = $(req.responseXML.documentElement);
+            if ($("desc", root).size() > 0)
+                s_tbDesc = $("desc", root).get(0);
             if ((req.status != 200) || root.is("error"))
             {
                 var msg = root.is("error") ?
@@ -201,6 +207,7 @@ function Init(a_event)
             if (toBuild["menus"])
             {
                 s_editTransform.setParameter(null, "e_mode", "menus");
+                s_editTransform.setParameter(null, "e_app", s_param["app"]);
                 var menus =
                         s_editTransform.transformToDocument(req.responseXML);
                 var menuContent = $(menus.documentElement).children();
@@ -209,6 +216,7 @@ function Init(a_event)
             if (toBuild["style"])
             {
                 s_editTransform.setParameter(null, "e_mode", "style");
+                s_editTransform.setParameter(null, "e_app", s_param["app"]);
                 var style =
                         s_editTransform.transformToDocument(req.responseXML);
                 var styleRules = $(style).text().split('\n');
@@ -218,6 +226,7 @@ function Init(a_event)
             if (toBuild["key"])
             {
                 s_editTransform.setParameter(null, "e_mode", "key");
+                s_editTransform.setParameter(null, "e_app", s_param["app"]);
                 var key = s_editTransform.transformToDocument(req.responseXML);
                 var keyContent = $(key.documentElement);
                 $("div#key", document).append(keyContent);
@@ -229,6 +238,7 @@ function Init(a_event)
         {
             $("#edit-controls", document).remove();
             $("#alph-page-header", document).remove();
+            $("body", document).attr("alpheios-mode", "view");
         }
         if (!s_param["sentenceNavigation"] ||
             (s_param["sentenceNavigation"] == "no"))
@@ -288,6 +298,9 @@ function Init(a_event)
         s_posIndex =
             Number($("select[name='node-label-pos']", document).attr("n")) - 1;
         s_minWidth = (s_param["app"] == "viewer") ? 300 : (screen.width * .75);
+        s_expandFactor = (s_param["app"] == "viewer") ? 1.0 : 1.1;
+        if (s_param["app"] == "viewer")
+            s_mode = "view";
 
         // add event handlers
         $("#node-label-menus select", document).change(FormChanged);
@@ -338,6 +351,9 @@ function InitNewSentence()
     s_param["document_id"] = root.attr("document_id");
     s_param["subdoc"] = root.attr("subdoc");
     s_editTransform.setParameter(null, "e_mode", "xml-to-svg");
+    s_editTransform.setParameter(null, "e_app", s_param["app"]);
+    if (s_tbDesc)
+        s_editTransform.setParameter(null, "e_desc", s_tbDesc);
     var svg = s_editTransform.transformToDocument(sentence);
     $("svg", document).empty().append($(svg.documentElement).children());
 
@@ -492,8 +508,8 @@ function InitNewSentence()
 
 /**
  * Initialize handlers for node or nodes
- * @parameter {Node} a_node root node
- * @parameter {Boolean} a_single whether to do single node
+ * @param {Node} a_node root node
+ * @param {Boolean} a_single whether to do single node
  */
 function InitHandlers(a_node, a_single)
 {
@@ -850,19 +866,25 @@ function Expand(a_event)
 /**
  * Event handler for undo operation
  * @param {Event} a_event the event
+ * @return whether action was performed
+ * @type Boolean
  */
 function ClickOnUndo(a_event)
 {
     ReplayEvent(AlphEdit.popHistory(AdjustButtons), false);
+    return true;
 };
 
 /**
  * Event handler for redo operation
  * @param {Event} a_event the event
+ * @return whether action was performed
+ * @type Boolean
  */
 function ClickOnRedo(a_event)
 {
     ReplayEvent(AlphEdit.repushHistory(AdjustButtons), true);
+    return true;
 };
 
 /**
@@ -1140,10 +1162,13 @@ function Keypress(a_event)
             (s_keyTable[i][s_ktChar] == charCode) &&
             (s_keyTable[i][s_ktMod] == modifiers))
         {
-            s_keyTable[i][s_ktFunc](s_keyTable[i][s_ktArg]);
-            event.stopPropagation();
-            event.preventDefault();
-            return false;
+            if (s_keyTable[i][s_ktFunc](s_keyTable[i][s_ktArg]))
+            {
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            }
+            break;
         }
     }
 
@@ -1157,13 +1182,15 @@ function Keypress(a_event)
 /**
  * Set tool mode
  * @param {String} a_mode new mode
+ * @return whether action was performed
+ * @type Boolean
  */
 function SetMode(a_mode)
 {
     // if mode does not exist, don't try to set it
     var button = $("#" + a_mode + "-button", document);
     if (button.size() == 0)
-        return;
+        return false;
 
     // set mode
     s_mode = a_mode;
@@ -1172,6 +1199,8 @@ function SetMode(a_mode)
     // make sure buttons reflect mode
     $("button.mode-button", document).removeAttr("checked");
     button.attr("checked", "checked");
+
+    return true;
 };
 
 /**
@@ -1241,8 +1270,8 @@ function StartLabelling(a_type, a_label, a_x, a_y)
     if (div.size() == 0)
         return;
 
-    // nothing to do if elided node
-    if (a_label.is("[elided]"))
+    // nothing to do if node label of elided node
+    if (a_label.is("[elided]") && (a_type == "node"))
         return;
 
     s_currentLabelId = a_label.attr("id");
@@ -1684,11 +1713,23 @@ function ReAddElidedNode(a_elided, a_label, a_childIds)
     InitHandlers(newNode, true);
 };
 
+/**
+ * Show history
+ * @return whether action was performed
+ * @type Boolean
+ */
 function ShowHistory()
 {
     AlphEdit.showHistory(FormatHistoryEntry);
+    return true;
 };
 
+/**
+ * Format history event
+ * @param {Array} a_hEvent history event to format
+ * @return displayable representation of event
+ * @type String
+ */
 function FormatHistoryEntry(a_hEvent)
 {
     var value = a_hEvent[0] + "(";
@@ -1704,11 +1745,14 @@ function FormatHistoryEntry(a_hEvent)
 
 /**
  * Save contents
+ * @return whether action was performed
+ * @type Boolean
  */
 function SaveContents()
 {
     // transform sentence
     s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
+    s_editTransform.setParameter(null, "e_app", s_param["app"]);
     var doc = document.implementation.createDocument("", "", null);
     doc.appendChild(doc.importNode($("svg", document).get(0), true));
     var xml = s_editTransform.transformToDocument(doc);
@@ -1718,10 +1762,13 @@ function SaveContents()
                          s_param["doc"],
                          s_param["s"]);
     AdjustButtons();
+    return true;
 };
 
 /**
  * Abort current action
+ * @return whether action was performed
+ * @type Boolean
  */
 function AbortAction()
 {
@@ -1733,20 +1780,28 @@ function AbortAction()
         div.css("display", "none");
         s_currentLabelId = null;
         s_currentLabelType = null;
+        return true;
     }
     // if dragging
     else if (s_mode == "tree")
     {
         // drop outside of node
         Drop(null);
+        return true;
     }
+
+    return false;
 };
 
 /**
  * Finish current action
+ * @return whether action was performed
+ * @type Boolean
  */
 function FinishAction()
 {
+    var retVal = false;
+
     // if labelling
     if (s_mode == "label")
     {
@@ -1769,6 +1824,7 @@ function FinishAction()
             LabelArc(s_currentLabelId, newLabel, true);
             Reposition();
 
+            retVal = true;
             break;
 
           // if labelling node
@@ -1781,8 +1837,7 @@ function FinishAction()
             // set new label
             SetLabelFromForm(label, div);
 
-            s_currentLabelId = null;
-            s_currentLabelType = null;
+            retVal = true;
             break;
         }
 
@@ -1790,6 +1845,7 @@ function FinishAction()
         s_currentLabelType = null;
     }
 
+    return retVal;
 };
 
 /**
@@ -2145,6 +2201,13 @@ function positionTree(a_container, a_fontSize)
         a_container.children("g.expand").each(
         function()
         {
+            // if no children, hide expansion controls
+            if (a_container.children("g.tree-node").size() == 0)
+            {
+                this.setAttribute("display", "none");
+                return;
+            }
+
             this.setAttribute("transform",
                               "translate(" + (xCenter - textHeight / 4) +
                               ", " + textHeight + ")");
@@ -2160,11 +2223,7 @@ function positionTree(a_container, a_fontSize)
                             s_contractionSymbol :
                             s_expansionSymbol);
 
-            // if no children, hide expansion controls
-            if (a_container.children("g.tree-node").size() == 0)
-                this.setAttribute("visibility", "hidden");
-            else
-                this.removeAttribute("visibility");
+            this.setAttribute("display", "inline");
         });
     }
 
@@ -2302,8 +2361,10 @@ function positionAll(a_doc, a_treeSize, a_textSize, a_fontSize)
     if (a_fontSize + a_treeSize[0] > width)
         width = a_fontSize + a_treeSize[0];
     var height = a_textSize[1] + a_treeSize[1];
-    $("#dependency-tree", a_doc)[0].setAttribute("width", 1.1 * width);
-    $("#dependency-tree", a_doc)[0].setAttribute("height", 1.1 * height);
+    $("#dependency-tree", a_doc)[0].setAttribute("width",
+                                                 s_expandFactor * width);
+    $("#dependency-tree", a_doc)[0].setAttribute("height",
+                                                 s_expandFactor * height);
 };
 
 /**

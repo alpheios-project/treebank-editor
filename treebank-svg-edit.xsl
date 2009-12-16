@@ -17,7 +17,8 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
---><!--
+-->
+<!--
   Convert sentence between treebank format and SVG suitable for editing
 
   xml-to-svg:
@@ -62,9 +63,11 @@
                       style       generate style from format description
                       key         generate key from format description
       e_app     application ("editor" or "viewer")
+      e_desc    treebank description
   -->
   <xsl:param name="e_mode"/>
-  <xsl:param name="e_app" select="editor"/>
+  <xsl:param name="e_app" select="'editor'"/>
+  <xsl:param name="e_desc" select="''"/>
 
   <!--
     Template for external calls
@@ -75,6 +78,8 @@
       <xsl:when test="$e_mode = 'xml-to-svg'">
         <xsl:call-template name="xml-to-svg">
           <xsl:with-param name="a_sentence" select="sentence"/>
+          <xsl:with-param name="a_app" select="$e_app"/>
+          <xsl:with-param name="a_desc" select="$e_desc"/>
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$e_mode = 'svg-to-xml'">
@@ -106,12 +111,16 @@
 
     Parameters:
       $a_sentence     treebank sentence
+      $a_app          application (viewing or editing)
+      $a_desc         treebank description
 
     Return value:
       svg element containing SVG equivalent of sentence
   -->
   <xsl:template name="xml-to-svg">
     <xsl:param name="a_sentence"/>
+    <xsl:param name="a_app"/>
+    <xsl:param name="a_desc"/>
 
     <!-- get undeduped list of words -->
     <xsl:variable name="raw">
@@ -119,9 +128,9 @@
         <xsl:with-param name="a_words" select="$a_sentence/word"/>
       </xsl:call-template>
     </xsl:variable>
-    <xsl:variable name="rawwords" select="exsl:node-set($raw)/*"/>
 
     <!-- remove duplicate words -->
+    <xsl:variable name="rawwords" select="exsl:node-set($raw)/*"/>
     <xsl:variable name="raw2">
       <xsl:for-each select="$rawwords">
         <xsl:variable name="curPos" select="position()"/>
@@ -129,7 +138,7 @@
           <xsl:for-each select="$rawwords">
             <xsl:variable name="newPos" select="position()"/>
             <!-- if this is preceding inflection -->
-            <xsl:if test="$curPos &gt; $newPos">
+            <xsl:if test="$curPos > $newPos">
               <!-- and same values -->
               <xsl:if test="
                 (string($rawwords[$curPos]/@id) =
@@ -148,14 +157,35 @@
         </xsl:if>
       </xsl:for-each>
     </xsl:variable>
-    <xsl:variable name="words" select="exsl:node-set($raw2)/*"/>
+
+    <!-- remove terminal punctuation -->
+    <xsl:variable name="rawwords2" select="exsl:node-set($raw2)/*"/>
+    <xsl:variable name="raw3">
+      <xsl:choose>
+        <xsl:when test="$a_app = 'viewer'">
+          <!-- do nothing for now -->
+          <xsl:copy-of select="$raw2"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:copy-of select="$raw2"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <!-- if any words found -->
+    <xsl:variable name="words" select="exsl:node-set($raw3)/*"/>
     <xsl:if test="count($words)">
       <xsl:element name="svg">
         <!-- synthetic root -->
         <xsl:variable name="rootword">
           <xsl:element name="g">
             <xsl:attribute name="id">0</xsl:attribute>
-            <xsl:attribute name="form">#</xsl:attribute>
+            <xsl:attribute name="form">
+              <!-- empty root label for viewer -->
+              <xsl:if test="$a_app != 'viewer'">
+                <xsl:text>#</xsl:text>
+              </xsl:if>
+            </xsl:attribute>
           </xsl:element>
         </xsl:variable>
 
@@ -167,6 +197,8 @@
             <xsl:with-param name="a_sentenceId" select="$a_sentence/@id"/>
             <xsl:with-param name="a_allwords" select="$words"/>
             <xsl:with-param name="a_words" select="exsl:node-set($rootword)/*"/>
+            <xsl:with-param name="a_app" select="$a_app"/>
+            <xsl:with-param name="a_desc" select="$a_desc"/>
           </xsl:call-template>
         </xsl:element>
 
@@ -204,6 +236,8 @@
       $a_sentenceId   sentence containing words
       $a_allwords     all words in sentence
       $a_words        words to process
+      $a_app          application (viewing or editing)
+      $a_desc         treebank description
 
     Return value:
       SVG equivalent of words
@@ -212,6 +246,8 @@
     <xsl:param name="a_sentenceId"/>
     <xsl:param name="a_allwords"/>
     <xsl:param name="a_words"/>
+    <xsl:param name="a_app"/>
+    <xsl:param name="a_desc"/>
 
     <!-- for each word -->
     <xsl:for-each select="$a_words">
@@ -234,24 +270,87 @@
         <xsl:attribute name="expanded">yes</xsl:attribute>
 
         <!-- arc label, if not root word -->
-        <xsl:element name="rect">
-          <xsl:attribute name="class">arc-highlight</xsl:attribute>
-        </xsl:element>
         <xsl:if test="@id != '0'">
+          <!-- arc label highlight -->
+          <xsl:element name="rect">
+            <xsl:attribute name="class">arc-highlight</xsl:attribute>
+          </xsl:element>
+
+          <xsl:variable name="relation">
+            <xsl:choose>
+              <xsl:when test="contains(@relation, '_')">
+                <xsl:value-of select="substring-before(@relation, '_')"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="@relation"/>
+              </xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <xsl:variable name="table"
+            select="$a_desc/tbd:table[@type = 'relation']"/>
+          <xsl:variable name="entry"
+            select="$table/tbd:entry[tbd:tb = $relation]"/>
+
+          <!-- arc label -->
           <xsl:element name="text">
             <xsl:attribute name="class">
               <xsl:text>arc-label alpheios-ignore</xsl:text>
             </xsl:attribute>
             <xsl:choose>
-              <xsl:when
-                test="@relation and (string-length(@relation) &gt; 0)">
-                <xsl:value-of select="@relation"/>
+              <!-- if non-empty relation value exists -->
+              <xsl:when test="$relation and (string-length($relation) > 0)">
+                <xsl:choose>
+                  <!-- if we're in viewer -->
+                  <xsl:when test="$a_app = 'viewer'">
+                    <xsl:choose>
+                      <!-- if description has displayable form, use it -->
+                      <xsl:when test="$entry/tbd:disp">
+                        <xsl:value-of select="$entry/tbd:disp"/>
+                      </xsl:when>
+                      <!-- else use original value -->
+                      <xsl:otherwise>
+                        <xsl:value-of select="$relation"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                  </xsl:when>
+                  <!-- if we're not in viewer -->
+                  <xsl:otherwise>
+                    <!-- use original value -->
+                    <xsl:value-of select="$relation"/>
+                  </xsl:otherwise>
+                </xsl:choose>
               </xsl:when>
+              <!-- if empty or missing relation -->
               <xsl:otherwise>
                 <xsl:text>nil</xsl:text>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:element>
+
+          <!-- if we're in viewer, arc help -->
+          <xsl:if test="$a_app = 'viewer'">
+            <xsl:variable name="help" select="$entry/tbd:help"/>
+            <!-- for each help text -->
+            <xsl:for-each select="$help">
+              <xsl:element name="text">
+                <xsl:attribute name="class">
+                  <xsl:value-of select="concat('arc-label-help-', ./@dir)"/>
+                </xsl:attribute>
+                <xsl:attribute name="visibility">hidden</xsl:attribute>
+                <xsl:variable name="arrow">
+                  <xsl:choose>
+                    <xsl:when test="./@dir = 'dn'">
+                      <xsl:text>&#x2193;</xsl:text>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <xsl:text>&#x2191;</xsl:text>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:variable>
+                <xsl:value-of select="concat($arrow, ' ', .)"/>
+              </xsl:element>
+            </xsl:for-each>
+          </xsl:if>
         </xsl:if>
 
         <!-- line -->
@@ -274,17 +373,21 @@
         </xsl:element>
 
         <!-- expansion control -->
-        <xsl:element name="g">
-          <xsl:attribute name="class">expand</xsl:attribute>
-          <xsl:element name="rect"/>
-          <xsl:element name="text">˄</xsl:element>
-        </xsl:element>
+        <xsl:if test="(@id != '0') or ($a_app != 'viewer')">
+          <xsl:element name="g">
+            <xsl:attribute name="class">expand</xsl:attribute>
+            <xsl:element name="rect"/>
+            <xsl:element name="text">˄</xsl:element>
+          </xsl:element>
+        </xsl:if>
 
         <!-- groups for children -->
         <xsl:call-template name="word-set">
           <xsl:with-param name="a_sentenceId" select="$a_sentenceId"/>
           <xsl:with-param name="a_allwords" select="$a_allwords"/>
           <xsl:with-param name="a_words" select="$children"/>
+          <xsl:with-param name="a_app" select="$a_app"/>
+          <xsl:with-param name="a_desc" select="$a_desc"/>
         </xsl:call-template>
       </xsl:element>
     </xsl:for-each>
@@ -301,6 +404,7 @@
   -->
   <xsl:template name="fix-words">
     <xsl:param name="a_words"/>
+
     <xsl:for-each select="$a_words">
       <xsl:choose>
         <xsl:when test="contains(@relation, '_ExD')">
@@ -319,7 +423,7 @@
           <xsl:variable name="tnum" select="substring-before($tail, '_')"/>
           <xsl:variable name="num">
             <xsl:choose>
-              <xsl:when test="string-length($tnum) &gt; 0">
+              <xsl:when test="string-length($tnum) > 0">
                 <xsl:value-of select="$tnum"/>
               </xsl:when>
               <xsl:otherwise>0</xsl:otherwise>
@@ -436,8 +540,9 @@
   -->
   <xsl:template name="reverse-string">
     <xsl:param name="a_in"/>
+
     <xsl:variable name="len" select="string-length($a_in)"/>
-    <xsl:if test="$len &gt; 0">
+    <xsl:if test="$len > 0">
       <xsl:value-of select="substring($a_in, $len, 1)"/>
       <xsl:call-template name="reverse-string">
         <xsl:with-param name="a_in" select="substring($a_in, 1, $len - 1)"/>
@@ -456,6 +561,7 @@
   -->
   <xsl:template name="svg-to-xml">
     <xsl:param name="a_sentence"/>
+
     <xsl:element name="sentence" namespace="">
       <xsl:copy-of select="$a_sentence/@alph-doc"/>
       <xsl:copy-of select="$a_sentence/@alph-sentid"/>
@@ -524,6 +630,7 @@
   <xsl:template name="get-dependency-info">
     <xsl:param name="a_relation"/>
     <xsl:param name="a_head"/>
+
     <xsl:choose>
       <!-- if this is an elided word -->
       <xsl:when test="$a_head/@elided">
@@ -562,10 +669,11 @@
   -->
   <xsl:template name="desc-to-menus">
     <xsl:param name="a_desc"/>
+
     <xhtml:div xmlns="http://www.w3.org/1999/xhtml" id="label-menus">
       <xsl:variable name="entries1"
         select="$a_desc/tbd:table[@type = 'relation']/tbd:entry"/>
-      <xsl:if test="count($entries1) &gt; 0">
+      <xsl:if test="count($entries1) > 0">
         <div id="arc-label-menus" class="cmenu" style="display: none">
           <form name="arc-label-menus">
             <div>Dependency Relation: </div>
@@ -590,7 +698,7 @@
             </xsl:if>
             <xsl:variable name="entries2"
               select="$a_desc/tbd:table[@type = 'subrelation']/tbd:entry"/>
-            <xsl:if test="count($entries2) &gt; 0">
+            <xsl:if test="count($entries2) > 0">
               <select name="arc-label-2">
                 <xsl:for-each select="$entries2">
                   <xsl:element name="option">
@@ -618,7 +726,7 @@
       </xsl:if>
       <xsl:variable name="categories"
         select="$a_desc/tbd:table[@type = 'morphology']/tbd:category"/>
-      <xsl:if test="count($categories) &gt; 0">
+      <xsl:if test="count($categories) > 0">
         <div id="node-label-menus" class="cmenu" style="display: none">
           <form name="node-label-menus">
             <table style="border: none">
@@ -695,6 +803,7 @@
   -->
   <xsl:template name="desc-to-style">
     <xsl:param name="a_desc"/>
+
     <xsl:variable name="entries"
       select="$a_desc/tbd:table[@type = 'morphology']/tbd:category[@id = 'pos']/tbd:entry"/>
     <xsl:element name="style" namespace="http://www.w3.org/1999/xhtml">
@@ -742,6 +851,7 @@
   <xsl:template name="desc-to-key">
     <xsl:param name="a_desc"/>
     <xsl:param name="a_app"/>
+
     <xsl:variable name="entries"
       select="$a_desc/tbd:table[@type = 'morphology']/tbd:category[@id = 'pos']/tbd:entry"/>
     <table xmlns="http://www.w3.org/1999/xhtml">
@@ -766,7 +876,7 @@
             <td showme="focus-descendant">Other words that depend on focus
               word</td>
           </tr>
-          <xsl:if test="$e_app = 'viewer'">
+          <xsl:if test="$a_app = 'viewer'">
             <tr>
               <td first="yes">First selected word(s)</td>
             </tr>

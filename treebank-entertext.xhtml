@@ -31,11 +31,11 @@
   <body>
     <div class="alpheios-ignore">
       <div id="alph-page-header">
-        <img src="../image/alpheios.png"/>
+        <img src="../image/alpheios.png" alt="Alpheios"/>
       </div>
     </div>
     <div>
-      <form name="input-form">
+      <form name="input-form" action="">
         <fieldset>
           <legend>Input text:</legend>
           <textarea name="inputtext" rows="10" cols="80"
@@ -55,14 +55,15 @@
           <legend>Language:</legend>
           <input type="radio" id="lang-grc" name="lang" value="grc"/>
           <label for="lang-grc">Greek</label>
-          <input type="radio" id="lang-la" name="lang" value="la" checked=""/>
+          <input type="radio" id="lang-la" name="lang" value="la"
+            checked="checked"/>
           <label for="lang-la">Latin</label>
           <input type="radio" id="lang-ara" name="lang" value="ara"/>
           <label for="lang-ara">Arabic</label>
           <input type="radio" id="lang-got" name="lang" value="got"/>
           <label for="lang-got">Gothic</label>
-          <input type="radio" id="lang-cu" name="lang" value="cu"/>
-          <label for="lang-cu">Old Church Slavonic</label>
+          <input type="radio" id="lang-chu" name="lang" value="chu"/>
+          <label for="lang-chu">Old Church Slavonic</label>
           <input type="radio" id="lang-en" name="lang" value="en"/>
           <label for="lang-en">English</label>
         </fieldset>
@@ -71,7 +72,10 @@
         onsubmit="EnterSentence(event)">
         <input type="hidden" name="doc"/>
         <input type="hidden" name="s"/>
-        <button type="submit">Edit</button>
+        <label for="sequential">Show words sequentially</label>
+        <input type="checkbox" id="sequential" name="sequential"
+          checked="checked"/>
+        <div><button type="submit">Edit</button></div>
       </form>
     </div>
   </body>

@@ -74,6 +74,7 @@ var s_keyTable =
     ["redo",     true,    0, 121, "0100", ClickOnRedo,       null,       "Ctrl+Y",        "Redo"],
     ["undo",     true,    0, 122, "0100", ClickOnUndo,       null,       "Ctrl+Z",        "Undo"],
     ["save",     true,    0, 115, "0100", SaveContents,      null,       "Ctrl+S",        "Save contents"],
+    ["nextword", true,    0,  43, "0010", ShowNextWord,      null,       "+",             "Show next word"],
     ["history",  true,    0, 118, "0100", ShowHistory,       null,       "Ctrl+V",        "History"]
 ];
 // symbolic names for key table fields
@@ -102,7 +103,7 @@ function Init(a_event)
 {
     try
     {
-        $("body", document).css("display", "none");
+        $("body", document).hide();
 
         // initialize internal params
         s_param["firebug"] = "no";
@@ -167,7 +168,7 @@ function Init(a_event)
         {
             // build list of content to be built
             var toBuild = s_param["buildContent"];
-            toBuild = (toBuild && toBuild.length) ? toBuild.split(' ') : [];
+            toBuild = (toBuild && toBuild.length) ? toBuild.split(',') : [];
             for (i in toBuild)
                 toBuild[toBuild[i]] = toBuild[i];
 
@@ -236,32 +237,37 @@ function Init(a_event)
         // adjust html structure
         if (s_param["app"] == "viewer")
         {
-            $("#edit-controls", document).remove();
-            $("#alph-page-header", document).remove();
+            $("#edit-controls", document).hide();
+            $("#alph-page-header", document).hide();
             $("body", document).attr("alpheios-mode", "view");
         }
         if (!s_param["sentenceNavigation"] ||
             (s_param["sentenceNavigation"] == "no"))
         {
-            $("div#sent-navigation", document).remove();
+            $("div#sent-navigation", document).hide();
         }
         var arcEditing =  s_param["arcEditing"] &&
                          (s_param["arcEditing"] == "yes");
         if (!arcEditing)
-            $("#arc-label-menus", document).remove();
+            $("#arc-label-menus", document).hide();
         var nodeEditing =  s_param["nodeEditing"] &&
                           (s_param["nodeEditing"] == "yes");
         if (!nodeEditing)
-            $("#node-label-menus", document).remove();
+            $("#node-label-menus", document).hide();
         if (!arcEditing && !nodeEditing)
         {
-            $("#label-button", document).remove();
+            $("#label-button", document).hide();
             s_keyTable[s_keyTable["label"]][s_ktActive] = false;
         }
         if (!s_param["ellipsis"] || (s_param["ellipsis"] == "no"))
         {
-            $("#ellipsis-button", document).remove();
+            $("#ellipsis-button", document).hide();
             s_keyTable[s_keyTable["ellipsis"]][s_ktActive] = false;
+        }
+        if (!s_param["sequential"] || (s_param["sequential"] == "no"))
+        {
+            $("#nextword-button", document).hide();
+            s_keyTable[s_keyTable["nextword"]][s_ktActive] = false;
         }
 
         // add shortcuts to key display
@@ -280,7 +286,10 @@ function Init(a_event)
         }
 
         // add shortcuts to hover text for buttons
-        var buttonList = ["tree", "label", "ellipsis", "undo", "redo", "save"];
+        var buttonList =
+        [
+          "tree", "label", "ellipsis", "undo", "redo", "save", "nextword"
+        ];
         for (i in buttonList)
         {
             // if shortcut key is active
@@ -324,7 +333,7 @@ function Init(a_event)
         // go to new sentence
         InitNewSentence();
 
-        $("body", document).css("display", "block");
+        $("body", document).show();
     }
     catch(e)
     {
@@ -482,16 +491,11 @@ function InitNewSentence()
     // initialize handlers
     InitHandlers(document, false);
 
-    // for text group
-    $("g.text", document).each(
-    function()
-    {
-        // turn off highlighting when we leave
-        $(this).bind(
-            "mouseleave",
-            function() { highlightWord(this.ownerDocument, null); }
-        );
-    });
+    // for text group, turn off highlighting when we leave
+    $("g.text", document).bind(
+        "mouseleave",
+        function() { highlightWord(this.ownerDocument, null); }
+    );
 
     // bind mouse events
     $("body", document).bind("click", Click);
@@ -502,6 +506,32 @@ function InitNewSentence()
     $("#redo-button", document).attr("disabled", "disabled");
     $("#save-button", document).attr("disabled", "disabled");
     AdjustButtons();
+
+    // highlight initial words in viewer
+    if ((s_param["app"] == "viewer") && s_param["w"] && s_param["w"].length)
+    {
+        var wds = s_param["w"].split(',');
+        for (i in wds)
+            wds[i] = s_param["s"] + '-' + wds[i];
+        highlightFirst(document, wds);
+    }
+
+    // adjust for sequential display
+    if (s_param["sequential"] && (s_param["sequential"] != "no"))
+    {
+        $("g.text *", document).attr("display", "none");
+        $("g.tree-node", document).attr("display", "none");
+        $("g.tree > g", document).attr("display", "inline");
+        if ($("text.text-word", document).size() == 0)
+        {
+            $("#nextword-button", document).attr("disabled", "disabled");
+        }
+        else
+        {
+            $("#nextword-button", document).removeAttr("disabled");
+            ShowNextWord();
+        }
+    }
 
     Reposition();
 };
@@ -515,109 +545,80 @@ function InitHandlers(a_node, a_single)
 {
     var prefix = a_single ? "> ": "";
 
-    // for each text word
-    $(prefix + "text.text-word", a_node).each(
-    function()
-    {
-        var thisNode = $(this);
-        var tbrefid = thisNode.attr("tbref");
-
-        // turn on highlighting for the word
-        thisNode.bind(
-            "mouseenter",
-            function()
+    // for each text word, turn on highlighting for the word
+    $(prefix + "text.text-word", a_node).bind(
+        "mouseenter",
+        function()
+        {
+            var tbrefid = $(this).attr("tbref");
+            if (s_dragObj)
             {
-                if (s_dragObj)
-                {
-                    // if we're dragging and this node is descendant
-                    // don't highlight
-                    var dragRoot = $("#" + s_dragId, document);
-                    var treeNode = $("#" + tbrefid, document);
-                    if (treeNode.parents().andSelf().index(dragRoot) >= 0)
-                        return;
-                }
-                highlightWord(this.ownerDocument, tbrefid);
+                // if we're dragging and this node is descendant
+                // don't highlight
+                var dragRoot = $("#" + s_dragId, document);
+                var treeNode = $("#" + tbrefid, document);
+                if (treeNode.parents().andSelf().index(dragRoot) >= 0)
+                    return;
             }
-        );
-    });
+            highlightWord(this.ownerDocument, tbrefid);
+        }
+    );
 
-    // for each label
-    $(prefix + "text.node-label, " + prefix + "rect.highlight", a_node).each(
-    function()
-    {
-        var thisNode = $(this);
-        // highlight the word while hovering
-        var id = thisNode.parent().attr("id");
-        thisNode.hover(
-            function()
+    // for each label, highlight the word while hovering
+    $(prefix + "text.node-label, " + prefix + "rect.highlight", a_node).hover(
+        function()
+        {
+            if (s_dragObj)
             {
-                if (s_dragObj)
-                {
-                    // if we're dragging and this node is descendant
-                    // don't highlight
-                    var dragRoot = $("#" + s_dragId, document);
-                    if ($(this).parents().andSelf().index(dragRoot) >= 0)
-                        return;
-                }
-                highlightWord(this.ownerDocument, id);
-            },
-            function() { highlightWord(this.ownerDocument, null); }
-        );
-    });
+                // if we're dragging and this node is descendant
+                // don't highlight
+                var dragRoot = $("#" + s_dragId, document);
+                if ($(this).parents().andSelf().index(dragRoot) >= 0)
+                    return;
+            }
+            highlightWord(this.ownerDocument, $(this).parent().attr("id"));
+        },
+        function() { highlightWord(this.ownerDocument, null); }
+    );
 
-    // for each arc highlight
+    // for each arc highlight, highlight while hovering
     $(prefix + "text.arc-label, " + prefix + "rect.arc-highlight",
-      a_node).each(
-    function()
-    {
-        // highlight while hovering
-        $(this).hover(
-            function()
+      a_node).hover(
+        function()
+        {
+            if (s_mode == "label")
             {
-                if (s_mode == "label")
-                {
-                    var label =
-                        $(this).parent().children("rect.arc-highlight");
-                    AlphEdit.addClass(label[0], "hovering");
-                }
-            },
-            function()
-            {
-                var label =
-                      $(this).parent().children("rect.arc-highlight");
-                AlphEdit.removeClass(label[0], "hovering"); }
-        );
-    });
+                var label = $(this).parent().children("rect.arc-highlight");
+                AlphEdit.addClass(label[0], "hovering");
+            }
+        },
+        function()
+        {
+            var label = $(this).parent().children("rect.arc-highlight");
+            AlphEdit.removeClass(label[0], "hovering");
+        }
+    );
 
-    // for each expansion control
-    $(prefix + "g.expand", a_node).each(
-    function()
-    {
-        // highlight while hovering
-        $(this).hover(
-            function()
-            {
-                if (!s_dragObj)
-                    this.setAttribute("showme", "focus");
-            },
-            function() { this.setAttribute("showme", "normal"); }
-        );
-    });
+    // for each expansion control, highlight while hovering
+    $(prefix + "g.expand", a_node).hover(
+        function()
+        {
+            if (!s_dragObj)
+                $(this).attr("showme", "focus");
+        },
+        function() { $(this).attr("showme", "normal"); }
+    );
 
     // bind mouse events
-    $(prefix + "text.text-word, " + prefix + "text.node-label",
-      a_node).bind("mouseover", Enter);
-    $(prefix + "text.text-word, " + prefix + "text.node-label",
-      a_node).bind("mouseout", Leave);
+    $(prefix + "text.text-word, " + prefix + "text.node-label", a_node)
+        .bind("mouseover", Enter)
+        .bind("mouseout", Leave);
     $(prefix + "text.arc-label", a_node).bind("click", ClickOnArcLabel);
     $(prefix + "text.node-label", a_node).bind("click", ClickOnNodeLabel);
     $(prefix + "text.text-word", a_node).bind("click", ClickOnTextWord);
-    $(prefix + "g.expand rect, " + prefix + "g.expand text", a_node).each(
-    function()
-    {
-        $(this).attr("pointer-events", "all");
-        $(this).bind("click", Expand);
-    });
+    $(prefix + "g.expand rect, " + prefix + "g.expand text", a_node)
+        .attr("pointer-events", "all")
+        .bind("click", Expand);
 };
 
 /**
@@ -782,7 +783,7 @@ function Drag(a_event)
             // can mouse over other nodes, regardless of Z order
             var newTransform = "translate(" + s_dragTransX + ", " +
                                               (s_dragTransY + 20) + ")";
-            s_dragObj.setAttributeNS(null, "transform", newTransform);
+            s_dragObj.setAttribute("transform", newTransform);
         }
         Log("Dragging to (" + s_dragX + ", " + s_dragY + ")");
     }
@@ -820,9 +821,9 @@ function Drop(a_event)
 
     // restore to original position, if any
     if (s_dragStartTrans)
-        s_dragObj.setAttributeNS(null, "transform", s_dragStartTrans);
+        s_dragObj.setAttribute("transform", s_dragStartTrans);
     else
-        s_dragObj.removeAttributeNS(null, "transform");
+        s_dragObj.removeAttribute("transform");
 
     if ($(s_dragObj).filter("text").size() > 0)
         $(s_dragObj).remove();
@@ -998,7 +999,7 @@ function ClickOnLabelButton(a_event)
       case "arc":
         // hide menu
         var div = $("#arc-label-menus", document);
-        div.css("display", "none");
+        div.hide();
 
         if ($(target).attr("id") == "arc-label-ok")
         {
@@ -1025,7 +1026,7 @@ function ClickOnLabelButton(a_event)
         if (action != "node-label-reset")
         {
             // hide menu
-            div.css("display", "none");
+            div.hide();
         }
 
         switch (action)
@@ -1056,6 +1057,15 @@ function ClickOnLabelButton(a_event)
 function ClickOnSave(a_event)
 {
     SaveContents();
+};
+
+/**
+ * Event handler for next word operation
+ * @param {Event} a_event the event
+ */
+function ClickOnNextWord(a_event)
+{
+    ShowNextWord();
 };
 
 /**
@@ -1146,6 +1156,10 @@ function ClickOnMode(a_event)
  */
 function Keypress(a_event)
 {
+    // ignore if in viewer
+    if (s_param["app"] == "viewer")
+        return true;
+
     var event = AlphEdit.getEvent(a_event);
 
     var keyCode = event.keyCode ? event.keyCode : 0;
@@ -1299,10 +1313,10 @@ function StartLabelling(a_type, a_label, a_x, a_y)
         document.body.scrollBottom ? document.body.scrollBottom :
                                      document.documentElement.scrollBottom
     ];
-    div.css("display", "none");
+    div.hide();
     div.css("left", Math.max(a_x + scroll[0] - 7, 0) + "px");
     div.css("top", Math.max(a_y + scroll[1] + 7 - div.height(), 0) + "px");
-    div.css("display", "block");
+    div.show();
     div.find("input, select")[0].focus();
 };
 
@@ -1504,10 +1518,10 @@ function SetHoverText(a_node, a_form)
     {
         var labelNode = $("> text.node-label", a_node);
         if (labelNode.size() > 0)
-            labelNode[0].setAttributeNS(s_xlinkns, "title", value);
+            labelNode[0].setAttribute("title", value);
         var textNode = $("text[tbref='" + a_node.attr("id") + "']", document);
         if (textNode.size() > 0)
-            textNode[0].setAttributeNS(s_xlinkns, "title", value);
+            textNode[0].setAttribute("title", value);
     }
 };
 
@@ -1714,6 +1728,24 @@ function ReAddElidedNode(a_elided, a_label, a_childIds)
 };
 
 /**
+ * Show next word sequentially
+ * @return whether action was performed
+ * @type Boolean
+ */
+function ShowNextWord()
+{
+    // find next word to reveal
+    var hidden = $("g.text text[display='none']", document);
+    var id = hidden.eq(0).attr("tbref");
+    $("g.text *[tbref='" + id + "']", document).attr("display", "inline");
+    $("#" + id, document).attr("display", "inline");
+    if (hidden.size() == 1)
+        $("#nextword-button", document).attr("disabled", "disabled");
+    Reposition();
+    return false;
+};
+
+/**
  * Show history
  * @return whether action was performed
  * @type Boolean
@@ -1777,7 +1809,7 @@ function AbortAction()
     {
         // hide menu
         var div = $("#" + s_currentLabelType + "-label-menus", document);
-        div.css("display", "none");
+        div.hide();
         s_currentLabelId = null;
         s_currentLabelType = null;
         return true;
@@ -1811,7 +1843,7 @@ function FinishAction()
           case "arc":
             // hide menu
             var div = $("#arc-label-menus", document);
-            div.css("display", "none");
+            div.hide();
 
             // set new label
             var newLabel = "";
@@ -1832,7 +1864,7 @@ function FinishAction()
             // hide menu
             var div = $("#node-label-menus", document);
             var label = $("#" + s_currentLabelId, document);
-            div.css("display", "none");
+            div.hide();
 
             // set new label
             SetLabelFromForm(label, div);
@@ -1853,9 +1885,8 @@ function FinishAction()
  */
 function Reposition()
 {
-    $("body", document).css("display", "block");
-    var svgXML = $("#dependency-tree", document);
-    var rootNode = svgXML.children("g.tree").children("g.tree-node").eq(0);
+    $("body", document).show();
+    var rootNode = $("g.tree > g.tree-node", document);
     show_tree(rootNode, true);
 
     var fontSize = 20;
@@ -2015,7 +2046,7 @@ function positionTree(a_container, a_fontSize)
     // childNodes contains arc labels followed by subtrees
     var textNode = a_container.children("text.node-label");
     var childNodes = a_container.filter('[expanded="yes"]').
-                                 children("g.tree-node");
+                                 children('g.tree-node[display!="none"]');
     var numChildren = childNodes.size();
     var childNodeArray = childNodes.get();
     childNodeArray.sort(compareByIdDir);
@@ -2388,30 +2419,10 @@ function highlightWord(a_doc, a_id)
     // if no id or bad id
     if (focusNode.size() == 0)
     {
-        $("#dependency-tree", a_doc).children("g").each(
-        function()
-        {
-            var thisNode = $(this);
-            if (thisNode.attr("class") != "key")
-            {
-                // display everything normally
-                thisNode.find("text").each(
-                function()
-                {
-                    this.setAttribute("showme", "normal");
-                });
-                thisNode.find("line").each(
-                function()
-                {
-                    this.setAttribute("showme", "normal");
-                });
-                thisNode.find("rect").each(
-                function()
-                {
-                    this.setAttribute("showme", "normal");
-                });
-            }
-        });
+        // display everything normally
+        $("#dependency-tree", a_doc).children("g:not(.key)")
+                                    .find("text, line,rect")
+                                    .attr("showme", "normal");
         return;
     }
 
@@ -2472,18 +2483,9 @@ function highlightWord(a_doc, a_id)
  */
 function highlightTextWord(a_doc, a_id, a_focus)
 {
-    // do nothing if no id specified
-    if ((a_id == null) || (a_id.length == 0))
-        return;
-
-    $("rect", a_doc).each(
-    function()
-    {
-        if (this.getAttribute("tbref") == a_id)
-        {
-            this.setAttribute("showme", a_focus);
-        }
-    });
+    // if id specified
+    if (a_id && (a_id.length > 0))
+        $("g.text rect[tbref='" + a_id + "']", a_doc).attr("showme", a_focus);
 };
 
 /**

@@ -70,7 +70,7 @@
               What content to build from treebank description.
               This can only be done if the URL to retrieve treebank info
               is supplied above.
-              Contains a space-separated list of possible values:
+              Contains a comma-separated list of possible values:
                 menus = menus for arc and/or node label editing
                 style = style sheet controlling display of values
                 key = key describing values
@@ -82,6 +82,9 @@
               integers running from 1 to maxSentId, where maxSentId is obtained
               either from invoking the alpheios-getInfoURL or from the
               numSentences parameter.
+            sequential: [yes|no]
+              If "yes", initially only show first word in sentence and enable
+              button to reveal next word.
     -->
     <meta name="alpheios-param-app" content="editor"/>
     <meta name="alpheios-param-numSentences" content="1"/>
@@ -91,6 +94,7 @@
     <meta name="alpheios-param-nodeEditing" content="no"/>
     <meta name="alpheios-param-buildContent" content=""/>
     <meta name="alpheios-param-sentenceNavigation" content="no"/>
+    <meta name="alpheios-param-sequential" content="no"/>
 
     <!-- URLs to get and put a single sentence in treebank XML -->
     <meta name="alpheios-getSentenceURL"
@@ -204,8 +208,7 @@
                         <td>
                           <form onsubmit="return SubmitGoTo(this)"
                             name="sent-navigation-goto">
-                            <label>&#xA0;&#xA0;Go to sentence
-                              number</label>
+                            <label>&#160;&#160;Go to sentence number</label>
                             <input type="text" name="s" size="5"/>
                           </form>
                         </td>
@@ -231,17 +234,17 @@
                       <button id="tree-button" class="icon mode-button"
                         value="tree" checked="checked"
                         onclick="ClickOnMode(event)" title="Tree tool">
-                        <img src="../image/edit-tool-tree.png" alt="&#x2F4A;"/>
+                        <img src="../image/edit-tool-tree.png" alt="⽊"/>
                       </button>
                       <button id="label-button" class="icon mode-button"
                         value="label" onclick="ClickOnMode(event)"
                         title="Label tool">
-                        <img src="../image/edit-tool-label.png" alt="&#x270D;"/>
+                        <img src="../image/edit-tool-label.png" alt="✍"/>
                       </button>
                       <button id="ellipsis-button" class="icon mode-button"
                         value="ellipsis" onclick="ClickOnMode(event)"
                         title="Ellipsis tool">
-                        <img src="../image/edit-tool-ellipsis.png" alt="&#x2026;"/>
+                        <img src="../image/edit-tool-ellipsis.png" alt="…"/>
                       </button>
                     </tr>
                   </table>
@@ -250,7 +253,7 @@
                   <button id="expansion-checkbox" class="icon" checked="checked"
                     onclick="ShowExpansionControls(event)"
                     title="Show expansion controls">
-                    <img src="../image/edit-expansion-controls.png" alt="&#x21C5;"/>
+                    <img src="../image/edit-expansion-controls.png" alt="⇅"/>
                   </button>
                 </td>
                 <td>
@@ -259,12 +262,12 @@
                       <button id="undo-button" disabled="disabled" class="icon"
                         onclick="ClickOnUndo(event)" title="Undo"
                         base="../image/edit-undo">
-                        <img src="../image/edit-undo-disabled.png" alt="&#x27F2;"/>
+                        <img src="../image/edit-undo-disabled.png" alt="⟲"/>
                       </button>
                       <button id="redo-button" disabled="disabled" class="icon"
                         onclick="ClickOnRedo(event)" title="Redo"
                         base="../image/edit-redo">
-                        <img src="../image/edit-redo-disabled.png" alt="&#x27F3;"/>
+                        <img src="../image/edit-redo-disabled.png" alt="⟳"/>
                       </button>
                     </tr>
                   </table>
@@ -273,7 +276,14 @@
                   <button id="save-button" disabled="disabled" class="icon"
                     onclick="ClickOnSave(event)" title="Save sentence"
                     base="../image/document-save">
-                    <img src="../image/document-save-disabled.png" alt="&#x2707;"/>
+                    <img src="../image/document-save-disabled.png" alt="✇"/>
+                  </button>
+                </td>
+                <td>
+                  <button id="nextword-button" class="icon mode-button"
+                    value="nextword" onclick="ClickOnNextWord(event)"
+                    title="Show next word">
+                    <img src="../image/list-add.png" alt="+"/>
                   </button>
                 </td>
               </tr>
@@ -328,6 +338,8 @@
         </td>
       </tr>
     </table>
+    <div id="tree-error"/>
+    <div id="tree-hint" class="alpheios-hint"/>
     <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
     <!-- Provide key here if buildContent param does not contain "key" -->
     <div id="key">

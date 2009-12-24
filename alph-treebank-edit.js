@@ -525,6 +525,8 @@ function InitNewSentence()
         if ($("text.text-word", document).size() == 0)
         {
             $("#nextword-button", document).attr("disabled", "disabled");
+            var button = $("#nextword-button", document);
+            $("img", button).attr("src", button.attr("base") + "-disabled.png");
         }
         else
         {
@@ -1740,7 +1742,11 @@ function ShowNextWord()
     $("g.text *[tbref='" + id + "']", document).attr("display", "inline");
     $("#" + id, document).attr("display", "inline");
     if (hidden.size() == 1)
+    {
         $("#nextword-button", document).attr("disabled", "disabled");
+        var button = $("#nextword-button", document);
+        $("img", button).attr("src", button.attr("base") + "-disabled.png");
+    }
     Reposition();
     return false;
 };
@@ -1998,7 +2004,7 @@ function ReplayEvent(a_hEvent, a_forward)
  */
 function AdjustButtons()
 {
-    var name = ["undo", "redo", "save"]; 
+    var name = ["undo", "redo", "save"];
     for (i in name)
     {
         var button = $("#" + name[i] + "-button", document);

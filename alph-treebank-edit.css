@@ -30,6 +30,22 @@ table.event-history * {
     font-weight: bold;
 }
 
+/* alpheios hints */
+.alpheios-hint {
+    font-weight: normal;
+    color: #4E6476;
+    font-style: italic;
+    margin-bottom: 1em;
+    padding-left: 18px;
+    font-family:  Arial, sans-serif;
+    background: url(chrome://alpheios/skin/icons/information-16-g.png) 0 0 no-repeat;
+}
+
+/* hide the alpheios trigger hint by default */
+.alpheios-trigger-hint {
+    display: none;
+}
+
 svg {
     overflow: scroll;
 }

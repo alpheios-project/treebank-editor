@@ -425,10 +425,16 @@ function InitNewSentence()
     button.text("\u25B8\u25B8\u00A0" + numSentences);
 
     // html fixes
-    $("head title", document).text("Alpheios:Edit Treebank Sentence: " +
+    var title_text = s_param["app"] == 'viewer' ? 'View Treebank Sentence' : 'Edit Treebank Sentence';
+    $("head title", document).text("Alpheios:" + title_text + ':' +
                                    s_param["document_id"] +
                                    ": " +
                                    s_param["subdoc"]);
+    // only display the alpheios trigger hint in viewer mode
+    if (s_param['app'] == 'viewer')
+    {
+        $(".alpheios-trigger-hint",document).css("display","block");
+    }
     $("form[name='sent-navigation-exit'] input[name='s']",
       document).attr("value", s_param["s"]);
 
@@ -1077,7 +1083,7 @@ function ClickOnNextWord(a_event)
 function Resize(a_event)
 {
     // force full repositioning of elements
-    Reposition();
+    Reposition(a_event);
 };
 
 /**
@@ -1888,8 +1894,9 @@ function FinishAction()
 
 /**
  * Reposition everything in tree
+ * @param {Event} a_event optional triggering Event
  */
-function Reposition()
+function Reposition(a_event)
 {
     $("body", document).show();
     var rootNode = $("g.tree > g.tree-node", document);
@@ -1900,6 +1907,16 @@ function Reposition()
     var maxWidth = treeSize[0];
     var textSize = positionText(document, maxWidth, fontSize);
     positionAll(document, treeSize, textSize, fontSize);
+    // notify the Alpheios Diagram window that the tree has been resized
+    // but only if the repositioning wasn't triggered by some other event 
+    // if firefox supported the SVGResize event for embedded SVG 
+    // then this custom event wouldn't be necessary
+    if (! a_event)
+    {
+        var evt = document.createEvent("Events");
+        evt.initEvent("AlpheiosTreeResized", false, true);
+        document.dispatchEvent(evt);
+    }
 };
 
 /**

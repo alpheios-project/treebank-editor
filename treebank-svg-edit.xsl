@@ -158,23 +158,13 @@
       </xsl:for-each>
     </xsl:variable>
 
-    <!-- remove terminal punctuation -->
-    <xsl:variable name="rawwords2" select="exsl:node-set($raw2)/*"/>
-    <xsl:variable name="raw3">
-      <xsl:choose>
-        <xsl:when test="$a_app = 'viewer'">
-          <!-- do nothing for now -->
-          <xsl:copy-of select="$raw2"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:copy-of select="$raw2"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
-
     <!-- if any words found -->
-    <xsl:variable name="words" select="exsl:node-set($raw3)/*"/>
+    <xsl:variable name="words" select="exsl:node-set($raw2)/*"/>
     <xsl:if test="count($words)">
+      <xsl:variable name="posindex"
+        select="$a_desc/tbd:table[@type='morphology']/
+                        tbd:category[@id='pos']/@n"/>
+
       <xsl:element name="svg">
         <!-- synthetic root -->
         <xsl:variable name="rootword">
@@ -199,6 +189,7 @@
             <xsl:with-param name="a_words" select="exsl:node-set($rootword)/*"/>
             <xsl:with-param name="a_app" select="$a_app"/>
             <xsl:with-param name="a_desc" select="$a_desc"/>
+            <xsl:with-param name="a_posindex" select="$posindex"/>
           </xsl:call-template>
         </xsl:element>
 
@@ -238,6 +229,7 @@
       $a_words        words to process
       $a_app          application (viewing or editing)
       $a_desc         treebank description
+      $a_posindex     index of part of speech entry
 
     Return value:
       SVG equivalent of words
@@ -248,6 +240,7 @@
     <xsl:param name="a_words"/>
     <xsl:param name="a_app"/>
     <xsl:param name="a_desc"/>
+    <xsl:param name="a_posindex"/>
 
     <!-- for each word -->
     <xsl:for-each select="$a_words">
@@ -256,140 +249,165 @@
         <xsl:value-of select="@id"/>
       </xsl:variable>
       <xsl:variable name="children" select="$a_allwords[@head = $id]"/>
+      <xsl:variable name="pos" select="substring(@postag, $a_posindex, 1)"/>
+      <xsl:variable name="ispunct"
+        select="count($a_desc/tbd:table[@type='morphology']/
+                              tbd:category[@n=$a_posindex]/
+                              tbd:entry[tbd:short=$pos]/@punct) > 0"/>
 
-      <!-- return group -->
-      <xsl:element name="g">
-        <!-- attributes -->
-        <xsl:attribute name="class">
-          <xsl:text>tree-node</xsl:text>
-        </xsl:attribute>
-        <xsl:attribute name="id">
-          <xsl:value-of select="concat($a_sentenceId, '-', @id)"/>
-        </xsl:attribute>
-        <xsl:copy-of select="@elided|@lemma|@postag"/>
-        <xsl:attribute name="expanded">yes</xsl:attribute>
+      <!-- if not terminal punctuation in viewer -->
+      <xsl:if test="($a_app != 'viewer') or
+                    (count($children) > 0) or
+                    not($ispunct)">
+        <!-- return group -->
+        <xsl:element name="g">
+          <!-- attributes -->
+          <xsl:attribute name="class">
+            <xsl:text>tree-node</xsl:text>
+          </xsl:attribute>
+          <xsl:attribute name="id">
+            <xsl:value-of select="concat($a_sentenceId, '-', @id)"/>
+          </xsl:attribute>
+          <xsl:copy-of select="@elided|@lemma|@postag"/>
+          <xsl:attribute name="expanded">yes</xsl:attribute>
 
-        <!-- arc label, if not root word -->
-        <xsl:if test="@id != '0'">
-          <!-- arc label highlight -->
-          <xsl:element name="rect">
-            <xsl:attribute name="class">arc-highlight</xsl:attribute>
-          </xsl:element>
+          <!-- arc label, if not root word -->
+          <xsl:if test="@id != '0'">
+            <!-- arc label highlight -->
+            <xsl:element name="rect">
+              <xsl:attribute name="class">arc-highlight</xsl:attribute>
+            </xsl:element>
 
-          <xsl:variable name="relation">
             <xsl:choose>
-              <xsl:when test="contains(@relation, '_')">
-                <xsl:value-of select="substring-before(@relation, '_')"/>
-              </xsl:when>
-              <xsl:otherwise>
-                <xsl:value-of select="@relation"/>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:variable>
-          <xsl:variable name="table"
-            select="$a_desc/tbd:table[@type = 'relation']"/>
-          <xsl:variable name="entry"
-            select="$table/tbd:entry[tbd:tb = $relation]"/>
-
-          <!-- arc label -->
-          <xsl:element name="text">
-            <xsl:attribute name="class">
-              <xsl:text>arc-label alpheios-ignore</xsl:text>
-            </xsl:attribute>
-            <xsl:choose>
-              <!-- if non-empty relation value exists -->
-              <xsl:when test="$relation and (string-length($relation) > 0)">
-                <xsl:choose>
-                  <!-- if we're in viewer -->
-                  <xsl:when test="$a_app = 'viewer'">
-                    <xsl:choose>
-                      <!-- if description has displayable form, use it -->
-                      <xsl:when test="$entry/tbd:disp">
-                        <xsl:value-of select="$entry/tbd:disp"/>
-                      </xsl:when>
-                      <!-- else use original value -->
-                      <xsl:otherwise>
-                        <xsl:value-of select="$relation"/>
-                      </xsl:otherwise>
-                    </xsl:choose>
-                  </xsl:when>
-                  <!-- if we're not in viewer -->
-                  <xsl:otherwise>
-                    <!-- use original value -->
-                    <xsl:value-of select="$relation"/>
-                  </xsl:otherwise>
-                </xsl:choose>
-              </xsl:when>
-              <!-- if empty or missing relation -->
-              <xsl:otherwise>
-                <xsl:text>nil</xsl:text>
-              </xsl:otherwise>
-            </xsl:choose>
-          </xsl:element>
-
-          <!-- if we're in viewer, arc help -->
-          <xsl:if test="$a_app = 'viewer'">
-            <xsl:variable name="help" select="$entry/tbd:help"/>
-            <!-- for each help text -->
-            <xsl:for-each select="$help">
-              <xsl:element name="text">
-                <xsl:attribute name="class">
-                  <xsl:value-of select="concat('arc-label-help-', ./@dir)"/>
-                </xsl:attribute>
-                <xsl:attribute name="visibility">hidden</xsl:attribute>
-                <xsl:variable name="arrow">
+              <!-- if we're in viewer -->
+              <xsl:when test="$a_app = 'viewer'">
+                <xsl:variable name="relation">
                   <xsl:choose>
-                    <xsl:when test="./@dir = 'dn'">
-                      <xsl:text>&#x2193;</xsl:text>
+                    <xsl:when test="contains(@relation, '_')">
+                      <xsl:value-of select="substring-before(@relation, '_')"/>
                     </xsl:when>
                     <xsl:otherwise>
-                      <xsl:text>&#x2191;</xsl:text>
+                      <xsl:value-of select="@relation"/>
                     </xsl:otherwise>
                   </xsl:choose>
                 </xsl:variable>
-                <xsl:value-of select="concat($arrow, ' ', .)"/>
-              </xsl:element>
-            </xsl:for-each>
+                <xsl:variable name="table"
+                  select="$a_desc/tbd:table[@type = 'relation']"/>
+                <xsl:variable name="entry"
+                  select="$table/tbd:entry[tbd:tb = $relation]"/>
+
+                <!-- arc label -->
+                <xsl:element name="text">
+                  <xsl:attribute name="class">
+                    <xsl:text>arc-label alpheios-ignore</xsl:text>
+                  </xsl:attribute>
+                  <xsl:choose>
+                    <!-- if non-empty relation value exists -->
+                    <xsl:when test="$relation and (string-length($relation) > 0)">
+                      <xsl:choose>
+                        <!-- if description has displayable form, use it -->
+                        <xsl:when test="$entry/tbd:disp">
+                          <xsl:value-of select="$entry/tbd:disp"/>
+                        </xsl:when>
+                        <!-- else use original value -->
+                        <xsl:otherwise>
+                          <xsl:value-of select="$relation"/>
+                        </xsl:otherwise>
+                      </xsl:choose>
+                    </xsl:when>
+                    <!-- if empty or missing relation -->
+                    <xsl:otherwise>
+                      <xsl:text>nil</xsl:text>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:element>
+
+                <!-- arc help -->
+                <xsl:variable name="help" select="$entry/tbd:help"/>
+
+                <!-- for each help text -->
+                <xsl:for-each select="$help">
+                  <xsl:element name="text">
+                    <xsl:attribute name="class">
+                      <xsl:value-of select="concat('arc-label-help-', ./@dir)"/>
+                    </xsl:attribute>
+                    <xsl:attribute name="visibility">hidden</xsl:attribute>
+                    <xsl:variable name="arrow">
+                      <xsl:choose>
+                        <xsl:when test="./@dir = 'dn'">
+                          <xsl:text>&#x2193;</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                          <xsl:text>&#x2191;</xsl:text>
+                        </xsl:otherwise>
+                      </xsl:choose>
+                    </xsl:variable>
+                    <xsl:value-of select="concat($arrow, ' ', .)"/>
+                  </xsl:element>
+                </xsl:for-each>
+              </xsl:when>
+
+              <!-- if we're in editor -->
+              <xsl:otherwise>
+                <!-- arc label -->
+                <xsl:element name="text">
+                  <xsl:attribute name="class">
+                    <xsl:text>arc-label alpheios-ignore</xsl:text>
+                  </xsl:attribute>
+                  <xsl:choose>
+                    <!-- if non-empty relation value exists -->
+                    <xsl:when test="@relation and (string-length(@relation) > 0)">
+                      <xsl:value-of select="@relation"/>
+                    </xsl:when>
+                    <!-- if empty or missing relation -->
+                    <xsl:otherwise>
+                      <xsl:text>nil</xsl:text>
+                    </xsl:otherwise>
+                  </xsl:choose>
+                </xsl:element>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:if>
-        </xsl:if>
 
-        <!-- line -->
-        <xsl:element name="line"/>
+          <!-- line -->
+          <xsl:element name="line"/>
 
-        <!-- node label -->
-        <xsl:element name="rect">
-          <xsl:attribute name="class">highlight</xsl:attribute>
-        </xsl:element>
-        <xsl:element name="text">
-          <xsl:attribute name="class">
-            <xsl:text>node-label</xsl:text>
-          </xsl:attribute>
-          <xsl:if test="@postag">
-            <xsl:attribute name="pos">
-              <xsl:value-of select="substring(@postag, 1, 1)"/>
-            </xsl:attribute>
-          </xsl:if>
-          <xsl:value-of select="@form"/>
-        </xsl:element>
-
-        <!-- expansion control -->
-        <xsl:if test="(@id != '0') or ($a_app != 'viewer')">
-          <xsl:element name="g">
-            <xsl:attribute name="class">expand</xsl:attribute>
-            <xsl:element name="rect"/>
-            <xsl:element name="text">˄</xsl:element>
+          <!-- node label -->
+          <xsl:element name="rect">
+            <xsl:attribute name="class">highlight</xsl:attribute>
           </xsl:element>
-        </xsl:if>
+          <xsl:element name="text">
+            <xsl:attribute name="class">
+              <xsl:text>node-label</xsl:text>
+            </xsl:attribute>
+            <xsl:if test="@postag">
+              <xsl:attribute name="pos">
+                <xsl:value-of select="$pos"/>
+              </xsl:attribute>
+            </xsl:if>
+            <xsl:value-of select="@form"/>
+          </xsl:element>
 
-        <!-- groups for children -->
-        <xsl:call-template name="word-set">
-          <xsl:with-param name="a_sentenceId" select="$a_sentenceId"/>
-          <xsl:with-param name="a_allwords" select="$a_allwords"/>
-          <xsl:with-param name="a_words" select="$children"/>
-          <xsl:with-param name="a_app" select="$a_app"/>
-          <xsl:with-param name="a_desc" select="$a_desc"/>
-        </xsl:call-template>
-      </xsl:element>
+          <!-- expansion control -->
+          <xsl:if test="(@id != '0') or ($a_app != 'viewer')">
+            <xsl:element name="g">
+              <xsl:attribute name="class">expand</xsl:attribute>
+              <xsl:element name="rect"/>
+              <xsl:element name="text">˄</xsl:element>
+            </xsl:element>
+          </xsl:if>
+
+          <!-- groups for children -->
+          <xsl:call-template name="word-set">
+            <xsl:with-param name="a_sentenceId" select="$a_sentenceId"/>
+            <xsl:with-param name="a_allwords" select="$a_allwords"/>
+            <xsl:with-param name="a_words" select="$children"/>
+            <xsl:with-param name="a_app" select="$a_app"/>
+            <xsl:with-param name="a_desc" select="$a_desc"/>
+            <xsl:with-param name="a_posindex" select="$a_posindex"/>
+          </xsl:call-template>
+        </xsl:element>
+      </xsl:if>
     </xsl:for-each>
   </xsl:template>
 

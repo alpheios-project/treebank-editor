@@ -356,6 +356,9 @@ function InitNewSentence()
     var sentence = AlphEdit.getContents(s_getSentenceURL,
                                         s_param["doc"],
                                         s_param["s"]);
+    if (typeof sentence =="string")
+    {
+        sentence = (new DOMParser()).parseFromString(sentence,"text/xml");    	    }
     var root = $(sentence.documentElement);
     s_param["document_id"] = root.attr("document_id");
     s_param["subdoc"] = root.attr("subdoc");

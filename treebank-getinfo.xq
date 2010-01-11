@@ -45,19 +45,24 @@ declare option exist:serialize "method=xml media-type=text/xml";
 let $docStem := request:get-parameter("doc", ())
 let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
 let $desc := request:get-parameter("desc", ())
+let $user_info := substring-after($docStem,'user-')
 
 return
   if (not($docStem))
   then
     element error { "Treebank not specified" }
-  else if (not(doc-available($docName)))
-  then
-    element error { concat("Treebank for ", $docStem, " not available") }
+  else if (not(doc-available($docName)) and not($user_info))
+    then
+      element error { concat("Treebank for ", $docStem, " not available") }
   else
     let $doc := doc($docName)
-    let $format := $doc/treebank/@*:format
+    let $format := if ($user_info) 
+                   then substring-after($user_info,"-")
+                   else $doc/treebank/@*:format
     let $format := if ($format) then $format else "aldt"
-    let $lang := $doc/treebank/@*:lang
+    let $lang := if ($user_info)
+                 then substring-before($user_info,"-")
+                 else $doc/treebank/@*:lang
     return
       element info
       {

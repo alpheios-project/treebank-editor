@@ -259,3 +259,16 @@ g.tree line[showme="focus-descendant"] {
     stroke: darkgray;
 }
 /*--- end descendant rules ---*/
+
+/* tooltips */
+span.alph-tooltip {
+    font-size: small !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    background-color: #5BC8DC !important;
+    color: #0E2233;
+    border: 1px solid #B8B7B5 !important;
+    position: absolute;
+    z-index: 1000;
+}
+

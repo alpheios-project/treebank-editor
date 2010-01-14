@@ -334,6 +334,11 @@ function Init(a_event)
         InitNewSentence();
 
         $("body", document).show();
+
+        var evt = document.createEvent("Events");
+        evt.initEvent("AlpheiosTreeLoaded", false, true);
+        document.dispatchEvent(evt);
+
     }
     catch(e)
     {
@@ -1086,7 +1091,7 @@ function ClickOnNextWord(a_event)
 function Resize(a_event)
 {
     // force full repositioning of elements
-    Reposition(a_event);
+    Reposition();
 };
 
 /**
@@ -1897,9 +1902,8 @@ function FinishAction()
 
 /**
  * Reposition everything in tree
- * @param {Event} a_event optional triggering Event
  */
-function Reposition(a_event)
+function Reposition()
 {
     $("body", document).show();
     var rootNode = $("g.tree > g.tree-node", document);
@@ -1910,16 +1914,6 @@ function Reposition(a_event)
     var maxWidth = treeSize[0];
     var textSize = positionText(document, maxWidth, fontSize);
     positionAll(document, treeSize, textSize, fontSize);
-    // notify the Alpheios Diagram window that the tree has been resized
-    // but only if the repositioning wasn't triggered by some other event 
-    // if firefox supported the SVGResize event for embedded SVG 
-    // then this custom event wouldn't be necessary
-    if (! a_event)
-    {
-        var evt = document.createEvent("Events");
-        evt.initEvent("AlpheiosTreeResized", false, true);
-        document.dispatchEvent(evt);
-    }
 };
 
 /**

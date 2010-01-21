@@ -272,17 +272,20 @@ function Init(a_event)
 
         // add shortcuts to key display
         var shortcuts = $("#key_shortcuts", document);
-        for (i in s_keyTable)
+        if (shortcuts.size() > 0)
         {
-            // skip inactive keys
-            if (!s_keyTable[i][s_ktActive])
-                continue;
+            for (i in s_keyTable)
+            {
+                // skip inactive keys
+                if (!s_keyTable[i][s_ktActive])
+                    continue;
 
-            shortcuts.append(
-                "<tr>" +
-                  "<td>" + s_keyTable[i][s_ktKeyname] + "</td>" +
-                  "<td>" + s_keyTable[i][s_ktHelp] + "</td>" +
-                "</tr>");
+                shortcuts.append(
+                    "<tr>" +
+                      "<td>" + s_keyTable[i][s_ktKeyname] + "</td>" +
+                      "<td>" + s_keyTable[i][s_ktHelp] + "</td>" +
+                    "</tr>");
+            }
         }
 
         // add shortcuts to hover text for buttons
@@ -363,7 +366,8 @@ function InitNewSentence()
                                         s_param["s"]);
     if (typeof sentence =="string")
     {
-        sentence = (new DOMParser()).parseFromString(sentence,"text/xml");    	    }
+        sentence = (new DOMParser()).parseFromString(sentence,"text/xml");
+    }
     var root = $(sentence.documentElement);
     s_param["document_id"] = root.attr("document_id");
     s_param["subdoc"] = root.attr("subdoc");
@@ -375,7 +379,7 @@ function InitNewSentence()
     $("svg", document).empty().append($(svg.documentElement).children());
 
     // sentence id in <svg>
-    $("svg", document).attr("alph-sentid", s_param["s"]);
+    $("svg", document).attr("alph-s", s_param["s"]);
 
     // fix numeric sentence number
     s_param["snum"] = Number(s_param["s"]);
@@ -460,7 +464,7 @@ function InitNewSentence()
         {
             var thisNode = $(this);
             var text = thisNode.text();
-            if (text.match(/^[^0-9]*$/))
+            if (text.match(/^[^0-9A-Za-z]*$/))
             {
                 // if this is node, save original form
                 if (thisNode.is(".node-label"))
@@ -1072,7 +1076,9 @@ function ClickOnLabelButton(a_event)
  */
 function ClickOnSave(a_event)
 {
-    SaveContents();
+    // no need to confirm,
+    // since button should only be enabled when saving is needed
+    SaveContents(null);
 };
 
 /**
@@ -1100,13 +1106,8 @@ function Resize(a_event)
  */
 function SubmitExit(a_form)
 {
-    // if there are unsaved changes
-    if (AlphEdit.unsavedChanges())
-    {
-        if (confirm("Save changes before continuing?"))
-            SaveContents();
-    }
-
+    // give user chance to save changes
+    SaveContents("Save changes before continuing?");
     return true;
 };
 
@@ -1124,12 +1125,8 @@ function SubmitGoTo(a_form)
         return false;
     }
 
-    // if there are unsaved changes
-    if (AlphEdit.unsavedChanges())
-    {
-        if (confirm("Save changes before going to new sentence?"))
-            SaveContents();
-    }
+    // give user chance to save changes
+    SaveContents("Save changes before going to new sentence?");
 
     // go to new sentence
     s_param["s"] = a_form.s.value;
@@ -1145,12 +1142,8 @@ function SubmitGoTo(a_form)
  */
 function ClickOnGoTo(a_event)
 {
-    // if there are unsaved changes
-    if (AlphEdit.unsavedChanges())
-    {
-        if (confirm("Save changes before going to new sentence?"))
-            SaveContents();
-    }
+    // give user chance to save changes
+    SaveContents("Save changes before going to new sentence?");
 
     // go to new sentence
     s_param["s"] = AlphEdit.getEventTarget(a_event).value;
@@ -1797,11 +1790,24 @@ function FormatHistoryEntry(a_hEvent)
 
 /**
  * Save contents
+ * @param {String} a_confirm confirmation message
  * @return whether action was performed
  * @type Boolean
  */
-function SaveContents()
+function SaveContents(a_confirm)
 {
+    // if need to confirm
+    if (a_confirm)
+    {
+        // do nothing if no unsaved changes
+        if (!AlphEdit.unsavedChanges())
+            return;
+
+        // do nothing if action not confirmed
+        if (!confirm(a_confirm))
+            return;
+    }
+
     // transform sentence
     s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
     s_editTransform.setParameter(null, "e_app", s_param["app"]);
@@ -1813,6 +1819,9 @@ function SaveContents()
                          s_putSentenceURL,
                          s_param["doc"],
                          s_param["s"]);
+
+    // remember where we last saved and fix buttons
+    AlphEdit.saved();
     AdjustButtons();
     return true;
 };

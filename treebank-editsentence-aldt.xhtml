@@ -105,7 +105,8 @@
     <!-- URL to call when exiting and label to use on exit button -->
     <meta name="alpheios-exitURL"
       content="http://nlp.perseus.tufts.edu/hopper/annotate/displaySentence.jsp"/>
-    <meta name="alpheios-exitLabel" content="Return to table editor"/>
+    <meta name="alpheios-exitLabel"
+          content="Return&#160;to&#160;table&#160;editor"/>
 
     <!-- Provide style here if buildContent param does not contain "style".
          Styles should be provided for
@@ -175,7 +176,7 @@
         color:gold
       }</style>
   </head>
-  <body onkeypress="Keypress(event)" onload="Init(event)">
+  <body onkeypress="Keypress(event)" onload="Init(event)" style="display:none">
     <table style="border:none; padding:0; width:100%">
       <tr>
         <td>
@@ -208,7 +209,7 @@
                         <td>
                           <form onsubmit="return SubmitGoTo(this)"
                             name="sent-navigation-goto">
-                            <label>&#160;&#160;Go to sentence number</label>
+                            <label>&#160;&#160;Go&#160;to&#160;sentence&#160;number</label>
                             <input type="text" name="s" size="5"/>
                           </form>
                         </td>

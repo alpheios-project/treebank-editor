@@ -29,6 +29,7 @@
  :)
 
 import module namespace request="http://exist-db.org/xquery/request";
+declare namespace tb = "http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $docStem := request:get-parameter("doc", ())
@@ -62,17 +63,23 @@ return
       if ($sentNum)
       then
         let $num := number($sentNum)
-        return ($doc//sentence)[$num]
+        return ($doc//(tb:sentence|sentence))[$num]
       else
-        $doc//sentence[@*:id = $sentId]
+        $doc//(tb:sentence|sentence)[@*:id = $sentId]
     return
       if ($sentence)
       then
-        element sentence
+        element tb:sentence
         {
           attribute maxSentId { count($doc//sentence) },
           $sentence/@*,
-          $sentence/*
+          for $e in $sentence/*
+          return
+            element { concat("tb:", local-name($e)) }
+            {
+              $e/@*,
+              $e/*
+            }
         }
       else
         element error

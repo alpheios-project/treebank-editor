@@ -40,6 +40,7 @@
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace tbu="http://alpheios.net/namespaces/treebank-util"
               at "treebank-util.xquery";
+declare namespace tb = "http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $docStem := request:get-parameter("doc", ())
@@ -58,24 +59,24 @@ return
     let $doc := doc($docName)
     let $format := if ($user_info) 
                    then substring-after($user_info,"-")
-                   else $doc/treebank/@*:format
+                   else $doc/(tb:treebank|treebank)/@*:format
     let $format := if ($format) then $format else "aldt"
     let $lang := if ($user_info)
                  then substring-before($user_info,"-")
-                 else $doc/treebank/@*:lang
+                 else $doc/(tb:treebank|treebank)/@*:lang
     return
       element info
       {
-        attribute numSentences { count($doc//sentence) },
+        attribute numSentences { count($doc//(tb:sentence|sentence)) },
         (: number of words not used, commented out for now
-        attribute numWords { count($doc//word) }, :)
+        attribute numWords { count($doc//(tb:word|word)) }, :)
         attribute format { $format },
         attribute direction { if ($lang eq "ara") then "rtl" else "ltr" },
         attribute xml:lang { $lang },
 
         if ($desc)
         then
-          tbu:get-format-description($format, "/db/xq/config")
+          tbu:get-format-description($format, "/db/config")
         else
-          tbu:get-format-metadata($format, "/db/xq/config")
+          tbu:get-format-metadata($format, "/db/config")
       }

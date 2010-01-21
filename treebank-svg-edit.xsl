@@ -77,7 +77,8 @@
     <xsl:choose>
       <xsl:when test="$e_mode = 'xml-to-svg'">
         <xsl:call-template name="xml-to-svg">
-          <xsl:with-param name="a_sentence" select="sentence"/>
+          <xsl:with-param name="a_sentence"
+            select="(.//tb:sentence|.//sentence)[1]"/>
           <xsl:with-param name="a_app" select="$e_app"/>
           <xsl:with-param name="a_desc" select="$e_desc"/>
         </xsl:call-template>
@@ -125,7 +126,8 @@
     <!-- get undeduped list of words -->
     <xsl:variable name="raw">
       <xsl:call-template name="fix-words">
-        <xsl:with-param name="a_words" select="$a_sentence/word"/>
+        <xsl:with-param name="a_words"
+          select="($a_sentence/tb:word|$a_sentence/word)"/>
       </xsl:call-template>
     </xsl:variable>
 
@@ -580,9 +582,10 @@
   <xsl:template name="svg-to-xml">
     <xsl:param name="a_sentence"/>
 
-    <xsl:element name="sentence" namespace="">
+    <xsl:element name="sentence"
+      namespace="http://nlp.perseus.tufts.edu/syntax/treebank/1.5">
       <xsl:copy-of select="$a_sentence/@alph-doc"/>
-      <xsl:copy-of select="$a_sentence/@alph-sentid"/>
+      <xsl:copy-of select="$a_sentence/@alph-s"/>
       <xsl:for-each select="$a_sentence//svg:g[contains(@class, 'tree-node')]">
         <xsl:sort select="substring-after(@id, '-')" data-type="number"/>
         <xsl:variable name="num" select="substring-after(@id, '-')"/>
@@ -591,7 +594,8 @@
             select="svg:text[contains(@class, 'node-label')]"/>
           <xsl:variable name="arcLabel"
             select="svg:text[contains(@class, 'arc-label')]"/>
-          <xsl:element name="word" namespace="">
+          <xsl:element name="word"
+            namespace="http://nlp.perseus.tufts.edu/syntax/treebank/1.5">
             <xsl:attribute name="id">
               <xsl:value-of select="$num"/>
             </xsl:attribute>
@@ -942,14 +946,16 @@
           </tr>
         </tbody>
       </table>
-      <table>
-        <thead>
-          <tr>
-            <th>Keyboard Shortcuts</th>
-          </tr>
-        </thead>
-        <tbody id="key_shortcuts"/>
-      </table>
+      <xsl:if test="$a_app != 'viewer'">
+        <table>
+          <thead>
+            <tr>
+              <th>Keyboard Shortcuts</th>
+            </tr>
+          </thead>
+          <tbody id="key_shortcuts"/>
+        </table>
+      </xsl:if>
     </table>
   </xsl:template>
 </xsl:stylesheet>

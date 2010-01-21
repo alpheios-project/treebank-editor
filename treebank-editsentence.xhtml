@@ -102,7 +102,7 @@
 
     <!-- URL to call when exiting and label to use on exit button -->
     <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/>
-    <meta name="alpheios-exitLabel" content="Sentence list"/>
+    <meta name="alpheios-exitLabel" content="Sentence&#160;list"/>
 
     <!-- Provide style here if buildContent param does not contain "style".
          Styles should be provided for
@@ -112,7 +112,7 @@
     -->
     <style type="text/css"/>
   </head>
-  <body onkeypress="Keypress(event)" onload="Init(event)">
+  <body onkeypress="Keypress(event)" onload="Init(event)" style="display:none">
     <table style="border:none; padding:0; width:100%">
       <tr>
         <td>
@@ -145,7 +145,7 @@
                         <td>
                           <form onsubmit="return SubmitGoTo(this)"
                             name="sent-navigation-goto">
-                            <label>&#160;&#160;Go to sentence number</label>
+                            <label>&#160;&#160;Go&#160;to&#160;sentence&#160;number</label>
                             <input type="text" name="s" size="5"/>
                           </form>
                         </td>

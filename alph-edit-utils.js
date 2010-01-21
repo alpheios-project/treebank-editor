@@ -376,9 +376,6 @@ putContents: function(a_xml, a_url, a_doc, a_sentid)
         alert(msg);
         throw(msg);
     }
-
-    // remember where we last saved and reset button
-    this.saved();
 },
 
 //****************************************************************************

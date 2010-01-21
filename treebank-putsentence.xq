@@ -32,11 +32,12 @@
 
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace util="http://exist-db.org/xquery/util";
+declare namespace tb = "http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $data := request:get-data()
 let $docStem := $data/@alph-doc
-let $sentId := $data/@alph-sentid
+let $sentId := $data/@alph-s
 let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
 
 return
@@ -54,12 +55,29 @@ return
     element error { "No data found" }
   else
     let $doc := doc($docName)
-    let $oldSent := subsequence($doc//*:sentence, number($sentId), 1)
+    let $oldSentence := 
+      (subsequence($doc//tb:sentence, number($sentId), 1),
+       subsequence($doc//sentence, number($sentId), 1))[1]
     return
-    if ($oldSent)
+    if ($oldSentence)
     then
     (
-      update value $oldSent with $data/*,
+      (: build content in namespace of existing sentence :)
+      let $ns := namespace-uri($oldSentence)
+      let $newSentence :=
+        element { QName($ns, "sentence") }
+        {
+          $oldSentence/@*,
+
+          for $elt in $data/*
+          return
+            element { QName($ns, local-name($elt)) }
+            {
+              $elt/@*,
+              $elt/*
+            }
+        }
+      return update replace $oldSentence with $newSentence,
       element message { "Sentence saved" }
     )
     else

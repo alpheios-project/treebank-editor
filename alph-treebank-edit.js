@@ -1484,6 +1484,11 @@ function SetHoverText(a_node, a_form)
     if (a_node.attr("lemma"))
     {
         value = a_node.attr("lemma");
+
+        // if in viewer, strip any trailing digits from lemma
+        if (s_param["app"] == "viewer")
+            value = value.replace(/\d+$/, "");
+
         if (a_node.attr("postag"))
             value += ": ";
     }

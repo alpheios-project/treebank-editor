@@ -362,10 +362,23 @@ function InitNewSentence()
     AlphEdit.clearHistory();
 
     // get and transform treebank sentence
-    var params = {"doc": s_param["doc"],
-                  "app": s_param["app"],
-                  "s":   s_param["s"]};
-    var sentence = AlphEdit.getContents(s_getSentenceURL, params);
+    var sentence;
+    if (AlphEdit.getContents.length > 2)
+    {
+        // expecting more than two args: it's old version
+        sentence = AlphEdit.getContents(s_getSentenceURL,
+                                        s_param["doc"],
+                                        s_param["s"]);
+
+    }
+    else
+    {
+        // expecting two args: it's new version
+        var params = {"doc": s_param["doc"],
+                      "app": s_param["app"],
+                      "s":   s_param["s"]};
+        sentence = AlphEdit.getContents(s_getSentenceURL, params);
+    }
     if (typeof sentence =="string")
     {
         sentence = (new DOMParser()).parseFromString(sentence,"text/xml");

@@ -1,7 +1,7 @@
 /**
  * @fileoverview alph-edit-utils - editor utility functions
  *  
- * Copyright 2009 Cantus Foundation
+ * Copyright 2009-2010 Cantus Foundation
  * http://alpheios.net
  * 
  * This file is part of Alpheios.
@@ -232,6 +232,15 @@ saved : function()
 },
 
 /**
+ * Note that results need to be saved
+ */
+unsaved : function()
+{
+    this.d_saveCursor = -1;
+    $("#save-button", document).removeAttr("disabled");
+},
+
+/**
  * Show formatted history in separate window
  * @param {function} a_formatCallback function to format single event
  */
@@ -314,26 +323,30 @@ unsavedChanges: function()
 /**
  * Get contents of sentence from database
  * @param {String} a_url URL to get sentence from
- * @param {String} a_doc document name
- * @param {String} a_sentid sentence id
+ * @param {Object} a_params array of parameters
  * @returns sentence
  * @type {Document}
  */
-getContents: function(a_url, a_doc, a_sentid)
+getContents: function(a_url, a_params)
 {
     // get treebank sentence
     var req = new XMLHttpRequest();
-    req.open("GET", a_url + "?doc=" + a_doc + "&s=" + a_sentid, false);
+    var urlParams = "";
+    var first = true;
+    for (var key in a_params)
+    {
+        urlParams += (first ? "?" : "&") + key + "=" + a_params[key];
+        first = false;
+    }
+    req.open("GET", a_url + urlParams, false);
     req.send(null);
     var root = $(req.responseXML.documentElement);
     if ((req.status != 200) || root.is("error"))
     {
         var msg = root.is("error") ? root.text() :
-                                     "Error getting sentence " +
-                                       a_sentid +
-                                       " from treebank " +
-                                       a_doc +
-                                       ": " +
+                                     "Error getting sentence (" +
+                                       urlParams +
+                                       "): " +
                                        (req.responseText ? req.responseText :
                                                            req.statusText);
         alert(msg);
@@ -403,6 +416,37 @@ getEventTarget: function(a_event)
 {
     var event = this.getEvent(a_event);
     return (event.target != null) ? event.target : event.srcElement;
+},
+
+//****************************************************************************
+// miscellaneous
+//****************************************************************************
+
+/**
+ * Reverse text
+ * @param {JQuery} a_nodes nodes to reverse text in
+ * @param {String} a_attr attribute, if any, to save old value in
+ */
+reverseText : function(a_nodes, a_attr)
+{
+    a_nodes.each(
+    function()
+    {
+        var thisNode = $(this);
+        var text = thisNode.text();
+        // ignore strings containing letters or digits
+        if (text.match(/^[^0-9A-Za-z]*$/))
+        {
+            // save original form, if desired
+            if (a_attr)
+                thisNode.attr(a_attr, text);
+
+            // if starts with nbsp, move it to end
+            if (text.charAt(0) == '\u00A0')
+                text = text.substr(1) + '\u00A0';
+            thisNode.text(text.split("").reverse().join(""));
+        }
+    });
 }
 
 }

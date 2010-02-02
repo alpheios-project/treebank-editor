@@ -35,7 +35,15 @@ declare option exist:serialize "method=xml media-type=text/xml";
 let $docStem := request:get-parameter("doc", ())
 let $sentNum := request:get-parameter("s", ())
 let $sentId := request:get-parameter("id", ())
-let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
+let $app := request:get-parameter("app", ())
+let $docName := concat("/db/repository/",
+                       if ($app eq "viewer")
+                       then
+                         "treebank/"
+                       else
+                         "treebank.edit/",
+                       $docStem,
+                       ".tb.xml")
 
 return
   if (not($docStem))

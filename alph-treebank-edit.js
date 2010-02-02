@@ -1,7 +1,7 @@
 /**
  * @fileoverview alph-treebank-edit - treebank editor
  *  
- * Copyright 2009 Cantus Foundation
+ * Copyright 2009-2010 Cantus Foundation
  * http://alpheios.net
  * 
  * This file is part of Alpheios.
@@ -27,7 +27,7 @@ var s_getSentenceURL = null;          // where to get treebank sentence from
 var s_putSentenceURL = null;          // where to put modified treebank sentence
 var s_editTransform = null;           // transform between SVG and XML, etc.
 var s_editTransformDoc = null;        // transform document
-var s_param = [];                     // treebank parameters and metadata
+var s_param = [];                     // parameters and metadata
 
 var s_tbDesc = null;                  // treebank description
 
@@ -176,6 +176,7 @@ function Init(a_event)
             req.open("GET",
                      getInfoURL +
                         "?doc=" + s_param["doc"] +
+                        "&app=" + s_param["app"] +
                         (((toBuild.length > 0) ||
                           (s_param["app"] == "viewer")) ? "&desc=y" : ""),
                      false);
@@ -361,9 +362,10 @@ function InitNewSentence()
     AlphEdit.clearHistory();
 
     // get and transform treebank sentence
-    var sentence = AlphEdit.getContents(s_getSentenceURL,
-                                        s_param["doc"],
-                                        s_param["s"]);
+    var params = {"doc": s_param["doc"],
+                  "app": s_param["app"],
+                  "s":   s_param["s"]};
+    var sentence = AlphEdit.getContents(s_getSentenceURL, params);
     if (typeof sentence =="string")
     {
         sentence = (new DOMParser()).parseFromString(sentence,"text/xml");
@@ -456,26 +458,11 @@ function InitNewSentence()
     s_showExpansionControls = true;
 
     // right-to-left doesn't seem to be working in firefox svg
-    // reverse strings by hand, but ignore strings containing digits
+    // reverse strings by hand
     if (s_firefox && (s_param["direction"] == "rtl"))
     {
-        $("text.node-label, text.text-word", document).each(
-        function()
-        {
-            var thisNode = $(this);
-            var text = thisNode.text();
-            if (text.match(/^[^0-9A-Za-z]*$/))
-            {
-                // if this is node, save original form
-                if (thisNode.is(".node-label"))
-                    thisNode.attr("form", text);
-
-                // if starts with nbsp, move it to end
-                if (text.charAt(0) == '\u00A0')
-                    text = text.substr(1) + '\u00A0';
-                thisNode.text(text.split("").reverse().join(""));
-            }
-        });
+        AlphEdit.reverseText($("text.node-label", document), "form");
+        AlphEdit.reverseText($("text.text-word", document), null);
     }
 
     // for each elided node

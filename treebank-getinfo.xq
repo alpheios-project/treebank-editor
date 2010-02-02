@@ -22,9 +22,10 @@
   Query to retrieve information about treebank
 
   Form of request is:
-    .../treebank-getinfo.xq?doc=<file>[&desc=y]
+    .../treebank-getinfo.xq?doc=<file>&app=<app>[&desc=y]
   where
     doc is the stem of document file name (without path or extensions)
+    app is application in use (editor or viewer)
     desc if present indicates that the format description should be included
 
   Returns
@@ -44,7 +45,15 @@ declare namespace tb = "http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $docStem := request:get-parameter("doc", ())
-let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
+let $app := request:get-parameter("app", ())
+let $docName := concat("/db/repository/",
+                       if ($app eq "viewer")
+                       then
+                         "treebank/"
+                       else
+                         "treebank.edit/",
+                       $docStem,
+                       ".tb.xml")
 let $desc := request:get-parameter("desc", ())
 let $user_info := substring-after($docStem,'user-')
 

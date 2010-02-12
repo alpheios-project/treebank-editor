@@ -363,20 +363,22 @@ function InitNewSentence()
 
     // get and transform treebank sentence
     var sentence;
+    var sentParam = (s_param["s"] ? "s" : "id");
     if (AlphEdit.getContents.length > 2)
     {
         // expecting more than two args: it's old version
         sentence = AlphEdit.getContents(s_getSentenceURL,
                                         s_param["doc"],
-                                        s_param["s"]);
+                                        s_param[sentParam]);
 
     }
     else
     {
         // expecting two args: it's new version
-        var params = {"doc": s_param["doc"],
-                      "app": s_param["app"],
-                      "s":   s_param["s"]};
+        var params = [];
+        params["doc"] = s_param["doc"];
+        params["app"] = s_param["app"];
+        params[sentParam] = s_param[sentParam];
         sentence = AlphEdit.getContents(s_getSentenceURL, params);
     }
     if (typeof sentence =="string")
@@ -386,6 +388,7 @@ function InitNewSentence()
     var root = $(sentence.documentElement);
     s_param["document_id"] = root.attr("document_id");
     s_param["subdoc"] = root.attr("subdoc");
+    var sentId = root.attr("id");
     s_editTransform.setParameter(null, "e_mode", "xml-to-svg");
     s_editTransform.setParameter(null, "e_app", s_param["app"]);
     if (s_tbDesc)
@@ -394,7 +397,7 @@ function InitNewSentence()
     $("svg", document).empty().append($(svg.documentElement).children());
 
     // sentence id in <svg>
-    $("svg", document).attr("alph-s", s_param["s"]);
+    $("svg", document).attr("alph-" + sentParam, s_param[sentParam]);
 
     // fix numeric sentence number
     s_param["snum"] = Number(s_param["s"]);
@@ -530,7 +533,7 @@ function InitNewSentence()
     {
         var wds = s_param["w"].split(',');
         for (i in wds)
-            wds[i] = s_param["s"] + '-' + wds[i];
+            wds[i] = sentId + '-' + wds[i];
         highlightFirst(document, wds);
     }
 

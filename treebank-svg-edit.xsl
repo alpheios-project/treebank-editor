@@ -213,6 +213,7 @@
                 <xsl:attribute name="tbref">
                   <xsl:value-of select="$tbref"/>
                 </xsl:attribute>
+                <xsl:copy-of select="@form"/>
                 <xsl:value-of select="concat('&#160;', @form)"/>
               </xsl:element>
             </xsl:if>

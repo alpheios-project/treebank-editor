@@ -33,6 +33,10 @@
 import module namespace request="http://exist-db.org/xquery/request";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace util="http://exist-db.org/xquery/util";
+import module namespace tan  = "http://alpheios.net/namespaces/text-analysis"
+    at "textanalysis-utils.xquery";
+declare namespace treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
+declare namespace oac="http://www.openannotation.org/ns/";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 declare function local:createWords(
@@ -62,23 +66,53 @@ declare function local:createWords(
 };
 
 declare function local:createSentence(
-  $a_sent as xs:string?,
+  $a_data as node()?,
   $a_docId as xs:string,
-  $a_index as xs:integer) as element()
+  $a_index as xs:integer) as element()*
 {
-  let $sent := normalize-space($a_sent)
-  return
-    element sentence
-    {
-      attribute id { $a_index },
-      attribute document_id { $a_docId },
-      local:createWords($sent, 1)
-    }
+	(: TODO we really need to use namespaced and/or random ids to prevent multiple requests 
+	    from trampling on each other 
+	:)
+    let $dummy := element {QName("http://nlp.perseus.tufts.edu/syntax/treebank/1.5","sentence")} {}
+    let $sentences :=
+        (: if we've been sent an oac:Annotation, get the treebank data from it :)
+        if ($a_data//oac:Annotation)
+        then
+            let $orig := tan:get_OACTreebank($a_data)//sentence
+            for $s at $a_i in $orig return 
+                element sentence {
+                    attribute id { $a_index + $a_i },
+                    attribute n { $s/@id },
+                    $s/@*[local-name(.) != 'id' and local-name(.) != 'n'],
+                    $s/*
+                }
+            
+        (: else if we've been sent a bare sentence, just use it, stripped of the namespace :)
+        else if (name($a_data) = name($dummy))
+        then
+            let $orig := tan:change-element-ns-deep($a_data,"","")
+            for $s at $a_i in $orig return 
+                element sentence {
+                    attribute id { $a_index + $a_i },
+                    attribute n { $s/@id },
+                    $s/@*[local-name(.) != 'id' and local-name(.) != 'n'],
+                    $s/*
+                }
+        else 
+            let $text := normalize-space($a_data/text())
+            return
+              element sentence
+              {
+                attribute id { $a_index + 1 },
+                attribute document_id { $a_docId },
+                local:createWords($text, 1)
+              }
+    return $sentences
 };
 
 let $data := request:get-data()
-let $fmt := $data/@fmt
-let $lang := $data/@xml:lang
+let $fmt := request:get-parameter('fmt',$data/@fmt)
+let $lang := request:get-parameter('lang',$data/@xml:lang)
 let $collName := "/db/repository/treebank.edit"
 let $docId := concat("sentences-", $fmt, '-', $lang)
 let $docName := concat($collName, '/', $docId, ".tb.xml")
@@ -95,44 +129,50 @@ return
   then
     element error { "No data found" }
   else
-
-  (: if document already exists :)
-  if (doc-available($docName))
-  then
-    let $doc := doc($docName)
-    let $index := count($doc//sentence) + 1
-    let $junk := update
-                    insert local:createSentence($data/text(), $docId, $index)
-                    into $doc/treebank
-    return
-      element args
-      {
-        attribute doc { $docId },
-        attribute s { $index }
-      }
-
-  (: if need to create document :)
-  else
-    let $newDoc :=
-      <treebank xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://nlp.perseus.tufts.edu/syntax/treebank/1.5 treebank-1.5.xsd"
-                version="1.5">{
-        attribute format { $fmt },
-        attribute xml:lang { $lang },
-        local:createSentence($data/text(), $docId, 1)
-      }</treebank>
-    let $stored := xmldb:store($collName, concat($docId, ".tb.xml"), $newDoc)
-    return
-      if (not($stored))
-      then
-        element error
-        {
-          concat("Treebank ", $docId, " could not be created")
-        }
-      else
-        element args
-        {
-          attribute doc { $docId },
-          attribute s { 1 }
-        }
+    (: if document doesn't already exist, create it:)
+    let $error := if ( not(doc-available($docName)))
+        then
+            let $newDoc :=
+            <treebank xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://nlp.perseus.tufts.edu/syntax/treebank/1.5 treebank-1.5.xsd"
+                    version="1.5">{
+                attribute format { $fmt },
+                attribute xml:lang { $lang },
+                local:createSentence($data/text(), $docId, 1)
+              }</treebank>
+            let $stored := xmldb:store($collName, concat($docId, ".tb.xml"), $newDoc)
+            return
+            if (not($stored))
+            then
+                element error
+                {
+                  concat("Treebank ", $docId, " could not be created")
+                }
+            else ()
+        else()
+    return 
+    if ($error)     
+    then $error
+    else
+        let $doc := doc($docName) 
+        let $index := count($doc//sentence) 
+        let $sentences := local:createSentence($data, $docId, $index)
+        return 
+        if (count($sentences) > 0)
+            then
+            let $junk := for $s in $sentences
+                return update insert $s into $doc/treebank
+            let $s_list := for $s at $a_i in $sentences return xs:string($s/@id)
+            return
+                element args
+                    {
+                      attribute doc { $docId },
+                      attribute s { string-join($s_list, ' ') }
+                    }
+         else 
+             element error
+                {
+                  "No sentences found."
+                }
+            

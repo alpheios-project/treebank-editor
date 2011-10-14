@@ -473,13 +473,14 @@ function InitNewSentence()
     $("#expansion-checkbox", document).attr("checked", "checked");
     s_showExpansionControls = true;
 
+    // this seems to be fixed in Firefox 7. Leaving code in place commented out for now
     // right-to-left doesn't seem to be working in firefox svg
     // reverse strings by hand
-    if (s_firefox && (s_param["direction"] == "rtl"))
-    {
-        AlphEdit.reverseText($("text.node-label", document), "form");
-        AlphEdit.reverseText($("text.text-word", document), null);
-    }
+    //if (s_firefox && (s_param["direction"] == "rtl"))
+    //{
+    //    AlphEdit.reverseText($("text.node-label", document), "form");
+    //   AlphEdit.reverseText($("text.text-word", document), null);
+    //}
 
     // for each elided node
     $("g[elided]", document).each(

@@ -85,7 +85,7 @@ return
 
         if ($desc)
         then
-          tbu:get-format-description($format, "/db/config")
-        else()
-          (:tbu:get-format-metadata($format, "/db/config"):)
+            tbu:get-format-description($format, "/db/xq/config")
+        else
+          tbu:get-format-metadata($format, "/db/xq/config")
       }

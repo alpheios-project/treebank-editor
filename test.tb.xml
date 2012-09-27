@@ -1,0 +1,58 @@
+<treebank xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="http://nlp.perseus.tufts.edu/syntax/treebank/1.5 treebank-1.5.xsd" xml:lang="grc">
+    <date>Mon Oct 04 11:29:24 EDT 2010</date>
+    <sentence id="1" document_id="Perseus:text:1999.01.0133" subdoc="book=1:card=1" span="μῆνιν0:.0">
+        <primary>millermo</primary>
+        <primary>tovahk</primary>
+        <secondary>nicanor</secondary>
+        <word id="1" cid="34235766" form="μῆνιν" lemma="μῆνις1" postag="n-s---fa-" head="2" relation="OBJ"/>
+        <word id="2" cid="34235767" form="ἄειδε" lemma="ἀείδω1" postag="v2spma---" head="32" relation="PRED_CO"/>
+        <word id="3" cid="34235768" form="θεὰ" lemma="θεά1" postag="n-s---fv-" head="2" relation="ExD"/>
+        <word id="4" cid="34235769" form="Πηληϊάδεω" lemma="Πηληιάδης" postag="n-s---mg-" head="5" relation="ATR"/>
+        <word id="5" cid="34235770" form="Ἀχιλῆος" lemma="Ἀχιλλεύς1" postag="n-s---mg-" head="1" relation="ATR"/>
+        <word id="6" cid="34235771" form="οὐλομένην" lemma="οὐλόμενος1" postag="a-s---fa-" head="1" relation="ATR"/>
+        <word id="7" cid="34235772" form="," lemma="ξομμα1" postag="u--------" head="23" relation="AuxX"/>
+        <word id="8" cid="34235773" form="ἣ" lemma="ὅς1" postag="p-s---fn-" head="23" relation="SBJ"/>
+        <word id="9" cid="34235774" form="μυρί᾽" lemma="μυρίος1" postag="a-p---na-" head="11" relation="ATR"/>
+        <word id="10" cid="34235775" form="Ἀχαιοῖς" lemma="Ἀχαιός1" postag="a-p---md-" head="12" relation="OBJ"/>
+        <word id="11" cid="34235776" form="ἄλγε᾽" lemma="ἄλγος1" postag="n-p---na-" head="12" relation="OBJ"/>
+        <word id="12" cid="34235777" form="ἔθηκε" lemma="τίθημι1" postag="v3saia---" head="23" relation="ATR_CO"/>
+        <word id="13" cid="34235778" form="," lemma="ξομμα1" postag="u--------" head="23" relation="AuxX"/>
+        <word id="14" cid="34235779" form="πολλὰς" lemma="πολύς1" postag="a-p---fa-" head="17" relation="ATR"/>
+        <word id="15" cid="34235780" form="δ᾽" lemma="δέ1" postag="g--------" head="23" relation="AuxY"/>
+        <word id="16" cid="34235781" form="ἰφθίμους" lemma="ἴφθιμος1" postag="a-p---ma-" head="17" relation="ATR"/>
+        <word id="17" cid="34235782" form="ψυχὰς" lemma="ψυχή1" postag="n-p---fa-" head="19" relation="OBJ"/>
+        <word id="18" cid="34235783" form="Ἄϊδι" lemma="οτηερ" postag="---------" head="19" relation="OBJ"/>
+        <word id="19" cid="34235784" form="προΐαψεν" lemma="προιάπτω1" postag="v3saia---" head="23" relation="ATR_CO"/>
+        <word id="20" cid="34235785" form="ἡρώων" lemma="ἥρως1" postag="n-p---mg-" head="17" relation="ATR"/>
+        <word id="21" cid="34235786" form="," lemma="ξομμα1" postag="u--------" head="23" relation="AuxX"/>
+        <word id="22" cid="34235787" form="αὐτοὺς" lemma="αὐτός1" postag="a-p---ma-" head="25" relation="OBJ"/>
+        <word id="23" cid="34235788" form="δὲ" lemma="δέ1" postag="g--------" head="1" relation="COORD"/>
+        <word id="24" cid="34235789" form="ἑλώρια" lemma="ἑλώριον1" postag="n-p---na-" head="25" relation="OCOMP"/>
+        <word id="25" cid="34235790" form="τεῦχε" lemma="τεύχω1" postag="v3siia---" head="23" relation="ATR_CO"/>
+        <word id="26" cid="34235791" form="κύνεσσιν" lemma="κύων1" postag="n-p---md-" head="28" relation="OBJ_CO"/>
+        <word id="27" cid="34235792" form="οἰωνοῖσί" lemma="οἰωνός1" postag="n-p---md-" head="28" relation="OBJ_CO"/>
+        <word id="28" cid="34235793" form="τε" lemma="τε1" postag="g--------" head="25" relation="COORD"/>
+        <word id="29" cid="34235794" form="πᾶσι" lemma="πᾶς1" postag="a-p---md-" head="27" relation="ATR"/>
+        <word id="30" cid="34235795" form="," lemma="ξομμα1" postag="u--------" head="32" relation="AuxX"/>
+        <word id="31" cid="34235796" form="Διὸς" lemma="Ζεύς1" postag="n-s---mg-" head="34" relation="ATR"/>
+        <word id="32" cid="34235797" form="δ᾽" lemma="δέ1" postag="g--------" head="0" relation="COORD"/>
+        <word id="33" cid="34235798" form="ἐτελείετο" lemma="τελέω1" postag="v3siie---" head="32" relation="PRED_CO"/>
+        <word id="34" cid="34235799" form="βουλή" lemma="βουλή1" postag="n-s---fn-" head="33" relation="SBJ"/>
+        <word id="35" cid="34235800" form="," lemma="ξομμα1" postag="u--------" head="41" relation="AuxX"/>
+        <word id="36" cid="34235801" form="ἐξ" lemma="ἐκ1" postag="r--------" head="41" relation="AuxP"/>
+        <word id="37" cid="34235802" form="οὗ" lemma="ὅς1" postag="p-s---mg-" head="36" relation="ADV"/>
+        <word id="38" cid="34235803" form="δὴ" lemma="δή1" postag="g--------" head="41" relation="AuxY"/>
+        <word id="39" cid="34235804" form="τὰ" lemma="ὁ1" postag="l-p---na-" head="40" relation="ATR"/>
+        <word id="40" cid="34235805" form="πρῶτα" lemma="πρῶτος1" postag="a-p---na-" head="41" relation="ADV"/>
+        <word id="41" cid="34235806" form="διαστήτην" lemma="διίστημι1" postag="v3daia---" head="33" relation="ADV"/>
+        <word id="42" cid="34235807" form="ἐρίσαντε" lemma="ἐρίζω1" postag="t-dapamn-" head="41" relation="ADV"/>
+        <word id="43" cid="34235808" form="Ἀτρεΐδης" lemma="Ἀτρείδης1" postag="n-s---mn-" head="47" relation="SBJ_CO"/>
+        <word id="44" cid="34235809" form="τε" lemma="τε1" postag="g--------" head="47" relation="AuxY"/>
+        <word id="45" cid="34235810" form="ἄναξ" lemma="ἄναξ1" postag="n-s---mn-" head="43" relation="ATR"/>
+        <word id="46" cid="34235811" form="ἀνδρῶν" lemma="ἀνήρ1" postag="n-p---mg-" head="45" relation="ATR"/>
+        <word id="47" cid="34235812" form="καὶ" lemma="καί1" postag="c--------" head="41" relation="COORD"/>
+        <word id="48" cid="34235813" form="δῖος" lemma="δῖος1" postag="a-s---mn-" head="49" relation="ATR"/>
+        <word id="49" cid="34235814" form="Ἀχιλλεύς" lemma="Ἀχιλλεύς1" postag="n-s---mn-" head="47" relation="SBJ_CO"/>
+        <word id="50" cid="34235815" form="." lemma="περιοδ1" postag="u--------" head="0" relation="AuxK"/>
+    </sentence>
+</treebank>

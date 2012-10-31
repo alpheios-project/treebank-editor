@@ -66,15 +66,25 @@
           <label for="lang-chu">Old Church Slavonic</label>
           <input type="radio" id="lang-en" name="lang" value="en"/>
           <label for="lang-en">English</label>
+          <input type="radio" id="lang-zh" name="lang" value="zh"/>
+          <label for="lang-en">Chinese</label>
+        </fieldset>
+        <fieldset id="dir-buttons">
+          <legend>Text Direction:</legend>
+          <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked"/>
+          <label for="dir-ltr">Left to Right</label>
+          <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
+          <label for="dir-rtl">Right to Left</label>
         </fieldset>
       </form>
       <form name="submit-form" action="../app/treebank-editsentence.xhtml"
         onsubmit="EnterSentence(event)">
         <input type="hidden" name="doc"/>
         <input type="hidden" name="s"/>
+        <input type="hidden" name="direction" value="ltr"/>
+        <input type="hidden" name="lang" value=""/>
         <label for="sequential">Show words sequentially</label>
-        <input type="checkbox" id="sequential" name="sequential"
-          checked="checked"/>
+        <input type="checkbox" id="sequential" name="sequential"/>
         <div><button type="submit">Edit</button></div>
       </form>
     </div>

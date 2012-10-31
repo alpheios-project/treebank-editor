@@ -176,3 +176,65 @@ declare function tblst:get-list-page(
   }
   }</html>
 };
+
+(:
+  Function to create an HTML excerpt with a list of sentences
+  from an local treebank document
+
+  Parameters:
+    $a_doc     the document
+    $a_numWords    number of words to use from each sentence
+    $a_startSent   starting sentence number
+    $a_numSents    number of sentences to use from document
+
+  Return value:
+    HTML excerpt with a list of initial sentence fragments
+ :)
+declare function tblst:get-list-local(
+  $a_doc as node(),
+  $a_fileName as xs:string,
+  $a_numWords as xs:integer,
+  $a_startSent as xs:integer,
+  $a_numSents as xs:integer) as element()?
+{
+  let $sents :=
+    subsequence($a_doc//(tb:sentence|sentence), $a_startSent, $a_numSents)
+  return
+    element div
+    {
+      attribute id { "treebank-local-list"},
+  
+      element h2
+      {
+        "Sentence list"
+      },
+  
+      element ol
+      {
+        (: for each sentence :)
+        for $sent at $i in $sents
+        let $sentNum := if ($sent/@id) then $sent/@id else $i + $a_startSent - 1
+        return
+          element li
+          {
+            attribute value { $sentNum },
+            element div
+            {
+              attribute onclick { concat("return SelectSentence(",$sentNum,");") },
+              element div
+              {
+                attribute class
+                {
+                  "sentence"
+                },
+  
+                element div
+                {
+                  text { local:get-forms($sent/*:word, $a_numWords) }
+                }
+              }
+            }
+          }
+      }
+    }
+};

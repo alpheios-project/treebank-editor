@@ -31,6 +31,7 @@
  :)
 
 import module namespace request="http://exist-db.org/xquery/request";
+import module namespace response="http://exist-db.org/xquery/response";
 import module namespace xmldb="http://exist-db.org/xquery/xmldb";
 import module namespace util="http://exist-db.org/xquery/util";
 import module namespace tan  = "http://alpheios.net/namespaces/text-analysis"
@@ -116,6 +117,9 @@ let $lang := request:get-parameter('lang',$data/@xml:lang)
 let $collName := "/db/repository/treebank.edit"
 let $docId := concat("sentences-", $fmt, '-', $lang)
 let $docName := concat($collName, '/', $docId, ".tb.xml")
+let $h := response:set-header("Access-Control-Allow-Origin","*")
+let $c := response:set-header('Access-Control-Allow-Methods','POST, GET, OPTIONS')
+
 
 return
   (: handle various error conditions :)

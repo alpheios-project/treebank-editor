@@ -141,7 +141,7 @@ function Init(a_event)
         if (form.size() > 0)
             s_mode = $("input[checked]", form).attr("value");
         $("body", document).attr("alpheios-mode", s_mode);
-
+        
         // get treebank transform
         var req = new XMLHttpRequest();
         if (req.overrideMimeType)
@@ -363,23 +363,32 @@ function InitNewSentence()
 
     // get and transform treebank sentence
     var sentence;
+    var localSentence = $('#sentence-xml').html();
     var sentParam = (s_param["s"] ? "s" : "id");
-    if (AlphEdit.getContents.length > 2)
-    {
-        // expecting more than two args: it's old version
-        sentence = AlphEdit.getContents(s_getSentenceURL,
-                                        s_param["doc"],
-                                        s_param[sentParam]);
-
+    if (localSentence) {
+        sentence = localSentence
+    }   
+    else if (s_getSentenceURL != null) {
+        if (AlphEdit.getContents.length > 2)
+        {
+            // expecting more than two args: it's old version
+            sentence = AlphEdit.getContents(s_getSentenceURL,
+                                            s_param["doc"],
+                                            s_param[sentParam]);
+    
+        }
+        else
+        {
+            // expecting two args: it's new version
+            var params = [];
+            params["doc"] = s_param["doc"];
+            params["app"] = s_param["app"];
+            params[sentParam] = s_param[sentParam];
+            sentence = AlphEdit.getContents(s_getSentenceURL, params);
+        }
     }
-    else
-    {
-        // expecting two args: it's new version
-        var params = [];
-        params["doc"] = s_param["doc"];
-        params["app"] = s_param["app"];
-        params[sentParam] = s_param[sentParam];
-        sentence = AlphEdit.getContents(s_getSentenceURL, params);
+    if (sentence ==  null) {
+        return;
     }
     if (typeof sentence =="string")
     {
@@ -1820,6 +1829,7 @@ function SaveContents(a_confirm)
     // transform sentence
     s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
     s_editTransform.setParameter(null, "e_app", s_param["app"]);
+    
     var doc = document.implementation.createDocument("", "", null);
     doc.appendChild(doc.importNode($("svg", document).get(0), true));
     var xml = s_editTransform.transformToDocument(doc);

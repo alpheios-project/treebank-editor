@@ -25,7 +25,8 @@ function EnterSentence(a_event)
     // get input form and URL to use to add sentence
     var form = $("form[name='input-form']", document);
     var url = $("meta[name='url']", document).attr("content");
-
+    var dir = $("#dir-buttons input:checked",form).val();
+    $("input[name='inputtext']",form).attr("dir",dir);
     // create text of sentence
     var fmt = $("#format-buttons input:checked", form).val();
     var lang = $("#lang-buttons input:checked", form).val();
@@ -55,4 +56,6 @@ function EnterSentence(a_event)
     form = $("form[name='submit-form']", document);
     $("input[name='doc']", form).attr("value", root.attr("doc"));
     $("input[name='s']", form).attr("value", root.attr("s"));
+    $("input[name='direction']",form).attr("value",dir);
+    $("input[name='lang']",form).attr("value",lang);
 };

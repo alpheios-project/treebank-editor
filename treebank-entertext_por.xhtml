@@ -1,0 +1,95 @@
+<!--
+  Copyright 2008-2009 Cantus Foundation
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.w3.org/1999/xhtml http://nlp.perseus.tufts.edu/syntax/treebank/agdt/1.6/data/treebank-1.5.xsd"
+ xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:svg="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+<link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
+        <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
+        <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+        <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+        <meta name="url" content="../xq/treebank-addsentence.xq"/>
+      </head>
+    <body>
+        <div class="alpheios-ignore">
+            <div id="alph-page-header">
+                <img src="http://repos1.alpheios.net/exist/rest/db/image/alpheios.png" alt="Alpheios" />
+            </div>
+        </div>
+        <div>
+            <form name="input-form" action="">
+                <fieldset>
+                    <legend>Input text:</legend>
+                    <textarea name="inputtext" rows="10" cols="80">Δένδρον παλαιὸν μεταφυτεύειν δύσκολον. </textarea>
+                </fieldset>
+                <fieldset id="format-buttons">
+                    <legend>Format:</legend>
+                    <input type="radio" id="format-aldt" name="format" value="aldt" checked="checked" />
+                    <label for="format-aldt">Árvore de
+                        Dependência Sintática de Língua Antiga (Ancient Language
+                        Dependency Treebank)</label>
+                    <input type="radio" id="format-catib" name="format" value="catib" />
+                    <label for="format-catib">Árvore Sintática do Árabe de Columbia
+                        (Columbia Arabic Treebank)</label>
+                    <input type="radio" id="format-proiel" name="format" value="proiel" />
+                    <label for="format-catib">PROIEL</label>
+                </fieldset>
+                <fieldset id="lang-buttons">
+                    <legend>Língua:</legend>
+                    <input type="radio" id="lang-grc" name="lang" value="grc" checked="checked"/>
+                    <label for="lang-grc">Grego</label>
+                    <input type="radio" id="lang-la" name="lang" value="la" />
+                    <label for="lang-la">Latim</label>
+                    <input type="radio" id="lang-ara" name="lang" value="ara" />
+                    <label for="lang-ara">Árabe</label>
+                    <input type="radio" id="lang-got" name="lang" value="got" />
+                    <label for="lang-got">Gótico</label>
+                    <input type="radio" id="lang-chu" name="lang" value="chu" />
+                    <label for="lang-chu">Eslavo Antigo Eclesiástico</label>
+                    <input type="radio" id="lang-en" name="lang" value="en" />
+                    <label for="lang-en">Inglês</label>
+                    <input type="radio" id="lang-zh" name="lang" value="zh" />
+                    <label for="lang-en">Chinês</label>
+                </fieldset>
+                <fieldset id="dir-buttons">
+                    <legend>Direção do texto:</legend>
+                    <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked" />
+                    <label for="dir-ltr">Left to Right</label>
+                    <input type="radio" id="dir-rtl" name="direction" value="rtl" />
+                    <label for="dir-rtl">Right to Left</label>
+                </fieldset>
+            </form>
+            <form name="submit-form" action="../app/treebank-editsentence.xhtml"
+        onsubmit="EnterSentence(event)">
+                <input type="hidden" name="doc" />
+                <input type="hidden" name="s" />
+                <input type="hidden" name="direction" value="ltr" />
+                <input type="hidden" name="lang" value="" />
+                <label for="sequential">Mostrar palavras sequencialmente</label>
+                <input type="checkbox" id="sequential" name="sequential" />
+                <div>
+                    <button type="submit">Editar</button>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

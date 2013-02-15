@@ -1,7 +1,7 @@
 <treebank xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" 
     xsi:schemaLocation="http://nlp.perseus.tufts.edu/syntax/treebank/1.5 treebank-1.5.xsd" xml:lang="grc"
-    format="gorman">
+    format="aldt">
     <date>Mon Oct 04 11:29:24 EDT 2010</date>
     <sentence id="1" document_id="Perseus:text:1999.01.0133" subdoc="book=1:card=1" span="μῆνιν0:.0">
         <primary>millermo</primary>

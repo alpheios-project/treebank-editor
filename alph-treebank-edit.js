@@ -107,6 +107,7 @@ function Init(a_event)
 
         // initialize internal params
         s_param["firebug"] = "no";
+        s_param["app"] = "editor";
 
         // get parameters from html metadata of form
         //  <meta name="alpheios-param-<name>" content="<value>"/>
@@ -166,6 +167,7 @@ function Init(a_event)
                            document).attr("content");
         if (getInfoURL)
         {
+            req = new XMLHttpRequest();
             // build list of content to be built
             var toBuild = s_param["buildContent"];
             toBuild = (toBuild && toBuild.length) ? toBuild.split(',') : [];
@@ -181,16 +183,27 @@ function Init(a_event)
                           (s_param["app"] == "viewer")) ? "&desc=y" : ""),
                      false);
             req.send(null);
+             if (req.status != 200)
+            {
+                var msg = "Can't get Format Info ";
+                alert(msg);
+                throw(msg);
+            }
             var root = $(req.responseXML.documentElement);
             if ($("desc", root).size() > 0)
                 s_tbDesc = $("desc", root).get(0);
-            if ((req.status != 200) || root.is("error"))
+            if (root.is("error"))
             {
                 var msg = root.is("error") ?
                             root.text() :
                             "Error getting info for treebank " + s_param["doc"];
                 alert(msg);
                 throw(msg);
+            }
+            if ((toBuild["menus"] || toBuild["style"] || toBuild["key"]) && s_tbDesc == null) {
+                var msg = "Unable to build menus for requested format";
+                alert(msg);
+                throw(msg);   
             }
 
             // save treebank attributes
@@ -223,7 +236,9 @@ function Init(a_event)
                         s_editTransform.transformToDocument(req.responseXML);
                 var styleRules = $(style).text().split('\n');
                 for (i in styleRules)
-                    document.styleSheets[0].insertRule(styleRules[i], 0);
+                    if (document.styleSheets[i] != null && document.styleSheets[i] != "") {
+                        document.styleSheets[0].insertRule(styleRules[i], 0);
+                    }
             }
             if (toBuild["key"])
             {
@@ -346,6 +361,7 @@ function Init(a_event)
     }
     catch(e)
     {
+        alert("Unable to load treebank data: " + e);
         Log(e);
     }
 

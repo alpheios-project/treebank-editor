@@ -236,7 +236,7 @@ function Init(a_event)
                         s_editTransform.transformToDocument(req.responseXML);
                 var styleRules = $(style).text().split('\n');
                 for (i in styleRules)
-                    if (document.styleSheets[i] != null && document.styleSheets[i] != "") {
+                    if (styleRules[i] != null && styleRules[i] != "") {
                         document.styleSheets[0].insertRule(styleRules[i], 0);
                     }
             }

@@ -100,7 +100,7 @@ declare function local:createSentence(
                     $s/*
                 }
         else 
-            let $text := normalize-space($a_data/text())
+            let $text := normalize-space($a_data)
             return
               element sentence
               {
@@ -112,8 +112,15 @@ declare function local:createSentence(
 };
 
 let $data := request:get-data()
-let $fmt := request:get-parameter('fmt',$data/@fmt)
-let $lang := request:get-parameter('lang',$data/@xml:lang)
+(: 
+   eXist 1.4.x interprets the put sentence element to be the root of the document 
+   eXist 2.x interprets the put sentence element to be the first child of the root
+:)
+let $sentence := if (local-name($data) = 'sentence') then $data 
+                 else if ($data/*:sentence) then $data/*:sentence
+                 else $data
+let $fmt := request:get-parameter('fmt',$sentence/@fmt)
+let $lang := request:get-parameter('lang',$sentence/@xml:lang)
 let $collName := "/db/repository/treebank.edit"
 let $docId := concat("sentences-", $fmt, '-', $lang)
 let $docName := concat($collName, '/', $docId, ".tb.xml")
@@ -129,7 +136,7 @@ return
   else if (not($lang))
   then
     element error { "No language specified" }
-  else if (not($data))
+  else if (not($sentence))
   then
     element error { "No data found" }
   else
@@ -142,8 +149,7 @@ return
                     xsi:schemaLocation="http://nlp.perseus.tufts.edu/syntax/treebank/1.5 treebank-1.5.xsd"
                     version="1.5">{
                 attribute format { $fmt },
-                attribute xml:lang { $lang },
-                local:createSentence($data/text(), $docId, 1)
+                attribute xml:lang { $lang }
               }</treebank>
             let $stored := xmldb:store($collName, concat($docId, ".tb.xml"), $newDoc)
             return
@@ -161,7 +167,7 @@ return
     else
         let $doc := doc($docName) 
         let $index := count($doc//sentence) 
-        let $sentences := local:createSentence($data, $docId, $index)
+        let $sentences := local:createSentence($sentence/text(), $docId, $index)
         return 
         if (count($sentences) > 0)
             then

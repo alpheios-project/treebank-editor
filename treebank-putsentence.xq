@@ -43,13 +43,15 @@ let $data := request:get-data()
    eXist 1.4.x interprets the put sentence element to be the root of the document 
    eXist 2.x interprets the put sentence element to be the first child of the root
 :)
+let $sentence := if (local-name($data) = 'sentence') then $data 
+                 else if ($data/*:sentence) then $data/*:sentence
+                 else ()
+
 let $docStem := 
-    if ($data/@alph-doc) then $data/@alph-doc 
-    else if ($data/*:sentence/@alph-doc) then $data/*:sentence/@alph-doc 
+    if ($sentence/@alph-doc) then $sentence/@alph-doc 
     else request:get-parameter('doc','') 
 let $sentId := 
-    if ($data/@alph-s)then $data/@alph-s 
-    else if ($data/*:sentence/@alph-s) then $data/*:sentence/@alph-s 
+    if ($sentence/@alph-s)then $sentence/@alph-s 
     else request:get-parameter('s','')
 let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
 
@@ -63,7 +65,7 @@ return
   else if (not(doc-available($docName)))
   then
     element error { concat("Treebank for ", $docStem, " not available") }
-  else if (not($data))
+  else if (not($sentence))
   then
     element error { "No data found" }
   else
@@ -82,7 +84,7 @@ return
         {
           $oldSentence/@*,
 
-          for $elt in $data/*
+          for $elt in $sentence/*
           return
             element { QName($ns, local-name($elt)) }
             {

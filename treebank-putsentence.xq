@@ -26,6 +26,9 @@
   where
     doc is the stem of document file name (without path or extensions)
     s is sentence id
+    doc and s can also be supplied in the document itself as 
+    the following attributes on the <sentence/> element:
+    @alph-doc and @alph-s
 
   Request data holds new XML content of sentence
  :)
@@ -36,8 +39,18 @@ declare namespace tb = "http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
 declare option exist:serialize "method=xml media-type=text/xml";
 
 let $data := request:get-data()
-let $docStem := $data/@alph-doc
-let $sentId := $data/@alph-s
+(: 
+   eXist 1.4.x interprets the put sentence element to be the root of the document 
+   eXist 2.x interprets the put sentence element to be the first child of the root
+:)
+let $docStem := 
+    if ($data/@alph-doc) then $data/@alph-doc 
+    else if ($data/*:sentence/@alph-doc) then $data/*:sentence/@alph-doc 
+    else request:get-parameter('doc','') 
+let $sentId := 
+    if ($data/@alph-s)then $data/@alph-s 
+    else if ($data/*:sentence/@alph-s) then $data/*:sentence/@alph-s 
+    else request:get-parameter('s','')
 let $docName := concat("/db/repository/treebank.edit/", $docStem, ".tb.xml")
 
 return

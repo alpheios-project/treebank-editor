@@ -40,9 +40,23 @@
          If the URL is present then it will take precedence over the parameter
          values, so if the parameters are to be used then the URL should be
          commented out.
+         The url should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+         APP_REPLACE : gets replaced with the app identifier (viewer or editor)
+         DESC_REPLACE : gets replaced with a y/n flag value if descriptive information
+                        will be included
     -->
-    <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq"/>
-
+    <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq?doc=DOC_REPLACE&amp;app=APP_REPLACE&amp;desc=DESC_REPLACE"/>
+    
+    <!-- a session cookie and HTTP header name can be supplied for session sharing with a server on the same domain
+         the content of the alpheios-sessionTokenName attribute should be the name of the cookie set by the server
+         the content of the alpheios-sessionHeaderName attribute should be the name of the HTTP header to send the token back to the server in -->
+    <!--
+    <meta name="alpheios-sessionTokenName" content="csrftoken"/>
+    <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
+     -->
+    
     <!-- Parameters controlling behavior of the editor
          All names are prefixed in the <meta> tags with "alpheios-param-".
          All can be overridden by parameters supplied at invocation time to
@@ -97,11 +111,20 @@
     <meta name="alpheios-param-sequential" content="no"/>
 
     <!-- URLs to get and put a single sentence in treebank XML -->
-    <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq"/>
-    <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq"/>
+    <!-- The urls should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+         S_REPLACE : gets replaced with the sentence identifier
+    -->
+    <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE"/>
+    <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE"/>
 
     <!-- URL to call when exiting and label to use on exit button -->
-    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq"/>
+    <!-- The url should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+    -->
+    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq?doc=DOC_REPLACE"/>
     <meta name="alpheios-exitLabel" content="Sentence&#160;list"/>
 
     <!-- Provide style here if buildContent param does not contain "style".
@@ -223,6 +246,21 @@
                     <img src="../image/list-add.png" alt="+"/>
                   </button>
                 </td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                  <td>
+                  <form 
+                    method="post" action="../xq/treebank-export.xq" id="exportform">
+                    <button id="export-xml-button" class="icon"
+                      onclick="ClickOnExport(event)" title="Export sentence XML">Export XML</button>
+                    <input type="hidden" name="sentenceForExport" id="sentenceForExport"/>
+                    <input type="hidden" name="doc" value="tbdownload.xml"/>
+                    <input type="hidden" name="sentenceExportFormat" value=""/>
+                    <input type="hidden" name="sentenceExportLang" value=""/>
+                  </form>
+                  </td>
               </tr>
             </table>
             <!-- Provide menus here if buildContent param does not contain "menus" -->

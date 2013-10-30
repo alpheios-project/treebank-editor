@@ -173,15 +173,13 @@ function Init(a_event)
             toBuild = (toBuild && toBuild.length) ? toBuild.split(',') : [];
             for (i in toBuild)
                 toBuild[toBuild[i]] = toBuild[i];
-
+           
             // get info on format
-            req.open("GET",
-                     getInfoURL +
-                        "?doc=" + s_param["doc"] +
-                        "&app=" + s_param["app"] +
-                        (((toBuild.length > 0) ||
-                          (s_param["app"] == "viewer")) ? "&desc=y" : ""),
-                     false);
+            var builtUrl = getInfoURL.replace(/DOC_REPLACE/,s_param["doc"]);
+            builtUrl = builtUrl.replace(/APP_REPLACE/,s_param["app"]);
+            builtUrl = builtUrl.replace(/DESC_REPLACE/,(((toBuild.length > 0) ||
+                          (s_param["app"] == "viewer")) ? "y" : ""));
+            req.open("GET", builtUrl, false);
             req.send(null);
              if (req.status != 200)
             {
@@ -336,8 +334,9 @@ function Init(a_event)
         // set various values in html
         var exitForm = $("form[name='sent-navigation-exit']", document);
         var exitURL = $("meta[name='alpheios-exitURL']", document);
+        var exitAction = exitURL.attr("content").replace(/DOC_REPLACE/,s_param["doc"]);
         var exitLabel = $("meta[name='alpheios-exitLabel']", document);
-        exitForm.attr("action", exitURL.attr("content"));
+        exitForm.attr("action", exitAction);
         $("input[name='doc']", exitForm).attr("value", s_param["doc"]);
         $("button", exitForm).text(exitLabel.attr("content"));
         $("html", document).attr("xml:lang", s_param["lang"]);
@@ -383,6 +382,9 @@ function InitNewSentence()
     var sentParam = (s_param["s"] ? "s" : "id");
     if (localSentence) {
         sentence = localSentence
+        $("#sent-navigation").hide();
+        $("form[name=sent-navigation-exit]").remove();
+        $("#save-button").hide();
     }   
     else if (s_getSentenceURL != null) {
         if (AlphEdit.getContents.length > 2)
@@ -2656,4 +2658,22 @@ function traverseTreeDown()
         s_currentId = neighbor.attr("id");
         highlightWord(document, s_currentId);
     }
+};
+
+function ClickOnExport(a_evt) {
+    s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
+    s_editTransform.setParameter(null, "e_app", s_param["app"]);
+    var doc = document.implementation.createDocument("", "", null);
+    doc.appendChild(doc.importNode($("svg", document).get(0), true));
+    var xml = s_editTransform.transformToDocument(doc);
+    AlphEdit.ExportContents(xml,s_param['lang'],$(s_tbDesc).parent().attr('format'));
+};
+
+function ClickOnExportDisplay(a_evt) {
+s_editTransform.setParameter(null, "e_mode", "svg-to-xml");
+    s_editTransform.setParameter(null, "e_app", s_param["app"]);
+    var doc = document.implementation.createDocument("", "", null);
+    doc.appendChild(doc.importNode($("svg", document).get(0), true));
+    var xml = s_editTransform.transformToDocument(doc);
+    AlphEdit.ExportDisplay(xml,s_param['lang'],$(s_tbDesc).parent().attr('format'));
 };

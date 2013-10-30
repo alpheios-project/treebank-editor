@@ -88,5 +88,16 @@
         <div><button type="submit">Edit</button></div>
       </form>
     </div>
+    <p/>
+    <div>
+      <form name="upload-form" 
+        action="../xq/treebank-getupload.xq" enctype="multipart/form-data" method="post">
+        <label for="upload">Or upload a treebank XML file:</label>
+        <input type="file" name="upload"/><br/>
+        <label for="i">And use sentence:</label>
+        <input type="text" name="i" value="1"></input>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
   </body>
 </html>

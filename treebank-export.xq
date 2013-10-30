@@ -28,8 +28,16 @@ import module namespace util="http://exist-db.org/xquery/util";
               
 declare option exist:serialize "method=xml media-type=application/xml";
 
-
-let $docName := request:get-parameter("docName","") 
-let $data := util:parse(request:get-parameter("docForExport",""))
+let $docName := request:get-parameter("doc","") 
+let $format := request:get-parameter("sentenceExportFormat","")
+let $lang := request:get-parameter("sentenceExportLang","")
+let $data := util:parse(request:get-parameter("sentenceForExport",""))
 let $dispo := response:set-header("Content-disposition",concat("attachment; filename=",$docName))
-return $data
+return 
+    (: TODO support other namespaces  here :)
+    <treebank xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5" format="{$format}" xml:lang="{$lang}">
+        <sentence xmlns:treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5" id="1">
+            {$data/*:sentence/*}
+        </sentence>
+    </treebank>
+                

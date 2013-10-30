@@ -1,7 +1,9 @@
 /**
  * @fileoverview alph-treebank-enter - treebank entry
  *  
- * Copyright 2009 Cantus Foundation
+ * 
+ * Copyright 2013 The Alpheios Project, Ltd.
+ *           2009 Cantus Foundation
  * http://alpheios.net
  * 
  * This file is part of Alpheios.

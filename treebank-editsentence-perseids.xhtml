@@ -1,43 +1,23 @@
-(:
-Copyright 2012 The Alpheios Project, Ltd.
-http://alpheios.net
-
-This file is part of Alpheios.
-
-Alpheios is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Alpheios is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-:)
-
-import module namespace request="http://exist-db.org/xquery/request";
-import module namespace util="http://exist-db.org/xquery/util";
-declare namespace treebank="http://nlp.perseus.tufts.edu/syntax/treebank/1.5";
-
-
-declare option exist:serialize
-"method=xhtml media-type=application/xhtml+xml omit-xml-declaration=no indent=yes 
-doctype-public=-//W3C//DTD&#160;XHTML&#160;1.0&#160;Transitional//EN
-doctype-system=http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd";
-
-let $startSent := request:get-parameter("s", "1")
-let $docString := request:get-parameter("doc","")
-let $docName := request:get-parameter("f","")
-
-let $doc := util:eval(document { $docString})
-let $format := if ($doc/@format) then $doc/@format else "aldt"
-let $lang := $doc/@xml:lang
-let $sentence := $doc/*:sentence[@id=$startSent]
-
-return
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008-2009 Cantus Foundation
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:svg="http://www.w3.org/2000/svg"
   xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -60,8 +40,21 @@ return
          If the URL is present then it will take precedence over the parameter
          values, so if the parameters are to be used then the URL should be
          commented out.
+         The url should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+         APP_REPLACE : gets replaced with the app identifier (viewer or editor)
+         DESC_REPLACE : gets replaced with a y/n flag value if descriptive information
+                        will be included
     -->
-    <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq"/>
+    <meta name="alpheios-getInfoURL" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/DOC_REPLACE/info"/>
+    
+    <!-- a session cookie and HTTP header name can be supplied for session sharing with a server on the same domain
+         the content of the alpheios-sessionTokenName attribute should be the name of the cookie set by the server
+         the content of the alpheios-sessionHeaderName attribute should be the name of the HTTP header to send the token back to the server in -->
+    <meta name="alpheios-sessionTokenName" content="csrftoken"/>
+    <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
+    
 
     <!-- Parameters controlling behavior of the editor
          All names are prefixed in the <meta> tags with "alpheios-param-".
@@ -108,23 +101,29 @@ return
     -->
     <meta name="alpheios-param-app" content="editor"/>
     <meta name="alpheios-param-numSentences" content="1"/>
-    <meta name="alpheios-param-lang" content="{$lang}"/>
+    <meta name="alpheios-param-lang" content="la"/>
     <meta name="alpheios-param-direction" content="ltr"/>
     <meta name="alpheios-param-arcEditing" content="yes"/>
     <meta name="alpheios-param-nodeEditing" content="yes"/>
     <meta name="alpheios-param-buildContent" content="menus,style,key"/>
     <meta name="alpheios-param-sentenceNavigation" content="yes"/>
     <meta name="alpheios-param-sequential" content="no"/>
-    <meta name="alpheios-param-format" content="{$format}"/>
-    <meta name="alpheios-param-doc" content="{concat('user-',$lang,'-',$format)}"/>
-    <meta name="alpheios-param-docnamespace" content="{$doc/@xmlns}"/>
 
     <!-- URLs to get and put a single sentence in treebank XML -->
-    <meta name="alpheios-getSentenceURL" content=""/>
-    <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence-local.xq"/>
-    
+    <!-- The urls should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+         S_REPLACE : gets replaced with the sentence identifier
+    -->
+    <meta name="alpheios-getSentenceURL" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/DOC_REPLACE/partial?q=s%3DS_REPLACE"/>
+    <meta name="alpheios-putSentenceURL" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/DOC_REPLACE/partial?q=s%3DS_REPLACE"/>
+
     <!-- URL to call when exiting and label to use on exit button -->
-    <meta name="alpheios-exitURL" content="../xq/treebank-getlist-local.xq"/>
+    <!-- The url should contain the following placeholders which will be filled by 
+         the application:
+         DOC_REPLACE : gets replaced with the document identifier
+    -->
+    <meta name="alpheios-exitURL" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/DOC_REPLACE/return/edit"/>
     <meta name="alpheios-exitLabel" content="Sentence&#160;list"/>
 
     <!-- Provide style here if buildContent param does not contain "style".
@@ -136,12 +135,6 @@ return
     <style type="text/css"/>
   </head>
   <body onkeypress="Keypress(event)" onload="Init(event)" style="display:none">
-    <div id="doc-xml" style="display:none;">
-        {$doc}
-    </div>
-    <div id="sentence-xml" data-sentencenum="{$startSent}" style="display:none;">
-        {$sentence}
-    </div>
     <table style="border:none; padding:0; width:100%">
       <tr>
         <td>
@@ -149,7 +142,7 @@ return
             <table style="border:none; padding:0">
               <tr>
                 <td>
-                  <!--div id="sent-navigation">
+                  <div id="sent-navigation">
                     <table style="border:1px solid black; padding:0">
                       <tr>
                         <td>
@@ -180,13 +173,12 @@ return
                         </td>
                       </tr>
                     </table>
-                  </div-->
+                  </div>
                 </td>
                 <td>
-                  <form onsubmit="return SubmitExit(this)" id="sent-navigation-exit"
-                    name="sent-navigation-exit" method="post">
-                    <input type="hidden" name="docString" id="docForList" value="{$docString}"/>
-                    <input type="hidden" name="docName" value="{$docName}"/>
+                  <form onsubmit="return SubmitExit(this)"
+                    name="sent-navigation-exit">
+                    <input type="hidden" name="doc"/>
                     <input type="hidden" name="s"/>
                     <button type="submit">Exit</button>
                   </form>
@@ -240,14 +232,11 @@ return
                   </table>
                 </td>
                 <td>
-                  <form method="post" action="{concat("treebank-export.xq?doc=",$docName)}" id="exportform">
-                  <button id="export-xml-button" disabled="disabled" class="icon"
-                    onclick="ClickOnExport(event)" title="Export sentence XML">Export XML</button>
-                  <button id="export-svg-button" disabled="disabled" class="icon"
-                    onclick="ClickOnExportDisplay(event)" title="Export sentence display">Export XML</button>
-                  <input type="hidden" name="docForExport" id="docForExport"/>
-                  <input type="hidden" name="docName" value="{$docName}"/>
-                  </form>
+                  <button id="save-button" disabled="disabled" class="icon"
+                    onclick="ClickOnSave(event)" title="Save sentence"
+                    base="../image/document-save">
+                    <img src="../image/document-save-disabled.png" alt="✇"/>
+                  </button>
                 </td>
                 <td>
                   <button id="nextword-button" class="icon mode-button"
@@ -256,6 +245,21 @@ return
                     <img src="../image/list-add.png" alt="+"/>
                   </button>
                 </td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                  <td>
+                  <form 
+                    method="post" action="../xq/treebank-export.xq" id="exportform">
+                    <button id="export-xml-button" class="icon"
+                      onclick="ClickOnExport(event)" title="Export sentence XML">Export XML</button>
+                    <input type="hidden" name="sentenceForExport" id="sentenceForExport"/>
+                    <input type="hidden" name="doc" value="tbdownload.xml"/>
+                    <input type="hidden" name="sentenceExportFormat" value=""/>
+                    <input type="hidden" name="sentenceExportLang" value=""/>
+                  </form>
+                  </td>
               </tr>
             </table>
             <!-- Provide menus here if buildContent param does not contain "menus" -->

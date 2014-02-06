@@ -275,4 +275,17 @@ span.alph-tooltip {
     position: absolute;
     z-index: 1000;
 }
+#tree-title {
+    text-align:center;
+    font-style:italic;
+}
 
+#alpheios-put-notice {
+    text-align:center;
+    font-weight: bold;
+    color:green;
+}
+
+#alpheios-put-notice.error {
+    color:red;
+}

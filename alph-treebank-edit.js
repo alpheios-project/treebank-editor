@@ -188,8 +188,9 @@ function Init(a_event)
                 throw(msg);
             }
             var root = $(req.responseXML.documentElement);
-            if ($("desc", root).size() > 0)
+            if ($("desc", root).size() > 0) {
                 s_tbDesc = $("desc", root).get(0);
+            }
             if (root.is("error"))
             {
                 var msg = root.is("error") ?
@@ -415,10 +416,17 @@ function InitNewSentence()
     var root = $(sentence.documentElement);
     s_param["document_id"] = root.attr("document_id");
     s_param["subdoc"] = root.attr("subdoc");
+    
+    // add the document info to the display
+    $(".alpheios-document-id").html(s_param["document_id"]);
+    $(".alpheios-subdoc").html(s_param["subdoc"]);
     var sentId = root.attr("id");
     s_editTransform.setParameter(null, "e_mode", "xml-to-svg");
     s_editTransform.setParameter(null, "e_app", s_param["app"]);
-    if (s_tbDesc)
+    // TODO THIS DOES NOT WORK IN WEBKIT BROWSERS - THEY DO NOT SEEM
+    // TO SUPPORT PASSING A NODE AS A PARAMETER TO XSLT PROCESSOR
+    // TRY USING SAXON-CE??
+    if (s_tbDesc) 
         s_editTransform.setParameter(null, "e_desc", s_tbDesc);
     var svg = s_editTransform.transformToDocument(sentence);
     $("svg", document).empty().append($(svg.documentElement).children());

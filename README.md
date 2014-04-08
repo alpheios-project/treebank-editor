@@ -6,6 +6,16 @@ Alpheios Treebank Editor
 (ported from SourceForge https://svn.code.sf.net/p/alpheios/code/utilities/treebank-editor/)
 
 
+
+### Installation
+
+- Follow the [Installation
+  Instructions](http://alpheios.net/content/installation-alpheios-treebank-editor) to setup a local eXist environment
+- To include recent updates of this repository download it as a [zip file](https://github.com/alpheios-project/treebank-editor/archive/master.zip)
+- Use this zip file to repeat the process where you restore your
+  database from within the eXist client interface
+
+--------------
 Copyright 2009 Cantus Foundation
 http://alpheios.net
 

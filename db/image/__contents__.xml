@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/image" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:21-05:00" version="1">
+    <resource type="BinaryResource" name="Treebank_Editor_Sequence_Diagram.jpg" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="Treebank_Editor_Sequence_Diagram.jpg" mimetype="image/jpeg"/>
+    <resource type="BinaryResource" name="alpheios.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="alpheios.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="document-save-disabled.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="document-save-disabled.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="document-save.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="document-save.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-expansion-controls.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-expansion-controls.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-redo-disabled.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-redo-disabled.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-redo.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-redo.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-tool-ellipsis.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-tool-ellipsis.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-tool-label.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-tool-label.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-tool-tree.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-tool-tree.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-undo-disabled.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-undo-disabled.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="edit-undo.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="edit-undo.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="list-add-disabled.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="list-add-disabled.png" mimetype="image/png"/>
+    <resource type="BinaryResource" name="list-add.png" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="list-add.png" mimetype="image/png"/>
+</collection>

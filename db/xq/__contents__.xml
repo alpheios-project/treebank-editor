@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:21-05:00" version="1">
+    <resource type="BinaryResource" name="treebank-addsentence.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-addsentence.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-editsentence-local.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-editsentence-local.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-export.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-export.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getinfo.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getinfo.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getlist-local.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getlist-local.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getlist-upload.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getlist-upload.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getlist.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getlist.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getlist.xquery" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getlist.xquery" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-getsentence.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-getsentence.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-putsentence-local.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-putsentence-local.xq" mimetype="application/xquery"/>
+    <resource type="BinaryResource" name="treebank-putsentence.xq" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:22-05:00" modified="2013-02-15T07:37:22-05:00" filename="treebank-putsentence.xq" mimetype="application/xquery"/>
+    <subcollection name="config" filename="config"/>
+</collection>

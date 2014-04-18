@@ -377,6 +377,9 @@ function InitNewSentence()
     // clear undo/redo history
     AlphEdit.clearHistory();
 
+    // clear past notifications
+    AlphEdit.clearNotifications();
+
     // get and transform treebank sentence
     var sentence;
     var localSentence = $('#sentence-xml').html();

@@ -14,6 +14,8 @@ Alpheios Treebank Editor
 - To include recent updates of this repository download it as a [zip file](https://github.com/alpheios-project/treebank-editor/archive/master.zip)
 - Use this zip file to repeat the process where you restore your
   database from within the eXist client interface
+- Make sure you also use the latest version of the [editor
+  utilities](https://github.com/alpheios-project/edit-utils)
 
 --------------
 Copyright 2009 Cantus Foundation

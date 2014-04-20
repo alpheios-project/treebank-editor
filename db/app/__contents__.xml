@@ -3,7 +3,6 @@
     <resource type="XMLResource" name="treebank-editsentence-aldt.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-editsentence-aldt.xhtml" mimetype="application/xhtml+xml"/>
     <resource type="XMLResource" name="treebank-editsentence.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-editsentence.xhtml" mimetype="application/xhtml+xml"/>
     <resource type="XMLResource" name="treebank-entersentence.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-entersentence.xhtml" mimetype="application/xhtml+xml"/>
-    <resource type="XMLResource" name="treebank-entertb-local.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-entertb-local.xhtml" mimetype="application/xhtml+xml"/>
     <resource type="XMLResource" name="treebank-entertext.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-entertext.xhtml" mimetype="application/xhtml+xml"/>
     <resource type="XMLResource" name="treebank-entertext_por.xhtml" owner="admin" group="dba" mode="755" created="2013-02-15T07:42:44-05:00" modified="2013-02-15T07:42:44-05:00" filename="treebank-entertext_por.xhtml" mimetype="application/xhtml+xml"/>
 </collection>

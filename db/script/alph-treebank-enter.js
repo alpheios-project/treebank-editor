@@ -74,8 +74,8 @@ function EnterSentence(a_event)
         req.open("GET", base_svc, false);
         req.send(null);
         var tokenized = req.responseXML;
-        var root = $(tokenized.documentElement);
-        if ((req.status != 200) || root.is("error"))
+        var root = tokenized ? $(tokenized.documentElement) : null;
+        if (root ==null ||req.status != 200 || root.is("error"))
         {
             var msg = root.is("error") ? root.text() :
                 "Error tokenizing" +
@@ -99,6 +99,13 @@ function EnterSentence(a_event)
                 var transformDoc = req.responseXML;
                 var transformProc= new XSLTProcessor();
                 transformProc.importStylesheet(transformDoc);
+                transformProc.setParameter(null,"e_docuri",$("input[name='text_uri']").val());
+                transformProc.setParameter(null,"e_lang",$("input[name='lang']").val());
+                transformProc.setParameter(null,"e_format",$("input[name='format']").val());
+                transformProc.setParameter(null,"e_agenturi",base_svc);
+                transformProc.setParameter(null,"e_datetime",new Date().toDateString());
+                // TODO should probably allow identification of collection in input
+                transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']").val() + 'tb');
                 treebank = transformProc.transformToDocument(tokenized);
                 var x = "test";
             } catch (a_e) {
@@ -127,7 +134,7 @@ function EnterSentence(a_event)
         // another hack to make AlphEdit think we've done something
         AlphEdit.pushHistory(["create"],null);
         // send synchronous request to add
-        resp = AlphEdit.putContents(treebank,url,$("input[name='lang']",form).val(),'');
+        resp = AlphEdit.putContents(treebank,url,'','');
     } catch (a_e) {
         alert(a_e);
     }

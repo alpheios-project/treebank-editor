@@ -31,14 +31,14 @@
     <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
     
     <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
-    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create?urn=urn:cite:perseus:DOC_REPLACEtb"/>
+    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create"/>
     <meta name="tokenization_service" 
         content="http://services.perseids.org/bsp/annotationservice/annotation/template/text"
         data-params="text_uri mime_type lang template_format inputtext|text lang"
         data-transform=""/>
     <meta name="tokenization_service_lat"
       content="http://services.perseids.org/llt/segtok"
-      data-params="xml inline text_uri|uri split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text"
+      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text"
       data-transform="../xslt/segtok_to_tb.xsl"/>
   </head>
   <body>
@@ -51,7 +51,7 @@
       <form name="input-form" action="">
         <fieldset>
           <legend>Input text:</legend>
-          <label for="text_uri">URI</label>
+          <label for="text_uri">Text URI</label>
           <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
           <textarea name="inputtext" rows="10" cols="80"
             >tantum in amore preces et bene facta valent</textarea>

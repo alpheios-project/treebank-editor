@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008-2009 Cantus Foundation
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
+    <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+
+    <meta name="alpheios-sessionTokenName" content="csrftoken"/>
+    <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
+    
+    <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
+    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create?urn=urn:cite:perseus:DOC_REPLACEtb"/>
+    <meta name="tokenization_service" 
+        content="http://services.perseids.org/bsp/annotationservice/annotation/template/text"
+        data-params="text_uri mime_type lang template_format inputtext|text lang"
+        data-transform=""/>
+    <meta name="tokenization_service_lat"
+      content="http://services.perseids.org/llt/segtok"
+      data-params="xml inline text_uri|uri split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text"
+      data-transform="../xslt/segtok_to_tb.xsl"/>
+  </head>
+  <body>
+    <div class="alpheios-ignore">
+      <div id="alph-page-header">
+        <img src="../image/alpheios.png" alt="Alpheios"/>
+      </div>
+    </div>
+    <div>
+      <form name="input-form" action="">
+        <fieldset>
+          <legend>Input text:</legend>
+          <label for="text_uri">URI</label>
+          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
+          <textarea name="inputtext" rows="10" cols="80"
+            >tantum in amore preces et bene facta valent</textarea>
+        </fieldset>
+        <fieldset id="format-buttons">
+          <legend>Format:</legend>
+          <input type="radio" id="format-aldt" name="format" value="aldt"
+            checked="checked"/>
+          <label for="format-aldt">Ancient Language Dependency Treebank</label>
+        </fieldset>
+        <fieldset id="lang-buttons">
+          <legend>Language:</legend>
+          <input type="radio" id="lang-grc" name="lang" value="grc"/>
+          <label for="lang-grc">Greek</label>
+          <input type="radio" id="lang-lat" name="lang" value="lat"
+            checked="checked"/>
+          <label for="lang-lat">Latin</label>
+        </fieldset>
+        <fieldset id="dir-buttons">
+          <legend>Text Direction:</legend>
+          <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked"/>
+          <label for="dir-ltr">Left to Right</label>
+          <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
+          <label for="dir-rtl">Right to Left</label>
+        </fieldset>
+        <fieldset id="tokenization-options">
+          <legend>Tokenization Options:</legend>
+          <input type="checkbox" id="merge-tokens" name="merge-tokens"/>
+          <label for="merge-tokens">Merge split words</label>
+          <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
+          <label for="split-tokens">Split Enclytics</label>
+          <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
+          <label for="shift-tokens">Shift Enclytics</label>
+          <input type="hidden" name="template_format" value="Perseus"/>
+          <input type="hidden" id="mime_type" name="mime-type" value="text/plain"/> 
+          <input type="hidden" id="xml" name="xml" value="false"/>
+          <input type="hidden" id="inline" name="inline" value="true"/>
+        </fieldset>
+      </form>
+      <form name="submit-form" action="../app/treebank-editsentence-perseids-test.xhtml"
+        onsubmit="EnterSentence(event)">
+        <input type="hidden" name="doc"/>
+        <input type="hidden" name="s"/>
+        <input type="hidden" name="direction" value="ltr"/>
+        <input type="hidden" name="lang" value=""/>
+        <label for="sequential">Show words sequentially</label>
+        <input type="checkbox" id="sequential" name="sequential"/>
+        <div><button type="submit">Edit</button></div>
+      </form>
+    </div>
+    <p/>
+    <div>
+      <form name="upload-form" 
+        action="../xq/treebank-getupload.xq" enctype="multipart/form-data" method="post">
+        <p>Or Upload Base XML Treebank:</p>
+        <label for="uploaduri">From URL:</label>
+        <input type="text" name="uploaduri"></input>
+        <button type="submit">Upload</button>
+        <label for="upload">From local file:</label>
+        <input type="file" name="upload"/><br/>
+      </form>
+    </div>
+  </body>
+</html>

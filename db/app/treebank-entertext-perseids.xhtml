@@ -92,7 +92,7 @@
         </fieldset>
       </form>
       <form name="submit-form" action="../app/treebank-editsentence-perseids-test.xhtml"
-        onsubmit="EnterSentence(event)">
+        onsubmit="return EnterSentence(event);">
         <input type="hidden" name="doc"/>
         <input type="hidden" name="s"/>
         <input type="hidden" name="direction" value="ltr"/>
@@ -104,15 +104,8 @@
     </div>
     <p/>
     <div>
-      <form name="upload-form" 
-        action="../xq/treebank-getupload.xq" enctype="multipart/form-data" method="post">
         <p>Or Upload Base XML Treebank:</p>
-        <label for="uploaduri">From URL:</label>
-        <input type="text" name="uploaduri"></input>
-        <button type="submit">Upload</button>
-        <label for="upload">From local file:</label>
-        <input type="file" name="upload"/><br/>
-      </form>
+        <input type="file" id="file" name="files[]" onchange="startRead()"/>
     </div>
   </body>
 </html>

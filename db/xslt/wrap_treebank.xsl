@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:tei="http://www.tei-c.org/ns/1.0"
+    xmlns:oa="http://www.w3.org/ns/oa#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:prov="http://www.w3.org/ns/prov#"
+    xmlns:cnt="http://www.w3.org/2008/content#"
+    version="1.0">
+    
+    <!-- this template wraps a treebank annotation in an OA container.
+         
+         parameters 
+            e_datetime - the datetime of the serialization
+            e_collection - the urn of the collection which the annotation is/will be a member of
+    -->
+    
+    <xsl:param name="e_datetime"/>
+    <xsl:param name="e_collection" select="'urn:cite:perseus:'"/>
+    
+    <xsl:output indent="yes"></xsl:output>
+    
+    <xsl:template match="/">
+        
+        <!-- a hack to get a uuid for the body -->
+        <xsl:variable name="target" select="//sentence[1]/@document_id"/> 
+        <xsl:variable name="bodyid" select="concat('urn:uuid',generate-id(//treebank))"/>
+        <xsl:variable name="lang" select="//treebank/@xml:lang"/>
+        <xsl:variable name="collection" select="concat($e_collection,$lang,'tb')"/>
+        <xsl:element name="RDF" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <xsl:element name="Annotation" namespace="http://www.w3.org/ns/oa#">
+                <xsl:element name="memberOf" xmlns="http://purl.org/dc/dcam/">
+                    <xsl:attribute name="rdf:resource"><xsl:value-of select="$collection"/></xsl:attribute>
+                </xsl:element>
+                <xsl:element name="hasTarget" namespace="http://www.w3.org/ns/oa#">
+                    <xsl:attribute name="rdf:resource"><xsl:value-of select="$target"/></xsl:attribute>
+                </xsl:element>
+                <xsl:element name="hasBody" namespace="http://www.w3.org/ns/oa#">
+                    <xsl:attribute name="rdf:resource"><xsl:value-of select="$bodyid"/></xsl:attribute>
+                </xsl:element>
+                <!-- TODO this isn't the best motivation  we are going to need to subclass -->
+                <xsl:element name="isMotivatedBy" namespace="http://www.w3.org/ns/oa#">
+                    <xsl:attribute name="rdf:resource">oa:linking</xsl:attribute>
+                </xsl:element>
+            <xsl:element name="ContentAsXML" namespace="http://www.w3.org/ns/oa#">
+                <xsl:attribute name="rdf:about"><xsl:value-of select="$bodyid"/></xsl:attribute>
+                <xsl:element name="cnt:rest">
+                    <xsl:attribute name="rdf:parseType">Literal</xsl:attribute>
+                    <xsl:apply-templates></xsl:apply-templates>
+                </xsl:element>
+            </xsl:element>
+            </xsl:element>
+        </xsl:element>
+    </xsl:template>
+    
+    <xsl:template match="@*">
+        <xsl:copy/>
+    </xsl:template>
+
+    <xsl:template match="*">
+        <xsl:copy>
+            <xsl:apply-templates select="@*"/>
+            <xsl:apply-templates select="*"/>
+        </xsl:copy>
+        
+    </xsl:template>
+    
+</xsl:stylesheet>

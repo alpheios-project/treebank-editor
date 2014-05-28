@@ -68,7 +68,7 @@ function detect_language() {
  * Handler for the text_uri input to try to load the text
  */
 function load_text() {
-    $("textarea[name='inputtext']").val("loading...");
+    $("textarea[name='inputtext']").attr("placeholder","loading...");
     if ($("input[name='text_uri']").val().match(/^http/)) {
         $.ajax({
             url: $("input[name='text_uri']").val(),
@@ -86,7 +86,7 @@ function load_text() {
                         $("input[name='mime_type']").val("text/xml");
                         $("input[name='xml']").val("true");
                     } catch (a_e) {
-                         $("textarea[name='inputtext']").val("Unable to process text: " + a_e);   
+                         $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);   
                     }   
                 } else {
                     // TODO could eventually suppport other input formats
@@ -98,7 +98,7 @@ function load_text() {
                 
             },
             error: function(a_req,a_text,a_error) {
-               $("textarea[name='inputtext']").val("ERROR loading " + $("input[name='text_uri']").val() +" : " + a_text);
+               $("textarea[name='inputtext']").attr("placeholder","ERROR loading " + $("input[name='text_uri']").val() +" : " + a_text);
             }
         });
     }    

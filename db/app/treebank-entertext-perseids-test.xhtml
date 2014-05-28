@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2014 The Alpheios Project, Ltd.
+  http://alpheios.net
+  
+  This file is part of Alpheios.
+  
+  Alpheios is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Alpheios is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
+    <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
+    <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+
+    <!-- cookie and header name for CSRF session token  -->
+    <meta name="alpheios-sessionTokenName" content="csrftoken"/>
+    <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
+    
+    <!-- url to ping the server to set/refresh the CSRF cookie -->
+    <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
+    
+    <!-- url to POST to to create store a new treebank template -->
+    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create/DOC_REPLACE"/>
+    
+    <!-- default url to the tokenization service to use to process the input text. 
+         can be overridden per language.
+         - @content contains the base url for the tokenizatoin service POST 
+         - @data-params contains the names of input elements from the form which should
+           be forwarded to the tokenization service.  The format of this is a space separated list of 
+           attribute names. the attribute names optionally can be | separated map from the name of this 
+           parameter in the input form to the name of the parameter on the tokenization service.
+           this is a complete hack but was a quick and dirty way to reuse the existing form
+         - @data-transform contains the path to the XSLT transformation to apply to the tokenization
+           service output to create the treebank template for posting to to the back end storage service
+    -->
+    <meta name="tokenization_service" 
+        content="http://services.perseids.org/bsp/annotationservice/annotation/template/text"
+        data-params="mime_type lang template_format inputtext|text lang"
+        data-transform="../xslt/wrap_treebank.xsl"/>
+    
+    <!-- override the tokenization service to use for Latin text input. See above for description of parameters -->
+    <meta name="tokenization_service_lat"
+      content="http://services.perseids.org/llt/segtok"
+      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
+      data-transform="../xslt/segtok_to_tb.xsl"/>
+    
+    <!-- path to a transformation which wraps a treebank file in OA -->
+    <meta name="oa_wrapper_transform"
+      content="../xslt/wrap_treebank.xsl"/>
+  </head>
+  <body>
+    <div class="alpheios-ignore">
+      <div id="alph-page-header">
+        <img src="../image/alpheios.png" alt="Alpheios"/>
+      </div>
+    </div>
+    <div>
+      <form name="input-form" action="">
+        <fieldset>
+          <legend>Input text:</legend>
+          <label for="text_uri">Text URI</label>
+          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
+          <textarea name="inputtext" rows="10" cols="80" 
+              placeholder="Enter the text you want to treebank..."
+            ></textarea>
+        </fieldset>
+        <fieldset id="format-buttons">
+          <legend>Format:</legend>
+          <input type="radio" id="format-aldt" name="format" value="aldt"
+            checked="checked"/>
+          <label for="format-aldt">Ancient Language Dependency Treebank</label>
+        </fieldset>
+        <fieldset id="lang-buttons">
+          <legend>Language:</legend>
+          <input type="radio" id="lang-grc" name="lang" value="grc"/>
+          <label for="lang-grc">Greek</label>
+          <input type="radio" id="lang-lat" name="lang" value="lat"
+            checked="checked"/>
+          <label for="lang-lat">Latin</label>
+        </fieldset>
+        <fieldset id="dir-buttons">
+          <legend>Text Direction:</legend>
+          <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked"/>
+          <label for="dir-ltr">Left to Right</label>
+          <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
+          <label for="dir-rtl">Right to Left</label>
+        </fieldset>
+        <!-- TODO this should be customizable per tokenization service -->
+        <fieldset id="tokenization-options">
+          <legend>Tokenization Options:</legend>
+          <input type="checkbox" id="merge-tokens" name="merge-tokens"/>
+          <label for="merge-tokens">Merge split words</label>
+          <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
+          <label for="split-tokens">Split Enclytics</label>
+          <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
+          <label for="shift-tokens">Shift Enclytics</label><br/>
+          <label for="remove_tei[]">Ignore TEI Tags:</label>
+          <!-- TODO make it possible to add and remove values -->
+          <input type="text" name="remove_tei[]" value="head"/>
+          <input type="text" name="remove_tei[]" value="speaker"/>
+          <input type="text" name="remove_tei[]" value="note"/>
+          <input type="text" name="remove_tei[]" value="ref"/>
+          <input type="hidden" name="template_format" value="Perseus"/>
+          <!-- TODO mime_type and xml really should be merged into one setting
+               separating for now because different value types are needed by the
+               different tokenization services
+          -->
+          <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
+          <input type="hidden" id="xml" name="xml" value="false"/>
+          <input type="hidden" id="inline" name="inline" value="true"/>
+        </fieldset>
+      </form>
+      <form name="submit-form" action="../app/treebank-editsentence-perseids-test.xhtml"
+        onsubmit="return EnterSentence(event);">
+        <input type="hidden" name="doc"/>
+        <input type="hidden" name="s"/>
+        <input type="hidden" name="direction" value="ltr"/>
+        <input type="hidden" name="lang" value=""/>
+        <label for="sequential">Show words sequentially</label>
+        <input type="checkbox" id="sequential" name="sequential"/>
+        <div><button type="submit">Edit</button></div>
+      </form>
+    </div>
+    <p/>
+    <div>
+        <p>Or Upload Base XML Treebank:</p>
+        <input type="file" id="file" name="files[]" onchange="startRead()"/>
+    </div>
+  </body>
+</html>

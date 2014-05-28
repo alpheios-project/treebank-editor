@@ -193,21 +193,7 @@ function EnterSentence(a_event)
         }
         if (transform) {
             try {
-                // TODO could really switch this to a jquery ajax call -- it's just cut and paste code
-                var req = new XMLHttpRequest();
-                if (req.overrideMimeType)
-                    req.overrideMimeType('text/xml');
-                req.open("GET", transform, false);
-                req.send(null);
-                if (req.status != 200)
-                {
-                    var msg = "Can't get token transform";
-                    alert(msg);
-                    throw(msg);
-                }
-                var transformDoc = req.responseXML;
-                var transformProc= new XSLTProcessor();
-                transformProc.importStylesheet(transformDoc);
+                var transformProc = loadStylesheet(transform);
                 // TODO the transformation parameters should also be set per tokenization service
                 transformProc.setParameter(null,"e_docuri",$("input[name='text_uri']").val());
                 transformProc.setParameter(null,"e_lang",$("input[name='lang']").val());
@@ -313,21 +299,8 @@ function fileLoaded(evt) {
     var annotation = null;
     try {
         // TODO could really switch this to a jquery ajax call -- it's just cut and paste code
-        var req = new XMLHttpRequest();
-        if (req.overrideMimeType)
-            req.overrideMimeType('text/xml');
-        // TODO externalize path to this transformation
-        req.open("GET", "../xslt/wrap_treebank.xsl", false);
-        req.send(null);
-        if (req.status != 200)
-        {
-            var msg = "Can't get token transform";
-            alert(msg);
-            throw(msg);
-        }
-        var transformDoc = req.responseXML;
-        var transformProc= new XSLTProcessor();
-        transformProc.importStylesheet(transformDoc);
+        var transformUrl = $("meta[name='oa_wrapper_transform']").attr("content");
+        var transformProc = loadStylesheet(transformUrl);
         transformProc.setParameter(null,"e_datetime",new Date().toDateString());
         annotation = transformProc.transformToDocument(xml);
     } catch (a_e) {
@@ -337,4 +310,29 @@ function fileLoaded(evt) {
     if (put_treebank(annotation)) {
         $("form[name='submit-form']", document).submit();
     }
+}
+
+/**
+ * Send an synchronous request to load a stylesheet
+ * @param a_url the url of the styleshset
+ * @return an XSLTProcessor with the stylesheet imported
+ * @throw an error upon failure to load the stylesheet
+ */
+function loadStylesheet(a_url) {
+    var req = new XMLHttpRequest();
+    if (req.overrideMimeType) {
+        req.overrideMimeType('text/xml');
+    }
+    req.open("GET", a_url, false);
+    req.send(null);
+    if (req.status != 200)
+    {
+        var msg = "Can't get transform at " + a_url;
+        alert(msg);
+        throw(msg);
+    }
+    var transformDoc = req.responseXML;
+    var transformProc= new XSLTProcessor();
+    transformProc.importStylesheet(transformDoc);
+    return transformProc;
 }

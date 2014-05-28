@@ -58,6 +58,11 @@
       content="http://services.perseids.org/llt/segtok"
       data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
       data-transform="../xslt/segtok_to_tb.xsl"/>
+    
+    <!-- path to a transformation which wraps a treebank file in OA -->
+    <meta name="oa_wrapper_transform"
+      content="../xslt/wrap_treebank.xsl"/>
+    
   </head>
   <body>
     <div class="alpheios-ignore">

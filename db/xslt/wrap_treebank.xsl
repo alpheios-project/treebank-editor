@@ -15,7 +15,7 @@
     -->
     
     <xsl:param name="e_datetime"/>
-    <xsl:param name="e_collection" select="'urn:cite:perseus:'"/>
+    <xsl:param name="e_collection"/>
     
     <xsl:output indent="yes"></xsl:output>
     
@@ -25,7 +25,12 @@
         <xsl:variable name="target" select="//sentence[1]/@document_id"/> 
         <xsl:variable name="bodyid" select="concat('urn:uuid',generate-id(//treebank))"/>
         <xsl:variable name="lang" select="//treebank/@xml:lang"/>
-        <xsl:variable name="collection" select="concat($e_collection,$lang,'tb')"/>
+        <xsl:variable name="collection">
+            <xsl:choose>
+                <xsl:when test="$e_collection"><xsl:value-of select="$e_collection"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="concat('urn:cite:perseus:',$lang,'tb')"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:element name="RDF" namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
             <xsl:element name="Annotation" namespace="http://www.w3.org/ns/oa#">
                 <xsl:element name="memberOf" xmlns="http://purl.org/dc/dcam/">
@@ -57,10 +62,10 @@
     </xsl:template>
 
     <xsl:template match="*">
-        <xsl:copy>
-            <xsl:apply-templates select="@*"/>
+        <xsl:element name="{local-name(.)}">
+            <xsl:apply-templates select="@*[not(name(.) = 'xmlns')]"/>
             <xsl:apply-templates select="*"/>
-        </xsl:copy>
+        </xsl:element>
         
     </xsl:template>
     

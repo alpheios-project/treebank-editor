@@ -21,13 +21,77 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+var s_params = {};
+
 $(document).ready(function() {
 
     $("input[name='lang']").change(toggle_tokenization_options);
+    $("textarea[name='inputtext']").blur(detect_language);
+    $("input[name='text_uri']").change(load_text);
+    // get parameters from call
+    var callParams = location.search.substr(1).split("&");
+    for (i in callParams)
+    {
+        var pair = callParams[i].split(/=/);
+        if (pair.length == 2) {
+            s_params[pair[0]] = pair[1];
+        }
+        if (s_params['text_uri']) {
+            $("input[name='text_uri']").val(decodeURIComponent(s_params['text_uri']));
+            load_text();
+        }
+    }
+    toggle_tokenization_options();
 });
+
+function detect_language() {
+    // this is a really big hack to just try to see if we have greek
+    // should be replaced asap
+    if ($("textarea[name='inputtext']").val().match(/[\u1F8D\u1F0D\u1F8B\u1F0B\u1F8F\u1F0F\u1F89\u1F09\u1F8C\u1F0C\u1F8A\u1F0A\u1F8E\u1F0E\u1F88\u1F08\u0386\u1FBA\u1FBC\u1FB9\u1FB8\u0391\u1F85\u1F05\u1F83\u1F03\u1F87\u1F07\u1F81\u1F01\u1F84\u1F04\u1F82\u1F02\u1F86\u1F06\u1F80\u1F00\u1FB4\u03AC\u1FB2\u1F70\u1FB7\u1FB6\u1FB3\u1FB1\u1FB0\u03B1\u0392\u03B2\u039E\u03BE\u0394\u03B4\u1F1D\u1F1B\u1F19\u1F1C\u1F1A\u1F18\u0388\u1FC8\u0395\u1F15\u1F13\u1F11\u1F14\u1F12\u1F10\u03AD\u1F72\u03B5\u03A6\u03C6\u0393\u03B3\u1F9D\u1F2D\u1F9B\u1F2B\u1F9F\u1F2F\u1F99\u1F29\u1F9C\u1F2C\u1F9A\u1F2A\u1F9E\u1F2E\u1F98\u1F28\u0389\u1FCA\u1FCC\u0397\u1F95\u1F25\u1F93\u1F23\u1F97\u1F27\u1F91\u1F21\u1F94\u1F24\u1F92\u1F22\u1F96\u1F26\u1F90\u1F20\u1FC4\u03AE\u1FC2\u1F74\u1FC7\u1FC6\u1FC3\u03B7\u1F3D\u1F3B\u1F3F\u1F39\u1F3C\u1F3A\u1F3E\u1F38\u03AA\u038A\u1FDA\u1FD9\u1FD8\u0399\u1F35\u1F33\u1F37\u1F31\u1F34\u1F32\u1F36\u1F30\u0390\u1FD2\u1FD7\u03CA\u03AF\u1F76\u1FD6\u1FD1\u1FD0\u03B9\u039A\u03BA\u039B\u03BB\u039C\u03BC\u039D\u03BD\u1F4D\u1F4B\u1F49\u1F4C\u1F4A\u1F48\u038C\u1FF8\u039F\u1F45\u1F43\u1F41\u1F44\u1F42\u1F40\u03CC\u1F78\u03BF\u03A0\u03C0\u0398\u03B8\u1FEC\u03A1\u1FE5\u1FE4\u03C1\u03A3\u03C3\u03A4\u03C4\u1F5D\u1F5B\u1F5F\u1F59\u03AB\u038E\u1FEA\u1FE9\u1FE8\u03A5\u1F55\u1F53\u1F57\u1F51\u1F54\u1F52\u1F56\u1F50\u03B0\u1FE2\u1FE7\u03CB\u03CD\u1F7A\u1FE6\u1FE1\u1FE0\u03C5\u03DC\u03DD\u1FAD\u1F6D\u1FAB\u1F6B\u1FAF\u1F6F\u1FA9\u1F69\u1FAC\u1F6C\u1FAA\u1F6A\u1FAE\u1F6E\u1FA8\u1F68\u038F\u1FFA\u1FFC\u03A9\u1FA5\u1F65\u1FA3\u1F63\u1FA7\u1F67\u1FA1\u1F61\u1FA4\u1F64\u1FA2\u1F62\u1FA6\u1F66\u1FA0\u1F60\u1FF4\u03CE\u1FF2\u1F7C\u1FF7\u1FF6\u1FF3\u03C9\u03A7\u03C7\u03A8\u03C8\u0396\u03B6\u1FDE\u0345\u1FDE\u1FDD\u0345\u1FDD\u1FDF\u0345\u1FDF\u02BD\u0345\u02BD\u1FCE\u0345\u1FCE\u1FCD\u0345\u1FCD\u1FCF\u0345\u1FCF\u02BC\u0345\u02BC\u1FEE\u1FED\u1FC1\u00A8\u00B4\u0345\u00B4\u0060\u0345\u0060\u1FC0\u0345\u1FC0\u1FBE\u00AF\u02D8\u02BC\u1FBB\u1F71\u1FC9\u1F73\u1FCB\u1F75\u1FDB\u1F77\u1FD3\u1FF9\u1F79\u03C2\u1FEB\u1F7B\u1FE3\u1FFB\u1F7D\u03C3\u03C2\u00B7]/)) {
+       $("#lang-grc").attr("checked",true);
+    } else {
+       $("#lang-lat").attr("checked",true);
+    }
+    toggle_tokenization();
+}
+
+function load_text() {
+    $("textarea[name='inputtext']").val("loading...");
+    if ($("input[name='text_uri']").val().match(/^http/)) {
+        $.ajax({
+            url: $("input[name='text_uri']").val(),
+            type: 'GET',
+            async: true,
+            success: function(a_data,a_status){
+                var content_type = a_data.contentType;
+                var content = a_data;
+                if (content_type == 'application/xml' || content_type == 'text/xml') {
+                    try {
+                        content = new XMLSerializer().serializeToString(a_data);
+                        $("input[name='mime_type']").val("text/xml");
+                        $("input[name='xml']").val("true");
+                    } catch (a_e) {
+                         $("textarea[name='inputtext']").val("Unable to process text: " + a_e);   
+                    }   
+                } else {
+                     $("input[name='mime_type']").val("text/plain");
+                     $("input[name='xml']").val("false");
+                }
+                $("textarea[name='inputtext']").val(content);
+                detect_language();
+                
+            },
+            error: function(a_req,a_text,a_error) {
+               $("textarea[name='inputtext']").val("ERROR loading " + $("input[name='text_uri']").val() +" : " + a_text);
+            }
+        });
+    }    
+}
 
 function EnterSentence(a_event)
 {
+
+   
     var treebank;
     // get input form and URL to use to add sentence
     var form = $("form[name='input-form']", document);
@@ -57,16 +121,24 @@ function EnterSentence(a_event)
                 input_elem = parts[0];
                 service_param = parts[1];
             }
-            // TODO this should be a POST
-            // transform checkboxes to true/false
-            var val = $("*[name='" + input_elem + "']").val();
-            if ($("*[name='" + input_elem + "']").attr("type") == 'checkbox') {
-                val = val == 'on' ? 'true' : 'false';
-            }
-            if (val) {
-                params[service_param] = val;
-                //base_svc = base_svc + "&" + service_param + "=" + encodeURIComponent(val);
-            }
+            var vals = [];
+            $("*[name='" + input_elem + "']").each(function() {
+                var val = $(this).val();
+                if ($(this).attr("type") == 'checkbox') {
+                    // transform checkboxes to true/false
+                    val = val == 'on' ? 'true' : 'false';
+                }
+                // skip unselected radio buttons
+                if ($(this).attr("type") == 'radio' && ! this.checked) {
+                    return;
+                }
+                if (val) {
+                    vals.push(val);        
+                    //base_svc = base_svc + "&" + service_param + "=" + encodeURIComponent(val);
+                }    
+            });
+            params[service_param] = vals;
+            
         }
         var tokenized;
         // send synchronous request to tokenize
@@ -88,7 +160,7 @@ function EnterSentence(a_event)
              
             },
             error: function(a_req,a_text,a_error) {
-                alert(a_error);
+                alert("Error tokenizing: " + a_error);
                 throw(a_error);   
             }
         });
@@ -115,7 +187,7 @@ function EnterSentence(a_event)
                 transformProc.setParameter(null,"e_agenturi",base_svc);
                 transformProc.setParameter(null,"e_datetime",new Date().toDateString());
                 // TODO should probably allow identification of collection in input
-                transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']").val() + 'tb');
+                transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']:checked").val() + 'tb');
                 treebank = transformProc.transformToDocument(tokenized);
             } catch (a_e) {
                 alert(a_e);
@@ -141,7 +213,7 @@ function put_treebank(treebank) {
         // another hack to make AlphEdit think we've done something
         AlphEdit.pushHistory(["create"],null);
         // send synchronous request to add
-        resp = AlphEdit.putContents(treebank,url,'','');
+        resp = AlphEdit.putContents(treebank,url,s_params['doc'],'');
     } catch (a_e) {
         alert(a_e);
         return false;
@@ -171,7 +243,7 @@ function put_treebank(treebank) {
 // Toggle tokenization options based upon input language
 // for now we only support tokenization options for latin
 function toggle_tokenization_options() {
-    var lang = $(this).val();
+    var lang = $("input[name='lang']:checked").val();
     if (lang == 'lat' || lang == "la") {
         $("#tokenization-options").show();
     } else {
@@ -209,8 +281,6 @@ function fileLoaded(evt) {
         var transformProc= new XSLTProcessor();
         transformProc.importStylesheet(transformDoc);
         transformProc.setParameter(null,"e_datetime",new Date().toDateString());
-        // TODO should probably allow identification of collection in input
-        transformProc.setParameter(null,"e_collection",'urn:cite:perseus:');
         annotation = transformProc.transformToDocument(xml);
     } catch (a_e) {
         alert(a_e);

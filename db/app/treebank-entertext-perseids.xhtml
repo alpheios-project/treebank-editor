@@ -31,14 +31,14 @@
     <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
     
     <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
-    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create"/>
+    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create/DOC_REPLACE"/>
     <meta name="tokenization_service" 
         content="http://services.perseids.org/bsp/annotationservice/annotation/template/text"
-        data-params="text_uri mime_type lang template_format inputtext|text lang"
-        data-transform=""/>
+        data-params="mime_type lang template_format inputtext|text lang"
+        data-transform="../xslt/wrap_treebank.xsl"/>
     <meta name="tokenization_service_lat"
       content="http://services.perseids.org/llt/segtok"
-      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text"
+      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
       data-transform="../xslt/segtok_to_tb.xsl"/>
   </head>
   <body>
@@ -84,9 +84,14 @@
           <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
           <label for="split-tokens">Split Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
-          <label for="shift-tokens">Shift Enclytics</label>
+          <label for="shift-tokens">Shift Enclytics</label><br/>
+          <label for="remove_tei[]">Ignore TEI Tags:</label>
+          <input type="text" name="remove_tei[]" value="head"/>
+          <input type="text" name="remove_tei[]" value="speaker"/>
+          <input type="text" name="remove_tei[]" value="note"/>
+          <input type="text" name="remove_tei[]" value="ref"/>
           <input type="hidden" name="template_format" value="Perseus"/>
-          <input type="hidden" id="mime_type" name="mime-type" value="text/plain"/> 
+          <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
           <input type="hidden" id="xml" name="xml" value="false"/>
           <input type="hidden" id="inline" name="inline" value="true"/>
         </fieldset>

@@ -1,23 +1,23 @@
 /**
  * @fileoverview alph-treebank-enter - treebank entry
- *  
- * 
+ *
+ *
  * Copyright 2013 The Alpheios Project, Ltd.
  *           2009 Cantus Foundation
  * http://alpheios.net
- * 
+ *
  * This file is part of Alpheios.
- * 
+ *
  * Alpheios is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Alpheios is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -27,16 +27,16 @@ $(document).ready(function() {
 
     // toggle tokenization options when the language changes
     $("input[name='lang']").change(toggle_tokenization_options);
-    
+
     // try to detect the input language
     $("textarea[name='inputtext']").blur(detect_language);
-    
+
     // try to load text from the supplied uri
     $("input[name='text_uri']").change(load_text);
-    
+
     // get parameters from call
     var callParams = location.search.substr(1).split("&");
-    for (i in callParams)
+    for (var i in callParams)
     {
         var pair = callParams[i].split(/=/);
         if (pair.length == 2) {
@@ -86,8 +86,8 @@ function load_text() {
                         $("input[name='mime_type']").val("text/xml");
                         $("input[name='xml']").val("true");
                     } catch (a_e) {
-                         $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);   
-                    }   
+                         $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);
+                    }
                 } else {
                     // TODO could eventually suppport other input formats
                     $("input[name='mime_type']").val("text/plain");
@@ -95,13 +95,12 @@ function load_text() {
                 }
                 $("textarea[name='inputtext']").val(content);
                 detect_language();
-                
             },
             error: function(a_req,a_text,a_error) {
                $("textarea[name='inputtext']").attr("placeholder","ERROR loading " + $("input[name='text_uri']").val() +" : " + a_text);
             }
         });
-    }    
+    }
 }
 
 /**
@@ -109,12 +108,12 @@ function load_text() {
  */
 function EnterSentence(a_event)
 {
-   
+
     var treebank;
     // get input form and text direction
     var form = $("form[name='input-form']", document);
     var dir = $("#dir-buttons input:checked",form).val();
-    
+
     // I think this is necessary to make the display react appropriately
     // to the user's input.
     $("input[name='inputtext']",form).attr("dir",dir);
@@ -123,7 +122,7 @@ function EnterSentence(a_event)
     // default if there isn't a language-specific one
     var lang = $("#lang-buttons input:checked", form).val();
     var tokenization_service = $("meta[name='tokenization_service_" + lang + "']");
-    if (tokenization_service.length == 0) {
+    if (tokenization_service.length === 0) {
         tokenization_service = $("meta[name='tokenization_service']");
     }
     if (tokenization_service.length == 1) {
@@ -135,7 +134,7 @@ function EnterSentence(a_event)
             var pair = form_atts[i];
             var input_elem = pair;
             var service_param = pair;
-            // a | in the parmater name means the actual form param is before the pipe
+            // a | in the parameter name means the actual form param is before the pipe
             // and the name of the param to pass to the tokenization service is after the pipe
             // if no | then the form and service params are the same
             if (pair.match(/\|/)) {
@@ -157,11 +156,11 @@ function EnterSentence(a_event)
                     return;
                 }
                 if (val) {
-                    vals.push(val);        
-                }    
+                    vals.push(val);
+                }
             });
             params[service_param] = vals;
-            
+
         }
         var tokenized;
         // send synchronous request to tokenize
@@ -175,30 +174,29 @@ function EnterSentence(a_event)
             success: function(a_data) {
                 tokenized = a_data;
                 var root = tokenized ? $(tokenized.documentElement) : null;
-                if (root ==null || root.is("error")) {
+                if (root === null || root.is("error")) {
                     var msg = root.is("error") ? root.text() :
                         "Error tokenizing";
-                    alert(msg);        
+                    alert(msg);
                 }
-             
             },
             error: function(a_req,a_text,a_error) {
-                alert("Error tokenizing: " + a_error);   
+                alert("Error tokenizing: " + a_error);
             }
         });
         if (! tokenized) {
-            // can't really do anything without tokenized text 
-            // TODO perhaps we should just fall back to the prior model of having  
+            // can't really do anything without tokenized text
+            // TODO perhaps we should just fall back to the prior model of having
             // the xquery code do it. Was more work than I had time for right now
             // to make the code backwards compatible though.
             return false;
         }
         if (transform) {
-            try {   
+            try {
                 // TODO could really switch this to a jquery ajax call -- it's just cut and paste code
                 var req = new XMLHttpRequest();
                 if (req.overrideMimeType)
-                    req.overrideMimeType('text/xml')
+                    req.overrideMimeType('text/xml');
                 req.open("GET", transform, false);
                 req.send(null);
                 if (req.status != 200)
@@ -226,7 +224,7 @@ function EnterSentence(a_event)
         }
     }
     return put_treebank(treebank);
-};
+}
 
 /**
  * POST the treebank to the backend storage service
@@ -241,7 +239,7 @@ function put_treebank(treebank) {
         req.open("GET", pingUrl, false);
         req.send(null);
     }
-    
+
     // get the url for the post
     var url = $("meta[name='url']", document).attr("content");
     var resp;
@@ -250,12 +248,12 @@ function put_treebank(treebank) {
         // so that I can reuse the AlphEdit.putContents code
         AlphEdit.pushHistory(["create"],null);
         // send synchronous request to add
-        resp = AlphEdit.putContents(treebank,url,s_params['doc'],'');
+        resp = AlphEdit.putContents(treebank, url, s_params['doc'], '');
     } catch (a_e) {
         alert(a_e);
         return false;
     }
-    
+
     // save values from return in submit form
     var form = $("form[name='submit-form']", document);
     var lang = $("#lang-buttons input:checked", form).val();
@@ -266,7 +264,7 @@ function put_treebank(treebank) {
     var s = 1;
     // this is holdover from the old version of the code
     // in which the alpheios xquery code returned an element with
-    // these parameters.  
+    // these parameters.
     if ($(resp).attr("doc")) {
         doc = $(resp).attr("doc");
         s = $(resp).attr("s");
@@ -282,7 +280,7 @@ function put_treebank(treebank) {
 
 /**
  * Toggle tokenization options based upon input language
- * for now we only support tokenization options for latin 
+ * for now we only support tokenization options for latin
  */
 function toggle_tokenization_options() {
     var lang = $("input[name='lang']:checked").val();
@@ -303,22 +301,21 @@ function startRead(evt) {
         var reader = new FileReader();
         reader.readAsText(file, "UTF-8");
         reader.onload = fileLoaded;
-        
     }
 }
 
 /**
- * On finish reading of a file, put it to the storage service and 
+ * On finish reading of a file, put it to the storage service and
  * submit the form
  */
 function fileLoaded(evt) {
     var xml = (new DOMParser()).parseFromString(evt.target.result,"text/xml");
     var annotation = null;
-     try {   
+    try {
         // TODO could really switch this to a jquery ajax call -- it's just cut and paste code
         var req = new XMLHttpRequest();
         if (req.overrideMimeType)
-            req.overrideMimeType('text/xml')
+            req.overrideMimeType('text/xml');
         // TODO externalize path to this transformation
         req.open("GET", "../xslt/wrap_treebank.xsl", false);
         req.send(null);

@@ -20,7 +20,7 @@
             e_lang   - language of the treebank file (e.g. 'grc','lat', etc.)
             e_agenturi - uri for the software agent that created the tokenization
             e_datetime - the datetime of the serialization
-            e_collection - the urn of the collection which the annotation is/will be a member of
+            e_collection - the urn of the CITE collection which the annotation is/will be a member of
     -->
     
     <xsl:param name="e_lang" select="'lat'"/>

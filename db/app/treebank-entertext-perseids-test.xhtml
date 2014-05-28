@@ -32,10 +32,10 @@
     <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
     
     <!-- url to ping the server to set/refresh the CSRF cookie -->
-    <meta name="pingurl" content="http://sosol.perseids.org/sosol/dmm_api/ping"/>
+    <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
     
     <!-- url to POST to to create store a new treebank template -->
-    <meta name="url" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/create/DOC_REPLACE"/>
+    <meta name="url" content="http://localhost/dmm_api/item/TreebankCite/create/DOC_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
          can be overridden per language.
@@ -104,8 +104,8 @@
           <label for="split-tokens">Split Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
           <label for="shift-tokens">Shift Enclytics</label><br/>
-          <!-- TODO make it possible to add and remove values -->
           <label for="remove_tei[]">Ignore TEI Tags:</label>
+          <!-- TODO make it possible to add and remove values -->
           <input type="text" name="remove_tei[]" value="head"/>
           <input type="text" name="remove_tei[]" value="speaker"/>
           <input type="text" name="remove_tei[]" value="note"/>

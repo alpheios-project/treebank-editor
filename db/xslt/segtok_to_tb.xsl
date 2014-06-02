@@ -29,6 +29,7 @@
     <xsl:param name="e_agenturi" select="'http://services.perseids.org/llt/segtok'"/>
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection" select="'urn:cite:perseus:lattb'"/>
+    <xsl:param name="e_attachtoroot" select="true()"/>
     
     <xsl:output indent="yes"></xsl:output>
     <xsl:key name="segments" match="tei:w|tei:pc|w|pc" use="@s_n" />
@@ -128,7 +129,12 @@
             <xsl:attribute name="form"><xsl:value-of select="."/></xsl:attribute>
             <xsl:attribute name="lemma"/>
             <xsl:attribute name="postag"/>
-            <xsl:attribute name="head">0</xsl:attribute>
+            <xsl:attribute name="head">
+            <xsl:choose>
+                <xsl:when test="$e_attachtoroot and $e_attachtoroot != ''">0</xsl:when>
+                <xsl:otherwise></xsl:otherwise>
+            </xsl:choose>
+            </xsl:attribute>
             <xsl:attribute name="relation">nil</xsl:attribute>
         </xsl:element>
     </xsl:template>

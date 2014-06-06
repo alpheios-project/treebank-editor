@@ -258,11 +258,25 @@ function put_treebank(treebank) {
     } else {
         doc = $(resp).text();
     }
-    $("input[name='doc']", form).attr("value",doc);
-    $("input[name='s']", form).attr("value", s);
-    $("input[name='direction']",form).attr("value",dir);
-    $("input[name='lang']",form).attr("value",lang);
-    return true;
+    // hack to work around form submission to hashbang urls
+    var form_action = $(form).attr("action"); 
+    if (form_action.match(/#/)) {
+        var redirect_url = form_action;
+        redirect_url = redirect_url + "?doc="  + encodeURIComponent(doc);
+        if (s) {
+            redirect_url = redirect_url + '&s=' + encodeURIComponent(s);
+        }
+        redirect_url = redirect_url + '&direction=' + encodeURIComponent(dir);
+        redirect_url = redirect_url + '&lang=' + encodeURIComponent(lang);
+        window.location = redirect_url;
+        return false;
+    } else {
+        $("input[name='doc']", form).attr("value",doc);
+        $("input[name='s']", form).attr("value", s);
+        $("input[name='direction']",form).attr("value",dir);
+        $("input[name='lang']",form).attr("value",lang);
+        return true;
+    }
 }
 
 /**

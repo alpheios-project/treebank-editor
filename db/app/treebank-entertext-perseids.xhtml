@@ -35,7 +35,7 @@
     <meta name="pingurl" content="http://sosol.perseids.org/sosol/dmm_api/ping"/>
     
     <!-- url to POST to to create store a new treebank template -->
-    <meta name="url" content="http://sosol.perseids.org/sosol/dmm_api/item/TreebankCite/create/DOC_REPLACE"/>
+    <meta name="url" content="http://sosol.perseids.org/sosol/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
          can be overridden per language.
@@ -74,11 +74,13 @@
       <form name="input-form" action="">
         <fieldset>
           <legend>Input text:</legend>
-          <label for="text_uri">Text URI</label>
-          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
           <textarea name="inputtext" rows="10" cols="80" 
             placeholder="Enter the text you want to treebank..."
-            ></textarea>
+            ></textarea><br/>
+          <label for="text_uri">Text URI</label>
+          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
+          <label for="mime_type">Mime Type</label>
+          <input type="text" id="mime_type" name="mime_type" value="text/plain"/> 
         </fieldset>
         <fieldset id="format-buttons">
           <legend>Format:</legend>
@@ -121,7 +123,6 @@
                separating for now because different value types are needed by the
                different tokenization services
           -->
-          <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
           <input type="hidden" id="xml" name="xml" value="false"/>
           <input type="hidden" id="inline" name="inline" value="true"/>
         </fieldset>

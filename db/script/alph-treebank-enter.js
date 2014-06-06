@@ -202,7 +202,7 @@ function EnterSentence(a_event)
                 transformProc.setParameter(null,"e_datetime",new Date().toDateString());
                 // TODO should probably allow identification of target collection in input
                 transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']:checked").val() + 'tb');
-                transformProc.setParameter(null,"e_attachtoroot", $("input[name='attachtoroot']:checked").val()  == 'on' ? '1' : '');
+                transformProc.setParameter(null,"e_attachtoroot", $("input[name='attachtoroot']").get(0).checked  == true ? '1' : '');
                 treebank = transformProc.transformToDocument(tokenized);
             } catch (a_e) {
                 alert(a_e);

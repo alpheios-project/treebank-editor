@@ -112,7 +112,7 @@ function EnterSentence(a_event)
     var treebank;
     // get input form and text direction
     var form = $("form[name='input-form']", document);
-    var dir = $("#dir-buttons input:checked",form).val();
+    var dir = $("#dir-buttons input[name='direction']:checked",form).val();
 
     // I think this is necessary to make the display react appropriately
     // to the user's input.
@@ -243,8 +243,8 @@ function put_treebank(treebank) {
 
     // save values from return in submit form
     var form = $("form[name='submit-form']", document);
-    var lang = $("#lang-buttons input:checked", form).val();
-    var dir = $("#dir-buttons input:checked",form).val();
+    var lang = $("#lang-buttons input[name='lang']:checked").val();
+    var dir = $("#dir-buttons input[name='direction']:checked").val();
     $("input[name='inputtext']",form).attr("dir",dir);
 
     var doc = null;
@@ -262,6 +262,10 @@ function put_treebank(treebank) {
     var form_action = $(form).attr("action"); 
     if (form_action.match(/#/)) {
         var redirect_url = form_action;
+        // hack to use arabic conf for arethusa
+        if (lang == 'ara') {
+            redirect_url = redirect_url.replace('#/perseids','#/arabic');
+        }
         redirect_url = redirect_url + "?doc="  + encodeURIComponent(doc);
         if (s) {
             redirect_url = redirect_url + '&s=' + encodeURIComponent(s);

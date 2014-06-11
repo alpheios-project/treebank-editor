@@ -19,6 +19,7 @@
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection"/>
     <xsl:param name="e_docuri"/>
+    <xsl:param name="e_attachtoroot" select="true()"/>
     
     <!-- override the document_id and subdoc if we were passed a document uri -->
     <xsl:variable name="subdoc_override">
@@ -91,7 +92,7 @@
             </xsl:element>
         </xsl:element>
     </xsl:template>
-  
+
     <xsl:template match="@document_id">
         <xsl:choose>
             <xsl:when test="$doc_override != ''">
@@ -108,6 +109,15 @@
             </xsl:when>
             <xsl:otherwise><xsl:copy/></xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="@head">
+        <xsl:attribute name="head">
+          <xsl:choose>
+            <xsl:when test="$e_attachtoroot and $e_attachtoroot != ''">0</xsl:when>
+            <xsl:otherwise/>
+          </xsl:choose>
+        </xsl:attribute>
     </xsl:template>
     
     <xsl:template match="@*">

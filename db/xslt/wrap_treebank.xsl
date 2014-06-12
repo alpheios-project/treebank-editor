@@ -20,6 +20,7 @@
     <xsl:param name="e_collection"/>
     <xsl:param name="e_docuri"/>
     <xsl:param name="e_attachtoroot" select="true()"/>
+    <xsl:param name="e_dir" select="'ltr'"/>
     
     <!-- override the document_id and subdoc if we were passed a document uri -->
     <xsl:variable name="subdoc_override">
@@ -91,6 +92,16 @@
             </xsl:element>
             </xsl:element>
         </xsl:element>
+    </xsl:template>
+    
+    <xsl:template match="treebank">
+        <xsl:copy-of select="@*[not(local-name(.) = 'direction')]"/>
+        <xsl:attribute name="direction">
+            <xsl:choose>
+                <xsl:when test="@dir"><xsl:value-of select="@dir"/></xsl:when>
+                <xsl:otherwise><xsl:value-of select="$e_dir"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
     </xsl:template>
 
     <xsl:template match="@document_id">

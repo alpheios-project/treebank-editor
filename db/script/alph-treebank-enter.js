@@ -235,7 +235,7 @@ function put_treebank(treebank) {
         // so that I can reuse the AlphEdit.putContents code
         AlphEdit.pushHistory(["create"],null);
         // send synchronous request to add
-        resp = AlphEdit.putContents(treebank, url, s_params['doc'], '');
+        resp = AlphEdit.putContents(treebank, url, s_params['doc'] ? s_params['doc'] : '' , '');
     } catch (a_e) {
         alert(a_e);
         return false;

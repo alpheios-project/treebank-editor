@@ -1,0 +1,18 @@
+body { 
+  background-color:#F2F2F2;
+}
+
+button, #file * {
+  background: #3E8D9C;
+  color: white;
+}
+
+button:hover, #file *:hover {
+  background: #73CDDE;
+}
+
+header, #alph-page-header {
+    background-color:#4E6476;
+    margin-bottom: 1em;
+    padding-top: 2px;
+}

@@ -19,6 +19,8 @@
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection"/>
     <xsl:param name="e_docuri"/>
+    <xsl:param name="e_attachtoroot" select="true()"/>
+    <xsl:param name="e_dir" select="'ltr'"/>
     
     <!-- override the document_id and subdoc if we were passed a document uri -->
     <xsl:variable name="subdoc_override">
@@ -91,7 +93,20 @@
             </xsl:element>
         </xsl:element>
     </xsl:template>
-  
+    
+    <xsl:template match="treebank|treebank:treebank">
+        <xsl:element name="treebank">
+            <xsl:copy-of select="@*[not(name(.) = 'direction') and not(name(.) = 'xmlns')]"/>
+            <xsl:attribute name="direction">
+                <xsl:choose>
+                    <xsl:when test="@dir"><xsl:value-of select="@dir"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$e_dir"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+            <xsl:apply-templates select="node()"></xsl:apply-templates>
+        </xsl:element>
+    </xsl:template>
+
     <xsl:template match="@document_id">
         <xsl:choose>
             <xsl:when test="$doc_override != ''">
@@ -108,6 +123,15 @@
             </xsl:when>
             <xsl:otherwise><xsl:copy/></xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="@head">
+        <xsl:attribute name="head">
+          <xsl:choose>
+            <xsl:when test=". = '0' and (not($e_attachtoroot)  or $e_attachtoroot = '')"></xsl:when>
+            <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
     </xsl:template>
     
     <xsl:template match="@*">

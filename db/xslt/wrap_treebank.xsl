@@ -19,6 +19,9 @@
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection"/>
     <xsl:param name="e_docuri"/>
+    <xsl:param name="e_agenturi"/>
+    <xsl:param name="e_appuri"/>
+    <xsl:param name="e_format" select="'aldt'"/>
     <xsl:param name="e_attachtoroot" select="true()"/>
     <xsl:param name="e_dir" select="'ltr'"/>
     
@@ -96,13 +99,30 @@
     
     <xsl:template match="treebank|treebank:treebank">
         <xsl:element name="treebank">
-            <xsl:copy-of select="@*[not(name(.) = 'direction') and not(name(.) = 'xmlns')]"/>
+            <xsl:copy-of select="@*[not(name(.) = 'direction') and not(name(.) = 'xmlns') and not(name(.) = 'format')]"/>
             <xsl:attribute name="direction">
                 <xsl:choose>
                     <xsl:when test="@dir"><xsl:value-of select="@dir"/></xsl:when>
                     <xsl:otherwise><xsl:value-of select="$e_dir"/></xsl:otherwise>
                 </xsl:choose>
             </xsl:attribute>
+            <xsl:attribute name="format">
+                <xsl:value-of select="$e_format"/>
+            </xsl:attribute>
+            <xsl:element name="annotator">
+                <xsl:element name="short"/>
+                <xsl:element name="name"/>
+                <xsl:element name="address"/>
+                <xsl:element name="uri"><xsl:value-of select="$e_agenturi"/></xsl:element>
+            </xsl:element>
+            <xsl:if test="$e_appuri">
+                <xsl:element name="annotator">
+                    <xsl:element name="short"/>
+                    <xsl:element name="name"/>
+                    <xsl:element name="address"/>
+                    <xsl:element name="uri"><xsl:value-of select="$e_appuri"/></xsl:element>
+                </xsl:element>
+            </xsl:if>
             <xsl:apply-templates select="node()"></xsl:apply-templates>
         </xsl:element>
     </xsl:template>

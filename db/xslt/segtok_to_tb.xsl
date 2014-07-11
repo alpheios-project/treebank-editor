@@ -27,6 +27,7 @@
     <xsl:param name="e_format" select="'aldt'"/>
     <xsl:param name="e_docuri" select="'urn:cts:latinLit:tg.work.edition:1.1'"/>
     <xsl:param name="e_agenturi" select="'http://services.perseids.org/llt/segtok'"/>
+    <xsl:param name="e_appuri"/>
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection" select="'urn:cite:perseus:lattb'"/>
     <xsl:param name="e_attachtoroot" select="true()"/>
@@ -73,6 +74,20 @@
                         </xsl:attribute>
                         <xsl:attribute name="format"><xsl:value-of select="$e_format"/></xsl:attribute>
                         <xsl:attribute name="version">1.5</xsl:attribute>
+                        <xsl:element name="annotator">
+                            <xsl:element name="short"/>
+                            <xsl:element name="name"/>
+                            <xsl:element name="address"/>
+                            <xsl:element name="uri"><xsl:value-of select="$e_agenturi"/></xsl:element>
+                        </xsl:element>
+                        <xsl:if test="$e_appuri">
+                            <xsl:element name="annotator">
+                                <xsl:element name="short"/>
+                                <xsl:element name="name"/>
+                                <xsl:element name="address"/>
+                                <xsl:element name="uri"><xsl:value-of select="$e_appuri"/></xsl:element>
+                            </xsl:element>
+                        </xsl:if>
                         <xsl:apply-templates/>
                     </xsl:element>
                 </xsl:element>

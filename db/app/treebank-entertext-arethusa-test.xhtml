@@ -23,6 +23,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink">
   <head>
     <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/arethusa.css"/>
     <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
     <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
     <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
@@ -62,28 +63,31 @@
     <!-- path to a transformation which wraps a treebank file in OA -->
     <meta name="oa_wrapper_transform"
       content="../xslt/wrap_treebank.xsl"/>
+    
   </head>
   <body>
-    <div class="alpheios-ignore">
+    <header class="alpheios-ignore">
       <div id="alph-page-header">
-        <img src="../image/alpheios.png" alt="Alpheios"/>
+        <img src="http://localhost/arethusa/app/css/arethusa.png" alt="Arethusa"/>
       </div>
-    </div>
+    </header>
     <div>
       <form name="input-form" action="">
         <fieldset>
           <legend>Input text:</legend>
-          <label for="text_uri">Text URI</label>
-          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
           <textarea name="inputtext" rows="10" cols="80" 
-              placeholder="Enter the text you want to treebank..."
-            ></textarea>
+            placeholder="Enter the text you want to treebank..."
+            ></textarea><br/>
+          <label for="text_uri">Text URI</label>
+          <input type="text" id="text_uri" name="text_uri" size="100"></input>
         </fieldset>
         <fieldset id="format-buttons">
           <legend>Format:</legend>
           <input type="radio" id="format-aldt" name="format" value="aldt"
             checked="checked"/>
           <label for="format-aldt">Ancient Language Dependency Treebank</label>
+          <input type="radio" id="format-smyth" name="format" value="smyth"/>
+          <label for="format-smyth">Smyth Grammar Tag Set</label>
         </fieldset>
         <fieldset id="lang-buttons">
           <legend>Language:</legend>
@@ -92,9 +96,8 @@
           <input type="radio" id="lang-lat" name="lang" value="lat"
             checked="checked"/>
           <label for="lang-lat">Latin</label>
-          <input type="radio" id="lang-ara" name="lang" value="ara"
-           />
-          <label for="lang-lat">Arabic</label>
+          <input type="radio" id="lang-ara" name="lang" value="ara"/>
+          <label for="lang-ara">Arabic</label>
         </fieldset>
         <fieldset id="dir-buttons">
           <legend>Text Direction:</legend>
@@ -112,8 +115,8 @@
           <label for="split-tokens">Split Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
           <label for="shift-tokens">Shift Enclytics</label><br/>
-          <label for="remove_tei[]">Ignore TEI Tags:</label>
           <!-- TODO make it possible to add and remove values -->
+          <label for="remove_tei[]">Ignore TEI Tags:</label>
           <input type="text" name="remove_tei[]" value="head"/>
           <input type="text" name="remove_tei[]" value="speaker"/>
           <input type="text" name="remove_tei[]" value="note"/>
@@ -126,18 +129,17 @@
           <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
           <input type="hidden" id="xml" name="xml" value="false"/>
           <input type="hidden" id="inline" name="inline" value="true"/>
-          <input type="checkbox" id="attachtoroot" name="attachtoroot" checked="checked" style="display:none;"/>
-          <input type="hidden" id="appuri" name="appuri" value="http://github.com/alpheios-project/treebank-editor"/>
+          <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
         </fieldset>
       </form>
-      <form name="submit-form" action="../app/treebank-editsentence-perseids-test.xhtml"
-        onsubmit="return EnterSentence(event);">
+      <form name="submit-form" action="http://localhost/arethusa/app/#/perseidsLANGFORMAT"
+        onsubmit="return EnterSentence(event);" method="GET">
         <input type="hidden" name="doc"/>
         <input type="hidden" name="s"/>
         <input type="hidden" name="direction" value="ltr"/>
         <input type="hidden" name="lang" value=""/>
-        <label for="sequential">Show words sequentially</label>
-        <input type="checkbox" id="sequential" name="sequential"/>
+        <label for="attachtoroot">Attach unannotated tokens to root:</label>
+        <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
         <div><button type="submit">Edit</button></div>
       </form>
     </div>

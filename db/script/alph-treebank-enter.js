@@ -198,6 +198,7 @@ function EnterSentence(a_event)
                 transformProc.setParameter(null,"e_dir",$("input[name='direction']:checked").val());
                 transformProc.setParameter(null,"e_format",$("input[name='format']:checked").val());
                 transformProc.setParameter(null,"e_agenturi",base_svc);
+                transformProc.setParameter(null,"e_appuri",$("input[name='appuri']").val());
                 transformProc.setParameter(null,"e_datetime",new Date().toDateString());
                 // TODO should probably allow identification of target collection in input
                 transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']:checked").val() + 'tb');
@@ -261,10 +262,9 @@ function put_treebank(treebank) {
     var form_action = $(form).attr("action"); 
     if (form_action.match(/#/)) {
         var redirect_url = form_action;
-        // hack to use arabic conf for arethusa
-        if (lang == 'ara') {
-            redirect_url = redirect_url.replace('#/perseids','#/arabic');
-        }
+        // hack to use lang and format specific conf for arethusa
+        redirect_url = redirect_url.replace('LANG',lang);
+        redirect_url = redirect_url.replace('FORMAT',$("input[name='format']").val());
         redirect_url = redirect_url + "?doc="  + encodeURIComponent(doc);
         if (s) {
             redirect_url = redirect_url + '&s=' + encodeURIComponent(s);

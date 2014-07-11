@@ -2,7 +2,6 @@
     <subcollection name="css" filename="css"/>
     <subcollection name="repository" filename="repository"/>
     <subcollection name="image" filename="image"/>
-    <subcollection name="system" filename="system"/>
     <subcollection name="script" filename="script"/>
     <subcollection name="xslt" filename="xslt"/>
     <subcollection name="app" filename="app"/>

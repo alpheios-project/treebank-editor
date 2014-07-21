@@ -264,7 +264,12 @@ function put_treebank(treebank) {
         var redirect_url = form_action;
         // hack to use lang and format specific conf for arethusa
         redirect_url = redirect_url.replace('LANG',lang);
-        redirect_url = redirect_url.replace('FORMAT',$("input[name='format']").val());
+        var selected_format = $("input[name='format']:checked").val();
+        // hack to ignore selection of Smyth for non-greek text
+        if (selected_format == 'smyth' && lang != 'grc') {
+            selected_format = 'aldt';
+        }
+        redirect_url = redirect_url.replace('FORMAT',selected_format);
         redirect_url = redirect_url + "?doc="  + encodeURIComponent(doc);
         if (s) {
             redirect_url = redirect_url + '&s=' + encodeURIComponent(s);

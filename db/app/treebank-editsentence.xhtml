@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Copyright 2008-2009 Cantus Foundation
   http://alpheios.net
@@ -18,19 +17,15 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<html xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:svg="http://www.w3.org/2000/svg"
-  xmlns:xlink="http://www.w3.org/1999/xlink">
-  <head>
-    <title>Alpheios:Edit Treebank Sentence</title>
-    <meta id="alpheios-pedagogical-text" name="alpheios-pedagogical-text"
-      content="true"/>
-    <meta name="alpheios-editTransformURL"
-      content="../xslt/treebank-svg-edit.xsl"/>
-    <link rel="stylesheet" type="text/css" href="../css/alph-treebank-edit.css"/>
-    <script language="javascript" type="text/javascript" src="../script/alph-treebank-edit.js"/>
-    <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
-    <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+        <title>Alpheios:Edit Treebank Sentence</title>
+        <meta id="alpheios-pedagogical-text" name="alpheios-pedagogical-text" content="true"/>
+        <meta name="alpheios-editTransformURL" content="../xslt/treebank-svg-edit.xsl"/>
+        <link rel="stylesheet" type="text/css" href="../css/alph-treebank-edit.css"/>
+        <script language="javascript" type="text/javascript" src="../script/alph-treebank-edit.js"/>
+        <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+        <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
 
     <!-- A URL can be supplied that can be used to retrieve information about
          the document and treebank or else the following information should be
@@ -47,7 +42,7 @@
          DESC_REPLACE : gets replaced with a y/n flag value if descriptive information
                         will be included
     -->
-    <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq?doc=DOC_REPLACE&amp;app=APP_REPLACE&amp;desc=DESC_REPLACE"/>
+        <meta name="alpheios-getInfoURL" content="../xq/treebank-getinfo.xq?doc=DOC_REPLACE&amp;app=APP_REPLACE&amp;desc=DESC_REPLACE"/>
     
     <!-- a session cookie and HTTP header name can be supplied for session sharing with a server on the same domain
          the content of the alpheios-sessionTokenName attribute should be the name of the cookie set by the server
@@ -100,15 +95,15 @@
               If "yes", initially only show first word in sentence and enable
               button to reveal next word.
     -->
-    <meta name="alpheios-param-app" content="editor"/>
-    <meta name="alpheios-param-numSentences" content="1"/>
-    <meta name="alpheios-param-lang" content="la"/>
-    <meta name="alpheios-param-direction" content="ltr"/>
-    <meta name="alpheios-param-arcEditing" content="yes"/>
-    <meta name="alpheios-param-nodeEditing" content="yes"/>
-    <meta name="alpheios-param-buildContent" content="menus,style,key"/>
-    <meta name="alpheios-param-sentenceNavigation" content="yes"/>
-    <meta name="alpheios-param-sequential" content="no"/>
+        <meta name="alpheios-param-app" content="editor"/>
+        <meta name="alpheios-param-numSentences" content="1"/>
+        <meta name="alpheios-param-lang" content="la"/>
+        <meta name="alpheios-param-direction" content="ltr"/>
+        <meta name="alpheios-param-arcEditing" content="yes"/>
+        <meta name="alpheios-param-nodeEditing" content="yes"/>
+        <meta name="alpheios-param-buildContent" content="menus,style,key"/>
+        <meta name="alpheios-param-sentenceNavigation" content="yes"/>
+        <meta name="alpheios-param-sequential" content="no"/>
 
     <!-- URLs to get and put a single sentence in treebank XML -->
     <!-- The urls should contain the following placeholders which will be filled by 
@@ -116,16 +111,16 @@
          DOC_REPLACE : gets replaced with the document identifier
          S_REPLACE : gets replaced with the sentence identifier
     -->
-    <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE"/>
-    <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE"/>
+        <meta name="alpheios-getSentenceURL" content="../xq/treebank-getsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE&amp;app=APP_REPLACE"/>
+        <meta name="alpheios-putSentenceURL" content="../xq/treebank-putsentence.xq?doc=DOC_REPLACE&amp;s=S_REPLACE"/>
 
     <!-- URL to call when exiting and label to use on exit button -->
     <!-- The url should contain the following placeholders which will be filled by 
          the application:
          DOC_REPLACE : gets replaced with the document identifier
     -->
-    <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq?doc=DOC_REPLACE"/>
-    <meta name="alpheios-exitLabel" content="Sentence&#160;list"/>
+        <meta name="alpheios-exitURL" content="../xq/treebank-getlist.xq?doc=DOC_REPLACE"/>
+        <meta name="alpheios-exitLabel" content="Sentence&#160;list"/>
 
     <!-- Provide style here if buildContent param does not contain "style".
          Styles should be provided for
@@ -133,153 +128,129 @@
             td[pos=<pos>]         words in key
          for each part of speech <pos>.
     -->
-    <style type="text/css"/>
-  </head>
-  <body onkeypress="Keypress(event)" onload="Init(event)" style="display:none">
-    <table style="border:none; padding:0; width:100%">
-      <tr>
-        <td>
-          <div class="controls alpheios-ignore" id="edit-controls">
-            <table style="border:none; padding:0">
-              <tr>
+        <style type="text/css"/>
+    </head>
+    <body onkeypress="Keypress(event)" onload="Init(event)" style="display:none">
+        <table style="border:none; padding:0; width:100%">
+            <tr>
                 <td>
-                  <div id="sent-navigation">
-                    <table style="border:1px solid black; padding:0">
-                      <tr>
-                        <td>
-                          <button id="first-button" onclick="ClickOnGoTo(event)"
-                            >&#160;</button>
-                        </td>
-                        <td>
-                          <button id="prev-button" onclick="ClickOnGoTo(event)"
-                            >&#160;</button>
-                        </td>
-                        <td>
-                          <label id="current-label">&#160;</label>
-                        </td>
-                        <td>
-                          <button id="next-button" onclick="ClickOnGoTo(event)"
-                            >&#160;</button>
-                        </td>
-                        <td>
-                          <button id="last-button" onclick="ClickOnGoTo(event)"
-                            >&#160;</button>
-                        </td>
-                        <td>
-                          <form onsubmit="return SubmitGoTo(this)"
-                            name="sent-navigation-goto">
-                            <label>&#160;&#160;Go&#160;to&#160;sentence&#160;number</label>
-                            <input type="text" name="s" size="5"/>
-                          </form>
-                        </td>
-                      </tr>
-                    </table>
-                  </div>
-                </td>
-                <td>
-                  <form onsubmit="return SubmitExit(this)"
-                    name="sent-navigation-exit">
-                    <input type="hidden" name="doc"/>
-                    <input type="hidden" name="s"/>
-                    <button type="submit">Exit</button>
-                  </form>
-                </td>
-              </tr>
-            </table>
-            <table style="border:none; padding:0">
-              <tr>
-                <td>
-                  <table style="border:none; padding:0">
-                    <tr>
-                      <button id="tree-button" class="icon mode-button"
-                        value="tree" checked="checked"
-                        onclick="ClickOnMode(event)" title="Tree tool">
-                        <img src="../image/edit-tool-tree.png" alt="⽊"/>
-                      </button>
-                      <button id="label-button" class="icon mode-button"
-                        value="label" onclick="ClickOnMode(event)"
-                        title="Label tool">
-                        <img src="../image/edit-tool-label.png" alt="✍"/>
-                      </button>
-                      <button id="ellipsis-button" class="icon mode-button"
-                        value="ellipsis" onclick="ClickOnMode(event)"
-                        title="Ellipsis tool">
-                        <img src="../image/edit-tool-ellipsis.png" alt="…"/>
-                      </button>
-                    </tr>
-                  </table>
-                </td>
-                <td>
-                  <button id="expansion-checkbox" class="icon" checked="checked"
-                    onclick="ShowExpansionControls(event)"
-                    title="Show expansion controls">
-                    <img src="../image/edit-expansion-controls.png" alt="⇅"/>
-                  </button>
-                </td>
-                <td>
-                  <table style="border:none; padding:0">
-                    <tr>
-                      <button id="undo-button" disabled="disabled" class="icon"
-                        onclick="ClickOnUndo(event)" title="Undo"
-                        base="../image/edit-undo">
-                        <img src="../image/edit-undo-disabled.png" alt="⟲"/>
-                      </button>
-                      <button id="redo-button" disabled="disabled" class="icon"
-                        onclick="ClickOnRedo(event)" title="Redo"
-                        base="../image/edit-redo">
-                        <img src="../image/edit-redo-disabled.png" alt="⟳"/>
-                      </button>
-                    </tr>
-                  </table>
-                </td>
-                <td>
-                  <button id="save-button" disabled="disabled" class="icon"
-                    onclick="ClickOnSave(event)" title="Save sentence"
-                    base="../image/document-save">
-                    <img src="../image/document-save-disabled.png" alt="✇"/>
-                  </button>
-                </td>
-                <td>
-                  <button id="nextword-button" class="icon mode-button"
-                    value="nextword" onclick="ClickOnNextWord(event)"
-                    base="../image/list-add" title="Show next word">
-                    <img src="../image/list-add.png" alt="+"/>
-                  </button>
-                </td>
-                </tr>
-            </table>
-            <table>
-                <tr>
-                  <td>
-                  <form 
-                    method="post" action="../xq/treebank-export.xq" id="exportform">
-                    <button id="export-xml-button" class="icon"
-                      onclick="ClickOnExport(event)" title="Export sentence XML">Export XML</button>
-                    <input type="hidden" name="sentenceForExport" id="sentenceForExport"/>
-                    <input type="hidden" name="doc" value="tbdownload.xml"/>
-                    <input type="hidden" name="sentenceExportFormat" value=""/>
-                    <input type="hidden" name="sentenceExportLang" value=""/>
-                  </form>
-                  </td>
-              </tr>
-            </table>
+                    <div class="controls alpheios-ignore" id="edit-controls">
+                        <table style="border:none; padding:0">
+                            <tr>
+                                <td>
+                                    <div id="sent-navigation">
+                                        <table style="border:1px solid black; padding:0">
+                                            <tr>
+                                                <td>
+                                                    <button id="first-button" onclick="ClickOnGoTo(event)">&#160;</button>
+                                                </td>
+                                                <td>
+                                                    <button id="prev-button" onclick="ClickOnGoTo(event)">&#160;</button>
+                                                </td>
+                                                <td>
+                                                    <label id="current-label">&#160;</label>
+                                                </td>
+                                                <td>
+                                                    <button id="next-button" onclick="ClickOnGoTo(event)">&#160;</button>
+                                                </td>
+                                                <td>
+                                                    <button id="last-button" onclick="ClickOnGoTo(event)">&#160;</button>
+                                                </td>
+                                                <td>
+                                                    <form onsubmit="return SubmitGoTo(this)" name="sent-navigation-goto">
+                                                        <label>&#160;&#160;Go&#160;to&#160;sentence&#160;number</label>
+                                                        <input type="text" name="s" size="5"/>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                                <td>
+                                    <form onsubmit="return SubmitExit(this)" name="sent-navigation-exit">
+                                        <input type="hidden" name="doc"/>
+                                        <input type="hidden" name="s"/>
+                                        <button type="submit">Exit</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                        <table style="border:none; padding:0">
+                            <tr>
+                                <td>
+                                    <table style="border:none; padding:0">
+                                        <tr>
+                                            <button id="tree-button" class="icon mode-button" value="tree" checked="checked" onclick="ClickOnMode(event)" title="Tree tool">
+                                                <img src="../image/edit-tool-tree.png" alt="⽊"/>
+                                            </button>
+                                            <button id="label-button" class="icon mode-button" value="label" onclick="ClickOnMode(event)" title="Label tool">
+                                                <img src="../image/edit-tool-label.png" alt="✍"/>
+                                            </button>
+                                            <button id="ellipsis-button" class="icon mode-button" value="ellipsis" onclick="ClickOnMode(event)" title="Ellipsis tool">
+                                                <img src="../image/edit-tool-ellipsis.png" alt="…"/>
+                                            </button>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <button id="expansion-checkbox" class="icon" checked="checked" onclick="ShowExpansionControls(event)" title="Show expansion controls">
+                                        <img src="../image/edit-expansion-controls.png" alt="⇅"/>
+                                    </button>
+                                </td>
+                                <td>
+                                    <table style="border:none; padding:0">
+                                        <tr>
+                                            <button id="undo-button" disabled="disabled" class="icon" onclick="ClickOnUndo(event)" title="Undo" base="../image/edit-undo">
+                                                <img src="../image/edit-undo-disabled.png" alt="⟲"/>
+                                            </button>
+                                            <button id="redo-button" disabled="disabled" class="icon" onclick="ClickOnRedo(event)" title="Redo" base="../image/edit-redo">
+                                                <img src="../image/edit-redo-disabled.png" alt="⟳"/>
+                                            </button>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td>
+                                    <button id="save-button" disabled="disabled" class="icon" onclick="ClickOnSave(event)" title="Save sentence" base="../image/document-save">
+                                        <img src="../image/document-save-disabled.png" alt="✇"/>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button id="nextword-button" class="icon mode-button" value="nextword" onclick="ClickOnNextWord(event)" base="../image/list-add" title="Show next word">
+                                        <img src="../image/list-add.png" alt="+"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table>
+                            <tr>
+                                <td>
+                                    <form method="post" action="../xq/treebank-export.xq" id="exportform">
+                                        <button id="export-xml-button" class="icon" onclick="ClickOnExport(event)" title="Export sentence XML">Export XML</button>
+                                        <input type="hidden" name="sentenceForExport" id="sentenceForExport"/>
+                                        <input type="hidden" name="doc" value="tbdownload.xml"/>
+                                        <input type="hidden" name="sentenceExportFormat" value=""/>
+                                        <input type="hidden" name="sentenceExportLang" value=""/>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
             <!-- Provide menus here if buildContent param does not contain "menus" -->
-            <div id="label-menus"/>
-          </div>
-        </td>
-        <td style="vertical-align:top; text-align:right">
-          <div class="alpheios-ignore" id="alph-page-header">
-            <img src="../image/alpheios.png" alt="Alpheios"/>
-          </div>
-        </td>
-      </tr>
-    </table>
-    <div id="tree-error"/>
-    <div id="tree-hint" class="alpheios-hint"/>
-    <div id="alpheios-trigger-hint" class="alpheios-ignore alpheios-trigger-hint alpheios-hint"/>    
-    <div id="alpheios-put-notice"/>
-    <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
+                        <div id="label-menus"/>
+                    </div>
+                </td>
+                <td style="vertical-align:top; text-align:right">
+                    <div class="alpheios-ignore" id="alph-page-header">
+                        <img src="../image/alpheios.png" alt="Alpheios"/>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div id="tree-error"/>
+        <div id="tree-hint" class="alpheios-hint"/>
+        <div id="alpheios-trigger-hint" class="alpheios-ignore alpheios-trigger-hint alpheios-hint"/>
+        <div id="alpheios-put-notice"/>
+        <svg xmlns="http://www.w3.org/2000/svg" id="dependency-tree"/>
     <!-- Provide key here if buildContent param does not contain "key" -->
-    <div id="key"/>
-  </body>
+        <div id="key"/>
+    </body>
 </html>

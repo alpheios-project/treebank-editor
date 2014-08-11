@@ -47,14 +47,9 @@
            this is a complete hack but was a quick and dirty way to reuse the existing form
          - @data-transform contains the path to the XSLT transformation to apply to the tokenization
            service output to create the treebank template for posting to to the back end storage service
-    -->
-    <meta name="tokenization_service" 
-        content="http://services.perseids.org/bsp/annotationservice/annotation/template/text"
-        data-params="mime_type lang template_format inputtext|text lang"
-        data-transform="../xslt/wrap_treebank.xsl"/>
-    
+    --> 
     <!-- override the tokenization service to use for Latin text input. See above for description of parameters -->
-    <meta name="tokenization_service_lat"
+    <meta name="tokenization_service"
       content="http://services.perseids.org/llt/segtok"
       data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
       data-transform="../xslt/segtok_to_tb.xsl"/>
@@ -115,12 +110,8 @@
           <label for="split-tokens">Split Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
           <label for="shift-tokens">Shift Enclytics</label><br/>
-          <!-- TODO make it possible to add and remove values -->
-          <label for="remove_tei[]">Ignore TEI Tags:</label>
-          <input type="text" name="remove_tei[]" value="head"/>
-          <input type="text" name="remove_tei[]" value="speaker"/>
-          <input type="text" name="remove_tei[]" value="note"/>
-          <input type="text" name="remove_tei[]" value="ref"/>
+          <label for="remove_tei_all">Ignore TEI Tags:</label>
+          <input type="text" id="remove_tei_all" name="remove_tei_all" value="head,speaker,note,ref"/>
           <input type="hidden" name="template_format" value="Perseus"/>
           <!-- TODO mime_type and xml really should be merged into one setting
                separating for now because different value types are needed by the
@@ -146,7 +137,7 @@
     <p/>
     <div>
         <p>Or Upload Base XML Treebank:</p>
-        <input type="file" id="file" name="files[]" onchange="startRead()"/>
+        <div id="file_upload"><input type="file" id="file" name="files[]" onchange="startRead()"/></div>
     </div>
   </body>
 </html>

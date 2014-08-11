@@ -115,3 +115,13 @@ body {
 ol {
     font-family: Georgia;
 }
+
+#file_upload {
+    padding-left: 18px;
+}
+
+#file_upload.loading {
+    background: transparent url(loading.gif) no-repeat;
+    cursor: progress;
+    white-space: nowrap;
+}

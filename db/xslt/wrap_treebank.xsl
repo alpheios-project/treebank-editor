@@ -51,6 +51,7 @@
     </xsl:variable>
     
     <xsl:output indent="yes"></xsl:output>
+    <xsl:strip-space elements="*"/>
     
     <xsl:template match="/">
         
@@ -109,12 +110,14 @@
             <xsl:attribute name="format">
                 <xsl:value-of select="$e_format"/>
             </xsl:attribute>
+            <xsl:if test="$e_agenturi">
             <xsl:element name="annotator">
                 <xsl:element name="short"/>
                 <xsl:element name="name"/>
                 <xsl:element name="address"/>
                 <xsl:element name="uri"><xsl:value-of select="$e_agenturi"/></xsl:element>
             </xsl:element>
+            </xsl:if>
             <xsl:if test="$e_appuri">
                 <xsl:element name="annotator">
                     <xsl:element name="short"/>
@@ -157,11 +160,15 @@
     <xsl:template match="@*">
         <xsl:copy/>
     </xsl:template>
-  
+
+    <xsl:template match="text()">
+        <xsl:copy/>
+    </xsl:template>
+    
     <xsl:template match="*">
         <xsl:element name="{local-name(.)}">
             <xsl:apply-templates select="@*[not(name(.) = 'xmlns')]"/>
-            <xsl:apply-templates select="*"/>
+            <xsl:apply-templates select="*|text()"/>
         </xsl:element>
         
     </xsl:template>

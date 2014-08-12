@@ -37,6 +37,9 @@
     
     <!-- url to POST to to create store a new treebank template -->
     <meta name="url" content="http://localhost/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
+    <!-- url to redirect to create new treebank template from an existing
+         one supplied by url -->
+    <meta name="linkurl" content="http://localhost:3000/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
          can be overridden per language.
@@ -135,10 +138,18 @@
         <div><button type="submit">Edit</button></div>
       </form>
     </div>
-    <p/>
+    <hr/>
     <div>
         <p>Or Upload Base XML Treebank:</p>
-        <div id="file_upload"><input type="file" id="file" name="files[]" onchange="startRead()"/></div>
+        <div id="file_upload">
+          <label for="fileurl">From file:</label>
+          <input type="file" id="file" name="files[]" onchange="startRead()"/>
+          <br/>
+          <label for="fileurl">From URL:</label>
+          <input type="url" id="fileurl" name="fileurl" placeholder="supply the url of the treebank template" size="50"/>
+          <button id="uploadurl" onclick="readFromUrl();">Create Link</button>
+          <div id="uploadcreate"></div>
+        </div>
     </div>
   </body>
 </html>

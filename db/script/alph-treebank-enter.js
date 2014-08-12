@@ -48,6 +48,21 @@ $(document).ready(function() {
 });
 
 /**
+ * Lookup the collection to store a file in according to language
+ */
+function find_collection(a_lang) {
+  var collections = {
+    'greek' : 'urn:cite:perseus:grctb',
+    'grc' : 'urn:cite:perseus:grctb',
+    'latin' : 'urn:cite:perseus:lattb',
+    'lat' : 'urn:cite:perseus:lattb',
+    'arabic' : 'urn:cite:perseus:aratb',
+    'ara' : 'urn:cite:perseus:aratb',
+  };
+  return collections[a_lang];
+}
+
+/**
  * splits a comma separated list from a single input element to
  * create mutliple hidden params
  * @param a_from the input element containing the list
@@ -224,7 +239,7 @@ function EnterSentence(a_event)
                 transformProc.setParameter(null,"e_appuri",$("input[name='appuri']").val());
                 transformProc.setParameter(null,"e_datetime",new Date().toDateString());
                 // TODO should probably allow identification of target collection in input
-                transformProc.setParameter(null,"e_collection",'urn:cite:perseus:' + $("input[name='lang']:checked").val() + 'tb');
+                transformProc.setParameter(null,"e_collection",find_collection($("input[name='lang']:checked").val() ));
                 transformProc.setParameter(null,"e_attachtoroot", $("input[name='attachtoroot']").get(0).checked  == true ? '1' : '');
                 treebank = transformProc.transformToDocument(tokenized);
             } catch (a_e) {
@@ -317,10 +332,37 @@ function put_treebank(treebank) {
 function startRead(evt) {
     var file = document.getElementById("file").files[0];
     if (file) {
+        $("#uploadcreate").html('');
         $("#file_upload").addClass("loading");
         var reader = new FileReader();
         reader.readAsText(file, "UTF-8");
-        reader.onload = fileLoaded;
+        reader.onload = function(evt) { fileLoaded(evt.target.result) };
+    }
+}
+
+/**
+ * Redirect to regular sosol create link for uploaded files
+ * to avoid cross-browser nonsense
+ */
+function readFromUrl() {
+    url = $("#fileurl").val(); 
+    if (url) {
+      var langquery = window.prompt("Is the template Greek, Latin or Arabic?")
+      var collection = find_collection(langquery.toLowerCase());
+      if (collection) {
+        var redirect_to = $("meta[name='linkurl']").attr("content");
+        redirect_to = redirect_to.replace("COLLECTION_REPLACE",collection)
+                                 .replace("URL_REPLACE",url);
+        $("#uploadcreate").html('Use this link to upload your template:' +
+        '<a href="' + redirect_to + '">' + redirect_to + '</a>')
+      }
+      else {
+         alert(langquery + " is not a supported treebank collection").
+         $("#uploadcreate").html('');
+      }
+    }
+    else {
+        alert("No URL supplied.");
     }
 }
 
@@ -328,8 +370,8 @@ function startRead(evt) {
  * On finish reading of a file, put it to the storage service and
  * submit the form
  */
-function fileLoaded(evt) {
-    var xml = (new DOMParser()).parseFromString(evt.target.result,"text/xml");
+function fileLoaded(data) {
+    var xml = (new DOMParser()).parseFromString(data,"text/xml");
     var annotation = null;
     try {
         // TODO could really switch this to a jquery ajax call -- it's just cut and paste code

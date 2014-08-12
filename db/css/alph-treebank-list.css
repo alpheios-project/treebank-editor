@@ -125,3 +125,8 @@ ol {
     cursor: progress;
     white-space: nowrap;
 }
+
+#file_upload #uploadcreate a {
+    color: blue;
+    text-decoration: underline;
+}

@@ -378,6 +378,7 @@ function fileLoaded(data) {
         var transformUrl = $("meta[name='oa_wrapper_transform']").attr("content");
         var transformProc = loadStylesheet(transformUrl);
         transformProc.setParameter(null,"e_datetime",new Date().toDateString());
+        transformProc.setParameter(null,"e_appuri",$("input[name='appuri']").val());
         annotation = transformProc.transformToDocument(xml);
     } catch (a_e) {
         alert(a_e);

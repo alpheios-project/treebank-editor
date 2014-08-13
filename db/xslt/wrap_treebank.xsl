@@ -110,6 +110,7 @@
             <xsl:attribute name="format">
                 <xsl:value-of select="$e_format"/>
             </xsl:attribute>
+            <xsl:apply-templates select="node()[(local-name(.) = 'date')]"></xsl:apply-templates>
             <xsl:if test="$e_agenturi">
             <xsl:element name="annotator">
                 <xsl:element name="short"/>
@@ -126,7 +127,7 @@
                     <xsl:element name="uri"><xsl:value-of select="$e_appuri"/></xsl:element>
                 </xsl:element>
             </xsl:if>
-            <xsl:apply-templates select="node()"></xsl:apply-templates>
+            <xsl:apply-templates select="node()[not(local-name(.) = 'date')]"></xsl:apply-templates>
         </xsl:element>
     </xsl:template>
 

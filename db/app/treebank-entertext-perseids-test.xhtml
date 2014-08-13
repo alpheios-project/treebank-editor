@@ -110,7 +110,7 @@
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
           <label for="shift-tokens">Shift Enclytics</label><br/>
           <label for="remove_tei_all">Ignore TEI Tags:</label>
-          <input type="text" id="remove_tei_all" name="remove_tei_all" value="head,speaker,note,ref"/>
+          <input type="text" id="remove_tei_all" name="remove_tei_all" value="teiHeader,head,speaker,note,ref"/>
           <input type="hidden" name="template_format" value="Perseus"/>
           <!-- TODO mime_type and xml really should be merged into one setting
                separating for now because different value types are needed by the
@@ -138,6 +138,7 @@
     <div>
         <p>Or Upload Base XML Treebank:</p>
         <div id="file_upload">
+          <div id="alpheios-put-notice"/>
           <label for="fileurl">From file:</label>
           <input type="file" id="file" name="files[]" onchange="startRead()"/>
           <br/>

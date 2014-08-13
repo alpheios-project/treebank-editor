@@ -37,7 +37,7 @@
     
     <!-- url to POST to to create store a new treebank template -->
     <meta name="url" content="http://sosol.perseids.org/sosol/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
-    <!-- url to redirect to create new treebank template from an existing
+    <!-- url to redirect to create new treebank template from an existing -->
     <meta name="linkurl" content="http://sosol.perseids.org/sosol/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
@@ -112,7 +112,7 @@
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
           <label for="shift-tokens">Shift Enclytics</label><br/>
           <label for="remove_tei_all">Ignore TEI Tags:</label>
-          <input type="text" id="remove_tei_all" name="remove_tei_all" value="head,speaker,note,ref"/>
+          <input type="text" id="remove_tei_all" name="remove_tei_all" value="teiHeader,head,speaker,note,ref"/>
           <input type="hidden" name="template_format" value="Perseus"/>
           <!-- TODO mime_type and xml really should be merged into one setting
                separating for now because different value types are needed by the
@@ -135,9 +135,11 @@
         <div><button type="submit">Edit</button></div>
       </form>
     </div>
+    <hr/>
     <div>
         <p>Or Upload Base XML Treebank:</p>
         <div id="file_upload">
+          <div id="alpheios-put-notice"/>
           <label for="fileurl">From file:</label>
           <input type="file" id="file" name="files[]" onchange="startRead()"/>
           <br/>

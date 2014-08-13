@@ -130,3 +130,17 @@ ol {
     color: blue;
     text-decoration: underline;
 }
+
+#alpheios-put-notice {
+    text-align:center;
+    font-weight: bold;
+    color:green;
+}
+#alpheios-put-notice a {
+    color: blue;
+    text-decoration: underline;
+}
+
+#alpheios-put-notice.error {
+    color:red;
+}

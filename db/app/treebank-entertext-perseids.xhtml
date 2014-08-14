@@ -75,9 +75,10 @@
             placeholder="Enter the text you want to treebank..."
             ></textarea><br/>
           <label for="text_uri">Text URI</label>
-          <input type="text" id="text_uri" name="text_uri" size="100"></input><br/>
-          <label for="mime_type">Mime Type</label>
-          <input type="text" id="mime_type" name="mime_type" value="text/plain"/> 
+          <input type="text" id="text_uri" name="text_uri" size="100"></input>
+          <br/>
+          <label for="xml">Input is XML:</label>
+          <input type="checkbox" id="xml" name="xml"/>
         </fieldset>
         <fieldset id="format-buttons">
           <legend>Format:</legend>
@@ -119,7 +120,7 @@
                separating for now because different value types are needed by the
                different tokenization services
           -->
-          <input type="hidden" id="xml" name="xml" value="false"/>
+          <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
           <input type="hidden" id="inline" name="inline" value="true"/>
           <input type="checkbox" id="attachtoroot" name="attachtoroot" checked="checked" style="display:none;"/>
           <input type="hidden" id="appuri" name="appuri" value="http://github.com/alpheios-project/treebank-editor"/>

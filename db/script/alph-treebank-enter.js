@@ -117,14 +117,14 @@ function load_text() {
                         // separate for now because the different tokenization services require
                         // different value types
                         $("input[name='mime_type']").val("text/xml");
-                        $("input[name='xml']").val("true");
+                        $("input[name='xml']").attr("checked",true)
                     } catch (a_e) {
                          $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);
                     }
                 } else {
                     // TODO could eventually suppport other input formats
                     $("input[name='mime_type']").val("text/plain");
-                    $("input[name='xml']").val("false");
+                    $("input[name='xml']").attr("checked",false)
                 }
                 $("textarea[name='inputtext']").val(content);
                 detect_language();

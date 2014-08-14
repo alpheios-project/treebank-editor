@@ -45,6 +45,7 @@ $(document).ready(function() {
             load_text();
         }
     }
+    $("#advanced-options-toggle").click(function(){$("#advanced-options").toggle();});
 });
 
 /**
@@ -69,9 +70,9 @@ function find_collection(a_lang) {
  * @param a_to the name of the input element create for each values in the list 
  */
 function split_list(a_from,a_to) {
-    // clear out prior values
     var form = $(a_from).parents("form");
-    $("input[name='" + a_from + "']",form).remove();
+    // clear out prior values
+    $("input[name='" + a_to + "']",form).remove();
     var list = $(a_from).val().split(/,/);
     for (var i=0; i<list.length; i++) {
         var val = list[i].trim();
@@ -117,14 +118,14 @@ function load_text() {
                         // separate for now because the different tokenization services require
                         // different value types
                         $("input[name='mime_type']").val("text/xml");
-                        $("input[name='xml']").attr("checked",true)
+                        $("input[name='xml']").get(0).checked = true;
                     } catch (a_e) {
                          $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);
                     }
                 } else {
                     // TODO could eventually suppport other input formats
                     $("input[name='mime_type']").val("text/plain");
-                    $("input[name='xml']").attr("checked",false)
+                    $("input[name='xml']").get(0).checked = false;
                 }
                 $("textarea[name='inputtext']").val(content);
                 detect_language();
@@ -185,17 +186,19 @@ function EnterSentence(a_event)
                     // transform checkboxes to true/false
                     // TODO value munging should really be something that is specified in the config
                     // for the tokenization service
-                    val = val == 'on' ? 'true' : 'false';
+                    val = this.checked  ? 'true' : 'false';
                 }
                 // skip unselected radio buttons
                 if ($(this).attr("type") == 'radio' && ! this.checked) {
                     return;
                 }
-                if (val) {
+                if (val && val != 'false') {
                     vals.push(val);
                 }
             });
-            params[service_param] = vals;
+            if (vals.length > 0) {
+              params[service_param] = vals.length > 1 ? vals : vals[0]
+            }
 
         }
         var tokenized;

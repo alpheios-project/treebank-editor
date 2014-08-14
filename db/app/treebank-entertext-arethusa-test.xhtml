@@ -24,7 +24,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
     <link rel="stylesheet" type="text/css" href="../css/arethusa.css"/>
-    <script language="javascript" type="text/javascript" src="../script/jquery-1.2.6-alph.js"/>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
     <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
 
@@ -37,9 +37,8 @@
     
     <!-- url to POST to to create store a new treebank template -->
     <meta name="url" content="http://localhost/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
-    <!-- url to redirect to create new treebank template from an existing
-         one supplied by url -->
-    <meta name="linkurl" content="http://localhost:3000/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
+    <!-- url to redirect to create new treebank template from an existing -->
+    <meta name="linkurl" content="http://localhost/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
          can be overridden per language.
@@ -51,8 +50,7 @@
            this is a complete hack but was a quick and dirty way to reuse the existing form
          - @data-transform contains the path to the XSLT transformation to apply to the tokenization
            service output to create the treebank template for posting to to the back end storage service
-    -->   
-    <!-- override the tokenization service to use for Latin text input. See above for description of parameters -->
+    -->
     <meta name="tokenization_service"
       content="http://services.perseids.org/llt/segtok"
       data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
@@ -61,6 +59,14 @@
     <!-- path to a transformation which wraps a treebank file in OA -->
     <meta name="oa_wrapper_transform"
       content="../xslt/wrap_treebank.xsl"/>
+
+    <!-- CTS Selector -->
+    <link rel="stylesheet" type="text/css" href="http://localhost/annotation-editor/perseids-annotate.css"/>
+    <script type="text/javascript" src="http://localhost/annotation-editor/jshashtable-3.0.js"></script>
+    <script type="text/javascript" src="http://localhost/annotation-editor/perseids-annotate.js"></script>
+    <script type="text/javascript" src="http://localhost/annotation-editor/cts_selector_widget.js"></script>
+    <meta name="cts_repos_url" content="http://localhost/cts/getrepos"/>
+    <meta name="cts_capabilities_url" content="http://localhost/cts/getcapabilities/"/>
     
   </head>
   <body>
@@ -75,20 +81,23 @@
           <legend>Input text:</legend>
           <textarea name="inputtext" rows="10" cols="80" 
             placeholder="Enter the text you want to treebank..."
-            ></textarea><br/>
+            ></textarea>
+          <br/>
           <label for="text_uri">Text URI</label>
           <input type="text" id="text_uri" name="text_uri" size="100"></input>
-          <br/>
-          <label for="xml">Input is XML:</label>
-          <input type="checkbox" id="xml" name="xml"/>
-        </fieldset>
-        <fieldset id="format-buttons">
-          <legend>Format:</legend>
-          <input type="radio" id="format-aldt" name="format" value="aldt"
-            checked="checked"/>
-          <label for="format-aldt">Ancient Language Dependency Treebank</label>
-          <input type="radio" id="format-smyth" name="format" value="smyth"/>
-          <label for="format-smyth">Smyth Grammar Tag Set</label>
+          <p class="cts_selector_hint">Click to toggle text selector..</p>
+          <div id="cts_annotation_selector">
+            <div id="cts_select_container" style="display:none;">
+              <select id="body_repo" name="body_repo"/>
+              <select id="group_urn" name="group_urn"/>
+              <select id="work_urn" name="work_urn"/>
+              <select id="version_urn" name="version_urn"/>
+              <div id="citeinfo">
+              </div>
+              <button id="cts_request_button" disabled="true">Retrieve Text</button>
+            </div>
+          </div>
+
         </fieldset>
         <fieldset id="lang-buttons">
           <legend>Language:</legend>
@@ -107,18 +116,32 @@
           <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
           <label for="dir-rtl">Right to Left</label>
         </fieldset>
+        <p id="advanced-options-toggle" class="toggle_hint">Click  to toggle advanced options...</p>
+        <div id="advanced-options" style="display:none;">
+        <fieldset id="format-buttons">
+          <legend>Format:</legend>
+          <input type="radio" id="format-aldt" name="format" value="aldt"
+            checked="checked"/>
+          <label for="format-aldt">Ancient Language Dependency Treebank</label>
+          <input type="radio" id="format-smyth" name="format" value="smyth"/>
+          <label for="format-smyth">Smyth Grammar Tag Set</label>
+        </fieldset>
         <!-- TODO this should be customizable per tokenization service -->
         <fieldset id="tokenization-options">
           <legend>Tokenization Options:</legend>
-          <input type="checkbox" id="merge-tokens" name="merge-tokens"/>
           <label for="merge-tokens">Merge split words</label>
-          <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
+          <input type="checkbox" id="merge-tokens" name="merge-tokens"/>
           <label for="split-tokens">Split Enclytics</label>
+          <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
+          <label for="shift-tokens">Shift Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
-          <label for="shift-tokens">Shift Enclytics</label><br/>
-          <!-- TODO make it possible to add and remove values -->
           <label for="remove_tei_all">Ignore TEI Tags:</label>
           <input type="text" id="remove_tei_all" name="remove_tei_all" value="teiHeader,head,speaker,note,ref"/>
+          <br/>
+          <label for="xml">Input is XML:</label>
+          <input type="checkbox" id="xml" name="xml"/>
+          <label for="attachtoroot">Attach unannotated tokens to root:</label>
+          <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
           <input type="hidden" name="template_format" value="Perseus"/>
           <!-- TODO mime_type and xml really should be merged into one setting
                separating for now because different value types are needed by the
@@ -128,15 +151,14 @@
           <input type="hidden" id="inline" name="inline" value="true"/>
           <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
         </fieldset>
+        </div>
       </form>
-      <form name="submit-form" action="http://localhost/arethusa/app/#/perseidsLANGFORMAT"
+      <form name="submit-form" action="/arethusa/app/#/perseidsLANGFORMAT"
         onsubmit="return EnterSentence(event);" method="GET">
         <input type="hidden" name="doc"/>
         <input type="hidden" name="s"/>
         <input type="hidden" name="direction" value="ltr"/>
         <input type="hidden" name="lang" value=""/>
-        <label for="attachtoroot">Attach unannotated tokens to root:</label>
-        <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
         <div><button type="submit">Edit</button></div>
       </form>
     </div>

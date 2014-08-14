@@ -144,3 +144,25 @@ ol {
 #alpheios-put-notice.error {
     color:red;
 }
+
+#cts_select_container {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+#advanced-options-toggle {
+    color: #4183C4;
+    font-size: smaller;
+    font-style: italic;
+    cursor: pointer;
+    margin-left: 1em;
+}
+
+#advanced-options {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+

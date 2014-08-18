@@ -115,3 +115,54 @@ body {
 ol {
     font-family: Georgia;
 }
+
+#file_upload {
+    padding-left: 18px;
+}
+
+#file_upload.loading {
+    background: transparent url(loading.gif) no-repeat;
+    cursor: progress;
+    white-space: nowrap;
+}
+
+#file_upload #uploadcreate a {
+    color: blue;
+    text-decoration: underline;
+}
+
+#alpheios-put-notice {
+    text-align:center;
+    font-weight: bold;
+    color:green;
+}
+#alpheios-put-notice a {
+    color: blue;
+    text-decoration: underline;
+}
+
+#alpheios-put-notice.error {
+    color:red;
+}
+
+#cts_select_container {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+#advanced-options-toggle {
+    color: #4183C4;
+    font-size: smaller;
+    font-style: italic;
+    cursor: pointer;
+    margin-left: 1em;
+}
+
+#advanced-options {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
+
+

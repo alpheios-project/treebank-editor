@@ -108,10 +108,10 @@ function load_text() {
             url: $("input[name='text_uri']").val(),
             type: 'GET',
             async: true,
-            success: function(a_data,a_status){
-                var content_type = a_data.contentType;
+            success: function(a_data,a_status,a_xhr){
+                var content_type = a_xhr.getResponseHeader("content-type");
                 var content = a_data;
-                if (content_type == 'application/xml' || content_type == 'text/xml') {
+                if (content_type.match(/application\/xml/) || content_type.match(/text\/xml/)) {
                     try {
                         content = new XMLSerializer().serializeToString(a_data);
                         // TODO mime_type and xml should really be merged into one input param

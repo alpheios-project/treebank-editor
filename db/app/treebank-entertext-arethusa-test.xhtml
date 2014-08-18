@@ -53,7 +53,7 @@
     -->
     <meta name="tokenization_service"
       content="http://services.perseids.org/llt/segtok"
-      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text  remove_tei[]"
+      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text remove_node[] go_to_root ns"
       data-transform="../xslt/segtok_to_tb.xsl"/>
     
     <!-- path to a transformation which wraps a treebank file in OA -->
@@ -135,19 +135,26 @@
           <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
           <label for="shift-tokens">Shift Enclytics</label>
           <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
-          <label for="remove_tei_all">Ignore TEI Tags:</label>
-          <input type="text" id="remove_tei_all" name="remove_tei_all" value="teiHeader,head,speaker,note,ref"/>
+          <br/>
+          <label for="attachtoroot">Attach unannotated tokens to root:</label>
+          <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
           <br/>
           <label for="xml">Input is XML:</label>
           <input type="checkbox" id="xml" name="xml"/>
-          <label for="attachtoroot">Attach unannotated tokens to root:</label>
-          <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
-          <input type="hidden" name="template_format" value="Perseus"/>
+          <div id="xml_options" style="display:none;">
+            <label for="go_to_root">Root Node:</label>
+            <input type="text" id="go_to_root" name="go_to_root" value="TEI"/>
+            <label for="ns">Document Namespace:</label>
+            <input type="text" id="ns" name="ns" value="http://www.tei-c.org/ns/1.0"/>
+            <label for="remove_node_all">Ignore TEI Tags:</label>
+            <input type="text" id="remove_node_all" name="remove_node_all" value="teiHeader,head,speaker,note,ref"/>
+          </div>
           <!-- TODO mime_type and xml really should be merged into one setting
                separating for now because different value types are needed by the
                different tokenization services
           -->
           <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
+          <input type="hidden" name="template_format" value="Perseus"/>
           <input type="hidden" id="inline" name="inline" value="true"/>
           <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
         </fieldset>

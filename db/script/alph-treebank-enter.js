@@ -28,6 +28,9 @@ $(document).ready(function() {
     // try to detect the input language
     $("textarea[name='inputtext']").blur(detect_language);
 
+    // respond to xml input or not
+    $("#xml").click(toggle_xml_options);
+
     // try to load text from the supplied uri
     $("input[name='text_uri']").change(load_text);
     
@@ -128,6 +131,7 @@ function load_text() {
                     $("input[name='xml']").get(0).checked = false;
                 }
                 $("textarea[name='inputtext']").val(content);
+                toggle_xml_options();
                 detect_language();
             },
             error: function(a_req,a_text,a_error) {
@@ -151,9 +155,10 @@ function EnterSentence(a_event)
     // I think this is necessary to make the display react appropriately
     // to the user's input.
     $("input[name='inputtext']",form).attr("dir",dir);
-    
-    // collapse the list of tei elements to remove for tokenization
-    split_list($("input[name='remove_tei_all']").get(0),'remove_tei[]');
+   
+
+    // collapse the list of xml elements to remove for tokenization
+    split_list($("input[name='remove_node_all']").get(0),'remove_node[]');
 
     // get the tokenization service for the selected language and fall back to
     // default if there isn't a language-specific one
@@ -252,6 +257,14 @@ function EnterSentence(a_event)
         }
     }
     return put_treebank(treebank);
+}
+
+function toggle_xml_options() {
+  if ($("input[name='xml']").get(0).checked == true) {
+    $("#xml_options").show();
+  } else {
+    $("#xml_options").hide();
+  }
 }
 
 /**

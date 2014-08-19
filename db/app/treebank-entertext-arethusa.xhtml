@@ -83,6 +83,9 @@
             placeholder="Enter the text you want to treebank..."
             ></textarea>
           <br/>
+          <label for="xml">Input is XML:</label>
+          <input type="checkbox" id="xml" name="xml"/>
+          <br/>
           <label for="text_uri">Text URI</label>
           <input type="text" id="text_uri" name="text_uri" size="100"></input>
           <p class="cts_selector_hint">Click to toggle text selector..</p>
@@ -138,9 +141,6 @@
           <br/>
           <label for="attachtoroot">Attach unannotated tokens to root:</label>
           <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
-          <br/>
-          <label for="xml">Input is XML:</label>
-          <input type="checkbox" id="xml" name="xml"/>
           <div id="xml_options" style="display:none;">
             <label for="go_to_root">Root Node:</label>
             <input type="text" id="go_to_root" name="go_to_root" value="TEI"/>

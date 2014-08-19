@@ -26,7 +26,7 @@ var s_params = {};
 $(document).ready(function() {
 
     // try to detect the input language
-    $("textarea[name='inputtext']").blur(detect_language);
+    $("textarea[name='inputtext']").blur(detect_language_and_type);
 
     // respond to xml input or not
     $("#xml").click(toggle_xml_options);
@@ -83,7 +83,41 @@ function split_list(a_from,a_to) {
     }
 }
 /**
- * Handler for inputtext change to detect the language of the text
+ * Handler for inputtext change to detect the language and mimetype of the text
+ */
+function detect_language_and_type() {
+    // first detect language
+    detect_language();
+
+    // now try to detect type
+    var text = $("textarea[name='inputtext']").val().trim();
+    var is_plain_text = true;
+    var looks_like_xml = text.match(/<(.*?)>/);
+    if (looks_like_xml) {
+      try {
+        var xml = (new DOMParser()).parseFromString(text,"text/xml");
+        if ($("parsererror",xml).length == 0) {
+          is_plain_text = false;
+        }
+      } catch(a_e) {
+         // if this fails assume plain text
+         // otherwise assume xml which might not be right because it could
+         // contain a parse error but there isn't a good cross-browser way 
+         // to detect this for sure
+      }
+    }
+    if (is_plain_text) {
+       $("input[name='mime_type']").val("text/plain");
+       $("input[name='xml']").get(0).checked = false;
+    } else {
+      $("input[name='mime_type']").val("text/xml");
+      $("input[name='xml']").get(0).checked = true;
+    }
+    toggle_xml_options();
+}
+
+/**
+ * Handler for inputtext change to detect the language of hte text 
  */
 function detect_language() {
     // TODO should maybe use a general purpose lib for this
@@ -219,7 +253,7 @@ function EnterSentence(a_event)
                 tokenized = a_data;
                 var root = tokenized ? $(tokenized.documentElement) : null;
                 if (root === null || root.is("error")) {
-                    var msg = root.is("error") ? root.text() :
+                   var msg = root.is("error") ? root.text() :
                         "Error tokenizing";
                     alert(msg);
                 }

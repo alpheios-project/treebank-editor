@@ -223,7 +223,8 @@ function EnterSentence(a_event)
                 var val = $(this).val();
                 if ($(this).attr("type") == 'checkbox') {
                     // transform checkboxes to true/false
-                    // TODO value munging should really be something that is specified in the config
+                    // TODO value munging should really be 
+                    // something that is specified in the config
                     // for the tokenization service
                     val = this.checked  ? 'true' : 'false';
                 }
@@ -231,7 +232,7 @@ function EnterSentence(a_event)
                 if ($(this).attr("type") == 'radio' && ! this.checked) {
                     return;
                 }
-                if (val && val != 'false') {
+                if (val) {
                     vals.push(val);
                 }
             });

@@ -27,6 +27,7 @@ $(document).ready(function() {
 
     // try to detect the input language
     $("textarea[name='inputtext']").blur(detect_language_and_type);
+    $("textarea[name='inputtext']").bind("cts-passage:retrieved",detect_language_and_type);
 
     // respond to xml input or not
     $("#xml").click(toggle_xml_options);
@@ -49,6 +50,19 @@ $(document).ready(function() {
         }
     }
     $("#advanced-options-toggle").click(function(){$("#advanced-options").toggle();});
+    try {
+        $("#text_uri").ctsTypeahead({
+          "endpoint" : $("meta[name='cts_repo_url']").attr("content"),
+          "version" : 3,
+          "inventories": { 
+            "annotsrc" : "Perseids Sources" 
+           },
+          "retrieve" : "#inputtext"
+        });
+    } catch (e) {
+       // fail silently if we don't have the cool new selector
+    }
+
 });
 
 /**

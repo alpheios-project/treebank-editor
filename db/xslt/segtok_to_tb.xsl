@@ -156,15 +156,21 @@
     
     <xsl:template match="tei:pc|pc">
         <xsl:variable name="s" select="@s_n"/>
+        <xsl:variable name="isComma" select=". = ','"/>
         <xsl:element name="word">
             <xsl:attribute name="id"><xsl:value-of select="@n"></xsl:value-of></xsl:attribute>
             <xsl:attribute name="form"><xsl:value-of select="."/></xsl:attribute>
             <xsl:attribute name="lemma">punc1</xsl:attribute>
             <xsl:attribute name="postag">u--------</xsl:attribute>
-            <xsl:attribute name="head">0</xsl:attribute>
+            <xsl:attribute name="head">
+                <xsl:choose>
+                    <xsl:when test="not($isComma) and $e_attachtoroot and $e_attachtoroot != ''">0</xsl:when>
+                    <xsl:otherwise></xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
             <xsl:choose>
                 <!-- RGorman says we always want AuxX for commas -->
-                <xsl:when test=".=','">
+                <xsl:when test="$isComma">
                     <xsl:attribute name="relation">AuxX</xsl:attribute>
                 </xsl:when>
                 <!-- if punctuation is mid-sentence-->

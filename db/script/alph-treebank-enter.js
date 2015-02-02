@@ -52,7 +52,7 @@ $(document).ready(function() {
     $("#advanced-options-toggle").click(function(){$("#advanced-options").toggle();});
     try {
         $("#text_uri").ctsTypeahead({
-          "endpoint" : $("meta[name='cts_repo_url']").attr("content"),
+          "endpoint" : "http://sosol.perseids.org/exist/rest/db/xq/CTS.xq?",
           "version" : 3,
           "inventories": { 
             "annotsrc" : "Perseids Sources" 

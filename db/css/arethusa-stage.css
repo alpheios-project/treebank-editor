@@ -1,0 +1,44 @@
+body { 
+  background-color:#F2F2F2;
+}
+
+button, #file * {
+  background: #3E8D9C;
+  color: white;
+}
+
+button:hover, #file *:hover {
+  background: #73CDDE;
+}
+
+header, #alph-page-header {
+    background-color:#4E6476;
+    margin-bottom: 1em;
+    padding-top: 2px;
+}
+
+fieldset {
+	margin: 0;
+	padding:0.5rem;
+}
+
+fieldset > legend {
+	background-color:transparent;
+}
+
+label.columns {
+	margin:0;
+	font-weight:normal;
+}
+
+.cts-selector-passage-container > * {
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    height: 21px !important;
+    line-height: 21px !important;
+    margin: 0 !important;
+    padding: 2px !important;
+    vertical-align: top!important;
+    font-size: 11px !important;
+
+}

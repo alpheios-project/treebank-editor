@@ -16,3 +16,12 @@ header, #alph-page-header {
     margin-bottom: 1em;
     padding-top: 2px;
 }
+
+fieldset {
+	margin: 0;
+	padding:0.5rem;
+}
+
+fieldset > legend {
+	background-color:transparent;
+}

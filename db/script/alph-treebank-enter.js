@@ -63,6 +63,18 @@ $(document).ready(function() {
        // fail silently if we don't have the cool new selector
     }
 
+    $("#advanced-options").ctsService("llt.tokenizer", {
+        "endpoint" : "http://services.perseids.org/llt/segtok",
+        "DOM" : {
+            "text" : $("#inputtext")
+        },
+        "click" : ".button",
+        "trigger" : "tokenize!",
+        "callback" : function(data) {
+            $("#inputtext").val(data);
+        },
+        "show" : "toggle-llt-tokenizer"
+    });
 });
 
 /**

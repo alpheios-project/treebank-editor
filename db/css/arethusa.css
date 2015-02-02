@@ -25,3 +25,20 @@ fieldset {
 fieldset > legend {
 	background-color:transparent;
 }
+
+label.columns {
+	margin:0;
+	font-weight:normal;
+}
+
+.cts-selector-passage-container > * {
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    height: 21px !important;
+    line-height: 21px !important;
+    margin: 0 !important;
+    padding: 2px !important;
+    vertical-align: top!important;
+    font-size: 11px !important;
+
+}

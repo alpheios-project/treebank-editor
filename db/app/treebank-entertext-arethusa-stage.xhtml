@@ -27,7 +27,7 @@
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"/>
         <script type="text/javascript" src="../script/cts.min.js"/>
         <script type="text/javascript" src="../script/jquery.cts.typeahead.min.js"/>
-        <script type="text/javascript" src="../script/jquery.cts.service.min.js"/>
+        <script type="text/javascript" src="../script/jquery.cts.service.js"/>
         <script type="text/javascript" src="../script/handlebars.min.js"></script>
         <script type="text/javascript" src="../script/typeahead.bundle.min.js"></script>
 
@@ -72,7 +72,7 @@
             </div>
         </header>
         <div>
-            <form name="input-form" action="">
+            <form name="input-form" action="http://www.perseids.org/tools/arethusa/app/#/perseids" onsubmit="return EnterSentence(event);" method="GET">
                 <div class="row">
                     <fieldset class="large-6 columns">
                         <legend for="inputtext">Input text:</legend>
@@ -97,41 +97,64 @@
                             <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
                             <label for="dir-rtl">Right to Left</label>
                         </fieldset>
+                        <div>
+                            <input type="hidden" name="doc"/>
+                            <input type="hidden" name="s"/>
+                            <input type="hidden" name="direction" value="ltr"/>
+                            <input type="hidden" name="lang" value=""/>
+                            <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
+                            <button type="submit" class="button small">Edit</button>
+                        </div>
                         <small id="advanced-options-toggle" class="toggle_hint">Click  to toggle advanced options...</small>
                         <div id="advanced-options" style="display: none;">
                             <fieldset id="format-buttons">
                                 <legend>Format:</legend>
-                                <input type="radio" id="format-aldt" name="format" value="aldt" checked="checked"/>
-                                <label for="format-aldt">Ancient Language Dependency Treebank</label>
-                                <input type="radio" id="format-smyth" name="format" value="smyth3"/>
-                                <label for="format-smyth">Smyth Grammar Tag Set</label>
+                                <div class="row">
+                                    <label class="columns large-8 small-8" for="format-aldt">Ancient Language Dependency Treebank</label>
+                                    <div class="columns large-4 small-4">
+                                        <input type="radio" id="format-aldt" name="format" value="aldt" checked="checked"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="columns large-8 small-8" for="format-smyth">Smyth Grammar Tag Set</label>
+                                    <div class="columns large-4 small-4">
+                                        <input type="radio" id="format-smyth" name="format" value="smyth3"/>
+                                    </div>
+                                </div>
                             </fieldset>
+                            <div class="row">
+                                <label class="columns large-8" for="attachtoroot">Attach unannotated tokens to root:</label>
+                                <div class="columns large-4">
+                                    <input id="attachtoroot" type="checkbox" name="attachtoroot"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
-            <form name="submit-form" action="http://www.perseids.org/tools/arethusa/app/#/perseids" onsubmit="return EnterSentence(event);" method="GET">
-                <input type="hidden" name="doc"/>
-                <input type="hidden" name="s"/>
-                <input type="hidden" name="direction" value="ltr"/>
-                <input type="hidden" name="lang" value=""/>
-                <div>
-                    <button type="submit" class="button small">Edit</button>
                 </div>
             </form>
         </div>
         <hr/>
         <div>
-            <p>Or Upload Base XML Treebank:</p>
-            <div id="file_upload">
-                <div id="alpheios-put-notice"/>
-                <label for="fileurl">From file:</label>
-                <input type="file" id="file" name="files[]" onchange="startRead()"/>
-                <br/>
-                <label for="fileurl">From URL:</label>
-                <input type="url" id="fileurl" name="fileurl" placeholder="supply the url of the treebank template" size="50"/>
-                <button id="uploadurl" onclick="readFromUrl();">Create Link</button>
-                <div id="uploadcreate"/>
+            <div class="row"><em>Or Upload Base XML Treebank</em></div>
+            <div id="file_upload" class="row">
+                <fieldset class="large-6 columns">
+                    <label for="fileurl">From file:</label>
+                    <div id="alpheios-put-notice"/>
+                    <input type="file" id="file" name="files[]" onchange="startRead()"/>
+                    <br/>
+                </fieldset>
+                <div class="large-6 columns">
+                    <label for="fileurl">From URL:</label>
+                    <div class="row collapse">
+                        <div class="small-8 columns">
+                            <input type="url" id="fileurl" name="fileurl" placeholder="supply the url of the treebank template" size="50"/>
+                        </div>
+                        <div class="small-4 columns">
+                            <button id="uploadurl" class="button postfix" onclick="readFromUrl();">Create Link</button>
+                            <div id="uploadcreate"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

@@ -238,7 +238,7 @@ function put_treebank(treebank) {
     if (selected_format === 'smyth' && lang !== 'grc') {
         selected_format = 'aldt';
     }
-    var redirect_url = form_action.replace('LANG',lang).replace('FORMAT',selected_format); + $.param({
+    var redirect_url = form_action.replace('LANG',lang).replace('FORMAT',selected_format) + $.param({
         "doc": doc,
         "s"  : s,
         "direction" : dir,

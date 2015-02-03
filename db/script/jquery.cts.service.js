@@ -16,16 +16,8 @@
     "DOM" : {},
     "defaults" : {},
     "show" : true,
-    "callback" : null
-    /**
-Key   type  Default   Informations
-onTrigger   string  null  Link sending data of the
-onClick   string,element  false   Send request on click
-existingValue   dictionary   {}   where you tie options of a service with an element in the window,
-overrideDefaults  dictionary  {}  override CTS.service.new(serviceName).options[value].default,
-show  boolean,string  true  on(string) -> Show the parameter (true, false, on a certain trigger $().on("triggrer"))
-callback  function  null  Function to trigger, passes received data as parameter
-    */
+    "callback" : null,
+    "names" : {}
   };
   // $css is the basic classes used for accessing DOM inside jQuery.cts.service
   var $css = {
@@ -87,8 +79,8 @@ callback  function  null  Function to trigger, passes received data as parameter
       //Sending data
       _this.element.trigger("cts-service:"+_this.serviceName+":doing");
       _this.service.send(function(data) {
-        _this.element.trigger("cts-service:"+_this.serviceName+":done");
         if(typeof _this.settings.callback === "function") { _this.settings.callback(data); }
+        _this.element.trigger("cts-service:"+_this.serviceName+":done");
       }, "text");
     },
     makeInput : function(key, object) {
@@ -133,6 +125,9 @@ callback  function  null  Function to trigger, passes received data as parameter
         $container.append($inputContainer);
 
         _this.container.append($container);
+      }
+      if(key in _this.settings.names) {
+        $input.attr("name", _this.settings.names[key]);
       }
       return $input;
     },

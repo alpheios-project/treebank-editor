@@ -23,30 +23,16 @@
  */
 var s_params = {};
 
-$(document).ready(function() {
-
-    // try to detect the input language
-    $("textarea[name='inputtext']").blur(detect_language_and_type);
-    $("textarea[name='inputtext']").bind("cts-passage:retrieved",detect_language_and_type);
-
-    // try to load text from the supplied uri
-    $("input[name='text_uri']").trigger("load_text");
-    
+$(document).ready(function() {    
     // get parameters from call
-    var callParams = location.search.substr(1).split("&");
-    for (var i in callParams)
-    {
-        var pair = callParams[i].split(/=/);
+    var callParams = CTS.utils.uriParam();
+    Object.keys(callParams).forEach(function(key) {
+        var pair = callParams[key];
         if (pair.length == 2) {
             s_params[pair[0]] = pair[1];
         }
-        // right now the only parameter we support in the query string to the form is the text_uri
-        if (s_params['text_uri']) {
-            $("input[name='text_uri']").val(decodeURIComponent(s_params['text_uri']));
-            load_text();
-        }
-    }
-    $("#advanced-options-toggle").click(function(){$("#advanced-options").toggle();});
+    });
+
     $("#text_uri").ctsTypeahead({
       "endpoint" : $("meta[name='cts_repos_url']").attr("content"),
       "version" : 3,
@@ -72,6 +58,44 @@ $(document).ready(function() {
             "field-input-container" : ["columns", "large-6", "small-6"]
         }
     });
+
+    $("#advanced-options").ctsXSLT("llt.segtok_to_tb", {
+        "endpoint" : $("meta[name='tokenization_service']").attr("data-transform"),
+        "xml" : $("#inputtext"),
+        "DOM" : {
+            "e_lang" : "input[name='lang']:checked",
+            "e_format" : "input[name='format']:checked",
+            "e_dir" : "input[name='direction']:checked",
+            "e_docuri" : "input[name='text_uri']",
+            "e_appuri" : "input[name='appuri']",
+            "e_collection" : function() {
+                return find_collection($("input[name='lang']:checked").val());
+            },
+            "e_agenturi" : function () {
+                return $("meta[name='tokenization_service']").attr("content");
+            }
+        },
+        "trigger" : "llt-transform",
+        "callback" : function(data) {
+            $("#inputtext").val(data);
+            return put_treebank(data);
+        },
+        "css" : {
+            "field-container" : ["row"],
+            "field-label" : ["columns", "large-6", "small-6"],
+            "field-input-container" : ["columns", "large-6", "small-6"]
+        }
+    });
+
+    //UI
+    $("#advanced-options-toggle").click(function(){$("#advanced-options").toggle();});
+
+    //Trigger queue
+    $("#advanced-options").on("cts-service:llt.tokenizer:done", function() {
+        $("#advanced-options").trigger("llt-transform");
+    });
+    $("textarea[name='inputtext']").blur(detect_language_and_type);
+    $("textarea[name='inputtext']").bind("cts-passage:retrieved",detect_language_and_type);
 });
 
 /**
@@ -89,22 +113,6 @@ function find_collection(a_lang) {
   return collections[a_lang];
 }
 
-/**
- * splits a comma separated list from a single input element to
- * create mutliple hidden params
- * @param a_from the input element containing the list
- * @param a_to the name of the input element create for each values in the list 
- */
-function split_list(a_from,a_to) {
-    var form = $(a_from).parents("form");
-    // clear out prior values
-    $("input[name='" + a_to + "']",form).remove();
-    var list = $(a_from).val().split(/,/);
-    for (var i=0; i<list.length; i++) {
-        var val = list[i].trim();
-        $(form).append('<input type="hidden" name="' + a_to + '" value="' + val + '"/>');
-    }
-}
 /**
  * Handler for inputtext change to detect the language and mimetype of the text
  */
@@ -157,86 +165,22 @@ function detect_language() {
 }
 
 /**
- * Handler for the text_uri input to try to load the text
- */
-function load_text() {
-    $("textarea[name='inputtext']").attr("placeholder","loading...");
-    if ($("input[name='text_uri']").val().match(/^http/)) {
-        $.ajax({
-            url: $("input[name='text_uri']").val(),
-            type: 'GET',
-            async: true,
-            success: function(a_data,a_status,a_xhr){
-                var content_type = a_xhr.getResponseHeader("content-type");
-                var content = a_data;
-                if (content_type.match(/application\/xml/) || content_type.match(/text\/xml/)) {
-                    try {
-                        content = new XMLSerializer().serializeToString(a_data);
-                        // TODO mime_type and xml should really be merged into one input param
-                        // separate for now because the different tokenization services require
-                        // different value types
-                        $("input[name='mime_type']").val("text/xml");
-                        $("#cts-service-1-xml").first().checked = true;
-                    } catch (a_e) {
-                         $("textarea[name='inputtext']").attr("placeholder","Unable to process text: " + a_e);
-                    }
-                } else {
-                    // TODO could eventually suppport other input formats
-                    $("input[name='mime_type']").val("text/plain");
-                    $("#cts-service-1-xml").first().checked = false;
-                }
-                $("textarea[name='inputtext']").val(content);
-                detect_language();
-            },
-            error: function(a_req,a_text,a_error) {
-               $("textarea[name='inputtext']").attr("placeholder","ERROR loading " + $("input[name='text_uri']").val() +" : " + a_text);
-            }
-        });
-    }
-}
-
-/**
  * Submit handler for the text entry form
+ *
+ *  @param  a_event  {event}  Event triggered when submitting a form
+ *
  */
 function EnterSentence(a_event)
 {
     a_event.preventDefault();
     $('form[name="input-form"] button[type="submit"]').text("Loading ...");
     $("#advanced-options").trigger("llt-tokenize");
-
-    //Then we trigger something else :) 
-    $("#advanced-options").on("cts-service:llt.tokenizer:done", function() {
-        var tokenization_service = $("meta[name='tokenization_service_" + $("input[name='lang']:checked").val() + "']");
-        if (tokenization_service.length === 0) {
-            tokenization_service = $("meta[name='tokenization_service']");
-        }
-        if (tokenization_service.length == 1) {
-            var transform = tokenization_service.attr("data-transform");
-        }
-        try {
-            var transformProc = loadStylesheet(transform);
-            // TODO the transformation parameters should also be set per tokenization service
-            transformProc.setParameter(null,"e_docuri",$("input[name='text_uri']").val());
-            transformProc.setParameter(null,"e_lang",$("input[name='lang']:checked").val());
-            transformProc.setParameter(null,"e_dir",$("input[name='direction']:checked").val());
-            transformProc.setParameter(null,"e_format",$("input[name='format']:checked").val());
-            transformProc.setParameter(null,"e_agenturi", tokenization_service.attr("content"));
-            transformProc.setParameter(null,"e_appuri",$("input[name='appuri']").val());
-            transformProc.setParameter(null,"e_datetime",new Date().toDateString());
-            // TODO should probably allow identification of target collection in input
-            transformProc.setParameter(null,"e_collection",find_collection($("input[name='lang']:checked").val() ));
-            transformProc.setParameter(null,"e_attachtoroot", $("input[name='attachtoroot']").get(0).checked  == true ? '1' : '');
-            treebank = transformProc.transformToDocument((new DOMParser()).parseFromString($("#inputtext").val(),"text/xml"));
-        } catch (a_e) {
-            alert(a_e);
-            return false;
-        }
-        return put_treebank(treebank);
-    });
 }
 
 /**
  * POST the treebank to the backend storage service
+ *
+ *  @param  treebank  {string}  The treebank to be saved
  */
 function put_treebank(treebank) {
     // a bit of a hack -- may need to ping the api get the cookie
@@ -256,17 +200,23 @@ function put_treebank(treebank) {
         // another hack to make AlphEdit think we've done something
         // so that I can reuse the AlphEdit.putContents code
         AlphEdit.pushHistory(["create"],null);
+
         // send synchronous request to add
-        resp = AlphEdit.putContents(treebank, url, s_params['doc'] ? s_params['doc'] : '' , '');
+        resp = AlphEdit.putContents(
+            treebank, //The treebank XML
+            url, //Endpoint of SOSOL
+            s_params['doc'] ? s_params['doc'] : '' , //Something set up with URI values
+            '' // ?
+        );
     } catch (a_e) {
         alert(a_e);
         return false;
     }
 
     // save values from return in submit form
-    var form = $("form[name='submit-form']", document);
-    var lang = $("#lang-buttons input[name='lang']:checked").val();
-    var dir = $("#dir-buttons input[name='direction']:checked").val();
+    var form = $("form[name='input-form']", document);
+    var lang = $("input[name='lang']:checked").val();
+    var dir  = $("input[name='direction']:checked").val();
     $("input[name='inputtext']",form).attr("dir",dir);
 
     var doc = null;
@@ -281,11 +231,11 @@ function put_treebank(treebank) {
         doc = $(resp).text();
     }
     // hack to work around form submission to hashbang urls
-    var form_action = $(form).attr("action"); 
+    var form_action = $("form[name='input-form']", document).attr("action"); 
 
     var selected_format = $("input[name='format']:checked").val();
     // hack to ignore selection of Smyth for non-greek text
-    if (selected_format == 'smyth' && lang != 'grc') {
+    if (selected_format === 'smyth' && lang !== 'grc') {
         selected_format = 'aldt';
     }
     var redirect_url = form_action.replace('LANG',lang).replace('FORMAT',selected_format); + $.param({

@@ -25,12 +25,13 @@
         <link rel="stylesheet" type="text/css" href="../css/jquery.cts.typeahead.css" />
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"/>
+        <script type="text/javascript" src="../script/typeahead.bundle.min.js"></script>
+        <script type="text/javascript" src="../script/handlebars.min.js"></script>
+        
         <script type="text/javascript" src="../script/cts.min.js"/>
         <script type="text/javascript" src="../script/jquery.cts.typeahead.min.js"/>
-        <script type="text/javascript" src="../script/jquery.cts.service.js"/>
-        <script type="text/javascript" src="../script/jquery.cts.xslt.js"/>
-        <script type="text/javascript" src="../script/handlebars.min.js"></script>
-        <script type="text/javascript" src="../script/typeahead.bundle.min.js"></script>
+        <script type="text/javascript" src="../script/jquery.cts.service.min.js"/>
+        <script type="text/javascript" src="../script/jquery.cts.xslt.min.js"/>
 
         <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter-stage.js"/>
         <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
@@ -77,7 +78,10 @@
                 <div class="row">
                     <fieldset class="large-6 columns">
                         <legend for="inputtext">Input text:</legend>
-                        <textarea id="inputtext" name="inputtext" rows="10" cols="80" placeholder="Enter the text you want to treebank..."/>
+                        <div>
+                            <textarea id="inputtext" name="inputtext" rows="10" cols="80" placeholder="Enter the text you want to treebank..."/>
+                            <small class="error" id="texterror" style="display:none;">Invalid entry</small>
+                        </div>
                         <label for="text_uri">CTS Text</label>
                         <input type="text" id="text_uri" name="text_uri" size="100"/>
                     </fieldset>

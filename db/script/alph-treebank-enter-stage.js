@@ -96,7 +96,33 @@ $(document).ready(function() {
     });
     $("textarea[name='inputtext']").blur(detect_language_and_type);
     $("textarea[name='inputtext']").bind("cts-passage:retrieved",detect_language_and_type);
+
+    //Error handling
+    $("textarea[name='inputtext']").on("cts-passage:passage-error", function() {
+        CTSError("The passage does not exist");
+    });
+    $("textarea[name='inputtext']").on("cts-passage:retrieving-error", function() {
+        CTSError("Unable to contact the server. Please try again.");
+    });
 });
+
+/**
+ *  Trigger an error message. If message is empty, remove the trigger
+ *
+ */
+function CTSError(error) {
+    var $input = $("textarea[name='inputtext']"),
+        $error = $("#texterror");
+    if(typeof error === "undefined") {
+        $input.removeClass("error");
+        $error.hide();
+    } else {
+
+        $input.addClass("error");
+        $error.text(error).show();
+    }
+
+} 
 
 /**
  * Lookup the collection to store a file in according to language
@@ -117,6 +143,7 @@ function find_collection(a_lang) {
  * Handler for inputtext change to detect the language and mimetype of the text
  */
 function detect_language_and_type() {
+    CTSError();
     // first detect language
     detect_language();
 
@@ -238,7 +265,7 @@ function put_treebank(treebank) {
     if (selected_format === 'smyth' && lang !== 'grc') {
         selected_format = 'aldt';
     }
-    var redirect_url = form_action.replace('LANG',lang).replace('FORMAT',selected_format) + $.param({
+    var redirect_url = form_action.replace('LANG',lang).replace('FORMAT',selected_format) + "?" + $.param({
         "doc": doc,
         "s"  : s,
         "direction" : dir,

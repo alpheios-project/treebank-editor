@@ -244,7 +244,7 @@ function put_treebank(treebank) {
         "direction" : dir,
         "lang" : lang
     });
-    window.location(redirect_url);
+    window.location = redirect_url;
 }
 
 /**

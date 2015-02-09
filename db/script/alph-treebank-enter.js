@@ -68,6 +68,7 @@ $(document).ready(function() {
             "e_dir" : "input[name='direction']:checked",
             "e_docuri" : "input[name='text_uri']",
             "e_appuri" : "input[name='appuri']",
+            "e_attachtoroot" : "input#attachtoroot",
             "e_collection" : function() {
                 return find_collection($("input[name='lang']:checked").val());
             },

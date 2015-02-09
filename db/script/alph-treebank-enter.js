@@ -56,6 +56,9 @@ $(document).ready(function() {
             "field-container" : ["row"],
             "field-label" : ["columns", "large-6", "small-6"],
             "field-input-container" : ["columns", "large-6", "small-6"]
+        },
+        "names" : {
+            "xml" : "xml_for_llt"
         }
     });
 
@@ -173,6 +176,7 @@ function detect_language_and_type() {
     } else {
       $("input[name='mime_type']").val("text/xml");
     }
+   $("input[name='xml_for_llt'])").prop("checked", !is_plain_text);
 }
 
 /**

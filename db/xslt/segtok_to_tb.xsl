@@ -162,12 +162,7 @@
             <xsl:attribute name="form"><xsl:value-of select="."/></xsl:attribute>
             <xsl:attribute name="lemma">punc1</xsl:attribute>
             <xsl:attribute name="postag">u--------</xsl:attribute>
-            <xsl:attribute name="head">
-                <xsl:choose>
-                    <xsl:when test="not($isComma) and $e_attachtoroot and $e_attachtoroot != ''">0</xsl:when>
-                    <xsl:otherwise></xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
+            <xsl:attribute name="head">0</xsl:attribute>
             <xsl:choose>
                 <!-- RGorman says we always want AuxX for commas -->
                 <xsl:when test="$isComma">

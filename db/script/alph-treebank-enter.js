@@ -176,7 +176,7 @@ function detect_language_and_type() {
     } else {
       $("input[name='mime_type']").val("text/xml");
     }
-   $("input[name='xml_for_llt'])").prop("checked", !is_plain_text);
+    $("input[name='xml_for_llt'])")[0].checked = !is_plain_text;
 }
 
 /**

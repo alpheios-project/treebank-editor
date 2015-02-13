@@ -44,7 +44,7 @@ $(document).ready(function() {
 
     $("#advanced-options").ctsService("llt.tokenizer", {
         "endpoint" : "http://services.perseids.org/llt/segtok",
-        "DOM" : {
+        "driver" : {
             "text" : $("#inputtext")
         },
         "trigger" : "llt-tokenize",
@@ -65,7 +65,7 @@ $(document).ready(function() {
     $("#advanced-options").ctsXSLT("llt.segtok_to_tb", {
         "endpoint" : $("meta[name='tokenization_service']").attr("data-transform"),
         "xml" : $("#inputtext"),
-        "DOM" : {
+        "driver" : {
             "e_lang" : "input[name='lang']:checked",
             "e_format" : "input[name='format']:checked",
             "e_dir" : "input[name='direction']:checked",

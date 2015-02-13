@@ -30,7 +30,7 @@
     <xsl:param name="e_appuri"/>
     <xsl:param name="e_datetime"/>
     <xsl:param name="e_collection" select="'urn:cite:perseus:lattb'"/>
-    <xsl:param name="e_attachtoroot" select="true()"/>
+    <xsl:param name="e_attachtoroot" select="false()"/>
     
     <xsl:output indent="yes"></xsl:output>
     <xsl:key name="segments" match="tei:w|tei:pc|w|pc" use="@s_n" />

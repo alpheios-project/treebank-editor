@@ -39,7 +39,21 @@ $(document).ready(function() {
       "inventories": { 
         "annotsrc" : "Perseids Sources" 
        },
-      "retrieve" : "#inputtext"
+      "retrieve" : "#inputtext",
+      "languages" : ["grc", "lat"],
+      "tokenizer" : function(query) {
+        query = Bloodhound.tokenizers.whitespace(query)
+        if($("input[name='lang']:checked").length === 1) {
+            query.push("lang:"+$("input[name='lang']:checked").val());
+        }
+        return query
+      }
+    });
+
+    $("#text_uri").on("cts-passage:urn-updated", function(event, suggestion) {
+        if(typeof suggestion !== "undefined" && typeof suggestion.lang !== "undefined"){
+            $("input[name='lang'][value='" + suggestion.lang + "']")[0].checked = true;
+        }
     });
 
     $("#advanced-options").ctsService("llt.tokenizer", {

@@ -146,7 +146,7 @@
             <xsl:attribute name="postag"/>
             <xsl:attribute name="head">
             <xsl:choose>
-                <xsl:when test="$e_attachtoroot and $e_attachtoroot != ''">0</xsl:when>
+                <xsl:when test="$e_attachtoroot and $e_attachtoroot != '' and $e_attachtoroot != false() and $e_attachtoroot != 'false'">0</xsl:when>
                 <xsl:otherwise></xsl:otherwise>
             </xsl:choose>
             </xsl:attribute>

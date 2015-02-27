@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Copyright 2014 The Alpheios Project, Ltd.
   http://alpheios.net
@@ -18,27 +17,36 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<html xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:svg="http://www.w3.org/2000/svg"
-  xmlns:xlink="http://www.w3.org/1999/xlink">
-  <head>
-    <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
-    <link rel="stylesheet" type="text/css" href="../css/arethusa.css"/>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
-    <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <head>
+        <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/foundation/5.5.0/css/foundation.min.css" />
+        <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/arethusa.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/jquery.cts.typeahead.css" />
+
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"/>
+        <script type="text/javascript" src="../script/typeahead.bundle.min.js"></script>
+        <script type="text/javascript" src="../script/handlebars.min.js"></script>
+        
+        <script type="text/javascript" src="../script/cts.min.js"/>
+        <script type="text/javascript" src="../script/jquery.cts.typeahead.min.js"/>
+        <script type="text/javascript" src="../script/jquery.cts.service.min.js"/>
+        <script type="text/javascript" src="../script/jquery.cts.xslt.min.js"/>
+
+        <script language="javascript" type="text/javascript" src="../script/alph-treebank-enter.js"/>
+        <script language="javascript" type="text/javascript" src="../script/alph-edit-utils.js"/>
 
     <!-- cookie and header name for CSRF session token  -->
-    <meta name="alpheios-sessionTokenName" content="csrftoken"/>
-    <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
+        <meta name="alpheios-sessionTokenName" content="csrftoken"/>
+        <meta name="alpheios-sessionHeaderName" content="X-CSRF-Token"/>
     
     <!-- url to ping the server to set/refresh the CSRF cookie -->
-    <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
+        <meta name="pingurl" content="http://localhost/dmm_api/ping"/>
     
     <!-- url to POST to to create store a new treebank template -->
-    <meta name="url" content="http://localhost/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
+        <meta name="url" content="http://localhost/dmm_api/create/item/TreebankCite/DOC_REPLACE"/>
     <!-- url to redirect to create new treebank template from an existing -->
-    <meta name="linkurl" content="http://localhost/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
+        <meta name="linkurl" content="http://localhost/cite_publications/create_from_linked_urn/Treebank/COLLECTION_REPLACE?init_value[]=URL_REPLACE"/>
     
     <!-- default url to the tokenization service to use to process the input text. 
          can be overridden per language.
@@ -51,137 +59,116 @@
          - @data-transform contains the path to the XSLT transformation to apply to the tokenization
            service output to create the treebank template for posting to to the back end storage service
     -->
-    <meta name="tokenization_service"
-      content="http://services.perseids.org/llt/segtok"
-      data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text remove_node[] go_to_root ns"
-      data-transform="../xslt/segtok_to_tb.xsl"/>
+        <meta name="tokenization_service" content="http://services2.perseids.org/llt/segtok" data-params="xml inline split-tokens|splitting merge-tokens|merging shift-tokens|shifting inputtext|text remove_node[] go_to_root ns" data-transform="../xslt/segtok_to_tb.xsl"/>
     
     <!-- path to a transformation which wraps a treebank file in OA -->
-    <meta name="oa_wrapper_transform"
-      content="../xslt/wrap_treebank.xsl"/>
+        <meta name="oa_wrapper_transform" content="../xslt/wrap_treebank.xsl"/>
 
-    <!-- CTS Selector -->
-    <link rel="stylesheet" type="text/css" href="http://localhost/annotation-editor/perseids-annotate.css"/>
-    <script type="text/javascript" src="http://localhost/annotation-editor/jshashtable-3.0.js"></script>
-    <script type="text/javascript" src="http://localhost/annotation-editor/perseids-annotate.js"></script>
-    <script type="text/javascript" src="http://localhost/annotation-editor/cts_selector_widget.js"></script>
-    <meta name="cts_repos_url" content="http://localhost/cts/getrepos"/>
-    <meta name="cts_capabilities_url" content="http://localhost/cts/getcapabilities/"/>
-    
-  </head>
-  <body>
-    <header class="alpheios-ignore">
-      <div id="alph-page-header">
-        <img src="http://localhost/arethusa/app/css/arethusa.png" alt="Arethusa"/>
-      </div>
-    </header>
-    <div>
-      <form name="input-form" action="">
-        <fieldset>
-          <legend>Input text:</legend>
-          <textarea name="inputtext" rows="10" cols="80" 
-            placeholder="Enter the text you want to treebank..."
-            ></textarea>
-          <br/>
-          <label for="xml">Input is XML:</label>
-          <input type="checkbox" id="xml" name="xml"/>
-          <br/>
-          <label for="text_uri">Text URI</label>
-          <input type="text" id="text_uri" name="text_uri" size="100"></input>
-          <p class="cts_selector_hint">Click to toggle text selector..</p>
-          <div id="cts_annotation_selector">
-            <div id="cts_select_container" style="display:none;">
-              <select id="body_repo" name="body_repo"/>
-              <select id="group_urn" name="group_urn"/>
-              <select id="work_urn" name="work_urn"/>
-              <select id="version_urn" name="version_urn"/>
-              <div id="citeinfo">
-              </div>
-              <button id="cts_request_button" disabled="true">Retrieve Text</button>
+        <meta name="cts_repos_url" content="http://sosol.perseids.org/exist/rest/db/xq/CTS.xq?"/>
+        <meta name="cts_capabilities_url" content="http://sosol.perseids.org/sosol/cts/getcapabilities/"/>
+    </head>
+    <body>
+        <header class="alpheios-ignore">
+            <div id="alph-page-header">
+                <img src="http://www.perseids.org/tools/arethusa/app/images/arethusa.png" alt="Arethusa"/>
             </div>
-          </div>
-
-        </fieldset>
-        <fieldset id="lang-buttons">
-          <legend>Language:</legend>
-          <input type="radio" id="lang-grc" name="lang" value="grc"/>
-          <label for="lang-grc">Greek</label>
-          <input type="radio" id="lang-lat" name="lang" value="lat"
-            checked="checked"/>
-          <label for="lang-lat">Latin</label>
-          <input type="radio" id="lang-ara" name="lang" value="ara"/>
-          <label for="lang-ara">Arabic</label>
-        </fieldset>
-        <fieldset id="dir-buttons">
-          <legend>Text Direction:</legend>
-          <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked"/>
-          <label for="dir-ltr">Left to Right</label>
-          <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
-          <label for="dir-rtl">Right to Left</label>
-        </fieldset>
-        <p id="advanced-options-toggle" class="toggle_hint">Click  to toggle advanced options...</p>
-        <div id="advanced-options" style="display:none;">
-        <fieldset id="format-buttons">
-          <legend>Format:</legend>
-          <input type="radio" id="format-aldt" name="format" value="aldt"
-            checked="checked"/>
-          <label for="format-aldt">Ancient Language Dependency Treebank</label>
-          <input type="radio" id="format-smyth" name="format" value="smyth"/>
-          <label for="format-smyth">Smyth Grammar Tag Set</label>
-        </fieldset>
-        <!-- TODO this should be customizable per tokenization service -->
-        <fieldset id="tokenization-options">
-          <legend>Tokenization Options:</legend>
-          <label for="merge-tokens">Merge split words</label>
-          <input type="checkbox" id="merge-tokens" name="merge-tokens"/>
-          <label for="split-tokens">Split Enclytics</label>
-          <input type="checkbox" id="split-tokens" name="split-tokens" checked="checked"/>
-          <label for="shift-tokens">Shift Enclytics</label>
-          <input type="checkbox" id="shift-tokens" name="shift-tokens"/>
-          <br/>
-          <label for="attachtoroot">Attach unannotated tokens to root:</label>
-          <input type="checkbox" id="attachtoroot" name="attachtoroot"/>
-          <div id="xml_options" style="display:none;">
-            <label for="go_to_root">Root Node:</label>
-            <input type="text" id="go_to_root" name="go_to_root" value="TEI"/>
-            <label for="ns">Document Namespace:</label>
-            <input type="text" id="ns" name="ns" value="http://www.tei-c.org/ns/1.0"/>
-            <label for="remove_node_all">Ignore TEI Tags:</label>
-            <input type="text" id="remove_node_all" name="remove_node_all" value="teiHeader,head,speaker,note,ref"/>
-          </div>
-          <!-- TODO mime_type and xml really should be merged into one setting
-               separating for now because different value types are needed by the
-               different tokenization services
-          -->
-          <input type="hidden" id="mime_type" name="mime_type" value="text/plain"/> 
-          <input type="hidden" name="template_format" value="Perseus"/>
-          <input type="hidden" id="inline" name="inline" value="true"/>
-          <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
-        </fieldset>
+        </header>
+        <div>
+            <form name="input-form" action="http://localhost:8081/app/#/perseids" onsubmit="return EnterSentence(event);" method="GET">
+                <div class="row">
+                    <fieldset class="large-6 columns">
+                        <legend for="inputtext">Input text:</legend>
+                        <div>
+                            <textarea id="inputtext" name="inputtext" rows="10" cols="80" placeholder="Enter the text you want to treebank..."/>
+                            <small class="error" id="texterror" style="display:none;">Invalid entry</small>
+                        </div>
+                        <label for="text_uri">CTS Text</label>
+                        <input type="text" id="text_uri" name="text_uri" size="100"/>
+                    </fieldset>
+                    <div class="large-6 columns">
+                        <fieldset id="lang-buttons">
+                            <legend>Language:</legend>
+                            <input type="radio" id="lang-grc" name="lang" value="grc"/>
+                            <label for="lang-grc">Greek</label>
+                            <input type="radio" id="lang-lat" name="lang" value="lat" />
+                            <label for="lang-lat">Latin</label>
+                            <input type="radio" id="lang-ara" name="lang" value="ara"/>
+                            <label for="lang-ara">Arabic</label>
+                            <input type="radio" id="lang-misc" name="lang" value="misc"/>
+                            <label for="lang-misc">Other</label>
+                        </fieldset>
+                        <fieldset id="dir-buttons">
+                            <legend>Text Direction:</legend>
+                            <input type="radio" id="dir-ltr" name="direction" value="ltr" checked="checked"/>
+                            <label for="dir-ltr">Left to Right</label>
+                            <input type="radio" id="dir-rtl" name="direction" value="rtl"/>
+                            <label for="dir-rtl">Right to Left</label>
+                        </fieldset>
+                        <div>
+                            <input type="hidden" name="doc"/>
+                            <input type="hidden" name="s"/>
+                            <input type="hidden" name="direction" value="ltr"/>
+                            <input type="hidden" name="lang" value=""/>
+                            <input type="hidden" id="appuri" name="appuri" value="http://github.com/latin-language-toolkit/arethusa"/>
+                            <button type="submit" class="button small">Edit</button>
+                        </div>
+                        <small id="advanced-options-toggle" class="toggle_hint">Click  to toggle advanced options...</small>
+                        <div id="advanced-options" style="display: none;">
+                            <fieldset id="format-buttons">
+                                <legend>Format:</legend>
+                                <div class="row">
+                                    <label class="columns large-8 small-8" for="format-aldt">Ancient Language Dependency Treebank</label>
+                                    <div class="columns large-4 small-4">
+                                        <input type="radio" id="format-aldt" name="format" value="aldt" checked="checked"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="columns large-8 small-8" for="format-smyth">Smyth Grammar Tag Set</label>
+                                    <div class="columns large-4 small-4">
+                                        <input type="radio" id="format-smyth" name="format" value="smyth3"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="columns large-8 small-8" for="format-smyth">ALDT (Without Morphology)</label>
+                                    <div class="columns large-4 small-4">
+                                        <input type="radio" id="format-aldt-misc" name="format" value="aldt-misc"/>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <div class="row">
+                                <label class="columns large-8" for="attachtoroot">Attach unannotated tokens to root:</label>
+                                <div class="columns large-4">
+                                    <input id="attachtoroot" type="checkbox" name="attachtoroot"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
-      <form name="submit-form" action="http://localhost/arethusa/app/#/perseids"
-        onsubmit="return EnterSentence(event);" method="GET">
-        <input type="hidden" name="doc"/>
-        <input type="hidden" name="s"/>
-        <input type="hidden" name="direction" value="ltr"/>
-        <input type="hidden" name="lang" value=""/>
-        <div><button type="submit">Edit</button></div>
-      </form>
-    </div>
-    <hr/>
-    <div>
-        <p>Or Upload Base XML Treebank:</p>
-        <div id="file_upload">
-          <div id="alpheios-put-notice"/>
-          <label for="fileurl">From file:</label>
-          <input type="file" id="file" name="files[]" onchange="startRead()"/>
-          <br/>
-          <label for="fileurl">From URL:</label>
-          <input type="url" id="fileurl" name="fileurl" placeholder="supply the url of the treebank template" size="50"/>
-          <button id="uploadurl" onclick="readFromUrl();">Create Link</button>
-          <div id="uploadcreate"></div>
+        <hr/>
+        <div>
+            <div class="row"><em>Or Upload Base XML Treebank</em></div>
+            <div id="file_upload" class="row">
+                <fieldset class="large-6 columns">
+                    <label for="fileurl">From file:</label>
+                    <div id="alpheios-put-notice"/>
+                    <input type="file" id="file" name="files[]" onchange="startRead()"/>
+                    <br/>
+                </fieldset>
+                <div class="large-6 columns">
+                    <label for="fileurl">From URL:</label>
+                    <div class="row collapse">
+                        <div class="small-8 columns">
+                            <input type="url" id="fileurl" name="fileurl" placeholder="supply the url of the treebank template" size="50"/>
+                        </div>
+                        <div class="small-4 columns">
+                            <button id="uploadurl" class="button postfix" onclick="readFromUrl();">Create Link</button>
+                            <div id="uploadcreate"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-  </body>
+    </body>
 </html>

@@ -44,7 +44,7 @@ $(document).ready(function() {
       "tokenizer" : function(query) {
         query = Bloodhound.tokenizers.whitespace(query)
         if($("input[name='lang']:checked").length === 1) {
-            query.push("lang:"+$("input[name='lang']:checked").val());
+            query.push("lang:"+getLangOverride());
         }
         return query
       }
@@ -80,8 +80,8 @@ $(document).ready(function() {
         "endpoint" : $("meta[name='tokenization_service']").attr("data-transform"),
         "xml" : $("#inputtext"),
         "driver" : {
-            "e_lang" : "input[name='lang']:checked",
-            "e_format" : "input[name='format']:checked",
+            "e_lang" : getLangOverride,
+            "e_format" : getFormatOverride,
             "e_dir" : "input[name='direction']:checked",
             "e_docuri" : "input[name='text_uri']",
             "e_appuri" : "input[name='appuri']",
@@ -155,7 +155,9 @@ function find_collection(a_lang) {
     'lat' : 'urn:cite:perseus:lattb',
     'arabic' : 'urn:cite:perseus:aratb',
     'ara' : 'urn:cite:perseus:aratb',
+    'misc' : 'urn:cite:perseus:misctb'
   };
+  // any other languages fall into misc collection for now
   return collections[a_lang];
 }
 
@@ -281,7 +283,7 @@ function put_treebank(treebank) {
     // hack to work around form submission to hashbang urls
     var form_action = $("form[name='input-form']", document).attr("action"); 
 
-    var selected_format = $("input[name='format']:checked").val();
+    var selected_format = getFormatOverride();
     // hack to ignore selection of Smyth for non-greek text
     if (selected_format === 'smyth' && lang !== 'grc') {
         selected_format = 'aldt';
@@ -383,4 +385,31 @@ function loadStylesheet(a_url) {
     var transformProc= new XSLTProcessor();
     transformProc.importStylesheet(transformDoc);
     return transformProc;
+}
+
+/**
+ * This is a hack to allow us to support treebanking in modern languages
+ * using the latin tag set as a way to get non-classicists working with the
+ * tools. Sets the language used in the data to lat.
+ */
+function getLangOverride() {
+  var lang_selected = $("input[name='lang']:checked").val();
+  if (lang_selected == 'misc') {
+    lang_selected = 'lat';
+  }
+  return lang_selected;
+}
+
+/**
+ * This is a hack to allow us to support treebanking in modern languages
+ * using the latin tag set as a way to get non-classicists working with the
+ * tools. Sets the format to aldt-misc which disables morph.
+ */
+function getFormatOverride() {
+  var format_selected = $("input[name='format']:checked").val();
+  var lang_selected = $("input[name='lang']:checked").val();
+  if (lang_selected == 'misc') {
+    format_selected = 'aldt-misc';
+  }
+  return format_selected;
 }

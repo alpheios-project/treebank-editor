@@ -19,7 +19,7 @@
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <head>
-        <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/foundation/5.5.0/css/foundation.min.css" />
+        <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.5.0/css/foundation.min.css" />
         <link rel="stylesheet" type="text/css" href="../css/alph-treebank-list.css"/>
         <link rel="stylesheet" type="text/css" href="../css/arethusa.css"/>
         <link rel="stylesheet" type="text/css" href="../css/jquery.cts.typeahead.css" />
@@ -82,8 +82,23 @@
                             <textarea id="inputtext" name="inputtext" rows="10" cols="80" placeholder="Enter the text you want to treebank..."/>
                             <small class="error" id="texterror" style="display:none;">Invalid entry</small>
                         </div>
-                        <label for="text_uri">CTS Text</label>
+                        <label for="text_uri">Search for a text</label>
                         <input type="text" id="text_uri" name="text_uri" size="100"/>
+                        <br />
+                        <div class="row">
+                            <div class="large-12 columns">
+                              <label for="own_uri">Enter your own text URI :</label>
+                              <div class="row collapse">
+                                <div class="small-10 columns">
+                                  <input type="text" placeholder="" id="own_uri" />
+                                </div>
+                                <div class="small-2 columns">
+                                  <a href="#" id="own_uri_trigger" class="button postfix">Select</a>
+                                </div>
+                              </div>
+                              <small class="error" id="own_uri_error" style="display:none;">Invalid entry</small>
+                            </div>
+                        </div>
                     </fieldset>
                     <div class="large-6 columns">
                         <fieldset id="lang-buttons">

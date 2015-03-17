@@ -33,6 +33,39 @@ $(document).ready(function() {
         }
     });
 
+    $("#own_uri_trigger").on("click", function(event) {
+        event.preventDefault();
+        var textURI = $("#own_uri").val(),
+            endpoint = new CTS.endpoint.simpleUrl(textURI);
+
+        var _error = function(e) {
+            var $input = $("#own_uri"),
+                $error = $("#own_uri_error");
+
+            if(typeof e === "undefined") {
+                $input.removeClass("error");
+                $error.hide();
+            } else {
+                $input.addClass("error");
+                $error.text(e).show();
+            }
+        }
+        endpoint.getPassage(null, {
+            success : function(xml) {
+                try {
+                    $("#inputtext").val((new XMLSerializer()).serializeToString(xml));
+                } catch (e) {
+                    $("#inputtext").val(xml);
+                }
+                $("textarea[name='inputtext']").trigger("cts-passage:retrieved");
+                _error();
+            },
+            error : function() {
+                _error("Unable to load uri");
+            }
+        })
+    });
+
     $("#text_uri").ctsTypeahead({
       "endpoint" : $("meta[name='cts_repos_url']").attr("content"),
       "version" : 3,

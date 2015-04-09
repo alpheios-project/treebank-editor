@@ -77,21 +77,24 @@ return
     if ($oldSentence)
     then
     (
-      (: build content in namespace of existing sentence :)
-      let $ns := namespace-uri($oldSentence)
-      let $newSentence :=
-        element { QName($ns, "sentence") }
-        {
-          $oldSentence/@*,
 
-          for $elt in $sentence/*
-          return
-            element { QName($ns, local-name($elt)) }
-            {
-              $elt/@*,
-              $elt/*
-            }
-        }
+      (:
+        Copy the old sentence and iterate over each element of the updated
+        annotation and its attributes.
+        These attributes replace their old counterparts in place - we just
+        update the contents of the sentence we received. Documents that
+        contain attributes the editor does not know of are therefore retained.
+      :)
+
+      let $newSentence := $oldSentence
+      for $elt in $sentence/*
+        let $id := $elt/@id
+        let $name := local-name($elt)
+        for $attr in $elt/@*
+          let $old_attr :=
+            $oldSentence/*[name()=$name and @id=$id]/@*[name()=name($attr)]
+          let $update := update replace $old_attr with $attr
+
       return update replace $oldSentence with $newSentence,
       element message { "Sentence saved" }
     )

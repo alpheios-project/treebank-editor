@@ -1,2 +1,2 @@
 <?xml version="1.0"?>
-<collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/repository/treebank" owner="admin" group="dba" mode="755" created="2013-02-15T07:41:08-05:00" version="1"/>
+<collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/repository/treebank" owner="admin" group="dba" mode="777" created="2013-02-15T07:41:08-05:00" version="1"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <collection xmlns="http://exist.sourceforge.net/NS/exist" name="/db/repository" owner="admin" group="dba" mode="755" created="2013-02-15T07:37:23-05:00" version="1">
-    <subcollection name="treebank.edit" filename="treebank.edit"/>
-    <subcollection name="treebank" filename="treebank"/>
+    <subcollection name="treebank.edit" mode="777" filename="treebank.edit"/>
+    <subcollection name="treebank" mode="777" filename="treebank"/>
 </collection>
